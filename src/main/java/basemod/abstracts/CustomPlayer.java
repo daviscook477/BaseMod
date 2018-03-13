@@ -39,6 +39,7 @@ public abstract class CustomPlayer extends AbstractPlayer implements ModelRender
 	private String modelString = null;
 	private String animationString = null;
 	private boolean rescaled = false;
+	public Texture deckTexture = null;
 	
 	private ArrayList<Texture> energyLayers = new ArrayList<Texture>();
 	private Texture orbVfx;
