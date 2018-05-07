@@ -20,15 +20,14 @@ import com.megacrit.cardcrawl.cards.DamageInfo;
                 "com.megacrit.cardcrawl.cards.AbstractCard$CardColor",
                 "com.megacrit.cardcrawl.cards.AbstractCard$CardRarity",
                 "com.megacrit.cardcrawl.cards.AbstractCard$CardTarget",
-                "com.megacrit.cardcrawl.cards.DamageInfo$DamageType",
-                "int"
+                "com.megacrit.cardcrawl.cards.DamageInfo$DamageType"
         }
 )
 public class CardIDModID
 {
     public static void Prefix(AbstractCard __instance, @ByRef String[] id, String name, String jokeUrl, String imgUrl, int cost, String rawDescription,
                               AbstractCard.CardType type, AbstractCard.CardColor color, AbstractCard.CardRarity rarity, AbstractCard.CardTarget target,
-                              DamageInfo.DamageType dType, int cardPool)
+                              DamageInfo.DamageType dType)
     {
         String modName = BaseMod.findCallingModName();
         if (modName != null && !id[0].startsWith(modName + ":")) {

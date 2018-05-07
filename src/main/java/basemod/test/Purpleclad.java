@@ -2,18 +2,21 @@ package basemod.test;
 
 import java.util.ArrayList;
 
+import basemod.abstracts.CustomPlayer;
 import com.badlogic.gdx.math.MathUtils;
 import com.esotericsoftware.spine.AnimationState;
+import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.EnergyManager;
 import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.helpers.CardLibrary;
 import com.megacrit.cardcrawl.screens.CharSelectInfo;
 import com.megacrit.cardcrawl.unlock.UnlockTracker;
 
-public class Purpleclad extends AbstractPlayer {
+public class Purpleclad extends CustomPlayer {
 
 	public Purpleclad(String name, PlayerClass setClass) {
-		super(name, setClass);
+		super(name, setClass, null, null, (String)null, (String)null);
 		
 		this.dialogX = (this.drawX + 0.0F * Settings.scale);
 		this.dialogY = (this.drawY + 220.0F * Settings.scale);
@@ -29,21 +32,21 @@ public class Purpleclad extends AbstractPlayer {
 
 	public static ArrayList<String> getStartingDeck() {
 		ArrayList<String> retVal = new ArrayList<>();
-		retVal.add("Strike_P");
-		retVal.add("Strike_P");
-		retVal.add("Strike_P");
-		retVal.add("Strike_P");
-		retVal.add("Defend_P");
-		retVal.add("Defend_P");
-		retVal.add("Defend_P");
-		retVal.add("Defend_P");
+		retVal.add(Strike_Purple.ID);
+		retVal.add(Strike_Purple.ID);
+		retVal.add(Strike_Purple.ID);
+		retVal.add(Strike_Purple.ID);
+		retVal.add(Defend_Purple.ID);
+		retVal.add(Defend_Purple.ID);
+		retVal.add(Defend_Purple.ID);
+		retVal.add(Defend_Purple.ID);
 		return retVal;
 	}
 	
 	public static ArrayList<String> getStartingRelics() {
 		ArrayList<String> retVal = new ArrayList<>();
-		retVal.add("Arcanosphere");
-		UnlockTracker.markRelicAsSeen("Arcanosphere");
+		retVal.add(Arcanosphere.ID);
+		UnlockTracker.markRelicAsSeen(Arcanosphere.ID);
 		return retVal;
 	}
 	
@@ -52,6 +55,4 @@ public class Purpleclad extends AbstractPlayer {
 				75, 75, 0, 99, 5,
 			CharacterEnumPatch.THE_PURPLECLAD, getStartingRelics(), getStartingDeck(), false);
 	}
-	
-	
 }

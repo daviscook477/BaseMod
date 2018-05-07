@@ -2463,17 +2463,19 @@ public class BaseMod {
                         || callingClass.getProtectionDomain().getCodeSource().getLocation() == null) {
                     continue;
                 }
-                if (callingClass.getName().startsWith("basemod.")) {
-                    continue;
-                }
                 URL callingURL = callingClass.getProtectionDomain().getCodeSource().getLocation().toURI().toURL();
                 for (ModInfo info : Loader.MODINFOS) {
+                    // Don't consider BaseMod when looking for mods, otherwise, we might end up with
+                    // accidentally replacing calls to vanilla
                     if (info.jarURL.equals(callingURL)) {
-                    	if (info.ID != null && !info.ID.isEmpty()) {
-                    		finalModName = info.ID;
-						} else {
-							finalModName = info.Name;
-						}
+                        if (info.ID != null && info.ID.equals("basemod")) {
+                            continue;
+                        }
+                        if (info.ID != null && !info.ID.isEmpty()) {
+                            finalModName = info.ID;
+                        } else {
+                            finalModName = info.Name;
+                        }
                         break;
                     }
                 }
