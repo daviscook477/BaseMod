@@ -2015,77 +2015,34 @@ public class BaseMod {
 	public static void publishPostCreateStartingRelics(PlayerClass chosenClass, ArrayList<String> relics) {
 		logger.info("postCreateStartingRelics for: " + chosenClass);
 
-		boolean clearDefault = false;
-		ArrayList<String> relicsToAdd = new ArrayList<>();
-
 		for (PostCreateStartingRelicsSubscriber sub : postCreateStartingRelicsSubscribers) {
 			logger.info("postCreateStartingRelics modifying starting relics for: " + sub);
-			switch (chosenClass) {
-			case IRONCLAD:
-				if (sub instanceof PostCreateIroncladStartingRelicsSubscriber) {
-					if (sub.receivePostCreateStartingRelics(relicsToAdd)) {
-						clearDefault = true;
-					}
+			if (sub instanceof PostCreateIroncladStartingRelicsSubscriber) {
+				if (chosenClass.equals(PlayerClass.IRONCLAD)) {
+					sub.receivePostCreateStartingRelics(chosenClass, relics);
 				}
-				break;
-			case THE_SILENT:
-				if (sub instanceof PostCreateSilentStartingRelicsSubscriber) {
-					if (sub.receivePostCreateStartingRelics(relicsToAdd)) {
-						clearDefault = true;
-					}
+			} else if (sub instanceof PostCreateSilentStartingRelicsSubscriber) {
+				if (chosenClass.equals(PlayerClass.THE_SILENT)) {
+					sub.receivePostCreateStartingRelics(chosenClass, relics);
 				}
-				break;
-			default:
-				break;
+			} else {
+				sub.receivePostCreateStartingRelics(chosenClass, relics);
 			}
 		}
 
 		StringBuilder logString = new StringBuilder("postCreateStartingRelics adding [ ");
-		for (String relic : relicsToAdd) {
+		for (String relic : relics) {
 			logString.append(relic).append(" ");
 		}
 		logString.append("]");
 		logger.info(logString.toString());
 
 		// mark as seen
-		for (String relic : relicsToAdd) {
+		for (String relic : relics) {
 			UnlockTracker.markRelicAsSeen(relic);
 		}
 
-		// the default setup for adding starting relics does not do
-		// equip triggers on the relics so we circumvent that by
-		// adding relics ourself on dungeon initialize and force
-		// the equip trigger
-		subscribeToPostDungeonInitialize(() -> {
-			int relicIndex = AbstractDungeon.player.relics.size();
-			int relicRemoveIndex = relicsToAdd.size() - 1;
-			while (relicsToAdd.size() > 0) {
-				System.out.println("Attempting to add: " + relicsToAdd.get(relicRemoveIndex));
-				AbstractRelic relic = RelicLibrary.getRelic(relicsToAdd.remove(relicRemoveIndex));
-				System.out.println("Found relic is: " + relic);
-				AbstractRelic relicCopy;
-				// without checking if the relic wants to have a player class
-				// provided
-				// the makeCopy() method would return null in cases where the
-				// relic
-				// didn't implement it
-				if (relicsThatNeedSpecificPlayer.contains(relic.name)) {
-					relicCopy = relic.makeCopy(AbstractDungeon.player.chosenClass);
-				} else {
-					relicCopy = relic.makeCopy();
-				}
-				relicCopy.instantObtain(AbstractDungeon.player, relicIndex, true);
-				relicRemoveIndex--;
-				relicIndex++;
-			}
-		});
-
-		if (clearDefault) {
-			logger.info("postCreateStartingRelics clearing initial relics");
-			relics.clear();
-		}
-
-		AbstractDungeon.relicsToRemoveOnStart.addAll(relicsToAdd);
+		AbstractDungeon.relicsToRemoveOnStart.addAll(relics);
 		unsubscribeLaterHelper(PostCreateStartingRelicsSubscriber.class);
 	}
 

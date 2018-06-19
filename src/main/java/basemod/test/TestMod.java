@@ -280,13 +280,11 @@ public class TestMod implements
 	private static final String RELIC_2 = "Velvet Choker";
 	
 	@Override
-	public boolean receivePostCreateStartingRelics(ArrayList<String> addRelicsToMe) {
+	public void receivePostCreateStartingRelics(AbstractPlayer.PlayerClass chosenClass, ArrayList<String> addRelicsToMe) {
 		// add one Snecko Eye, and Velvet Choker
 		// to the starting relics
 		addRelicToStartingSet(addRelicsToMe, RELIC_1);
 		addRelicToStartingSet(addRelicsToMe, RELIC_2);
-		// overwrite the starting relics
-		return true;
 	}
 
 	private static boolean hasCard(String card) {
