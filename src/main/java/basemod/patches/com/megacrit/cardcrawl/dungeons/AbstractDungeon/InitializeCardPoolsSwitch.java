@@ -10,6 +10,7 @@ import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.CardLibrary;
 import com.megacrit.cardcrawl.unlock.UnlockTracker;
+import com.megacrit.cardcrawl.daily.DailyMods;
 
 import basemod.BaseMod;
 import javassist.CtBehavior;
@@ -23,9 +24,18 @@ public class InitializeCardPoolsSwitch {
 		AbstractPlayer.PlayerClass chosenClass = player.chosenClass;
 		@SuppressWarnings("unchecked")
 		ArrayList<AbstractCard> tmpPool = (ArrayList<AbstractCard>) tmpPoolObj;
-		if (!BaseMod.isBaseGameCharacter(chosenClass)) {
+		AbstractCard card;
+		if (DailyMods.cardMods.get("Diverse")){
+			for (Map.Entry<String, AbstractCard> c : CardLibrary.cards.entrySet()) {
+				card = c.getValue();
+				if ((BaseMod.playerColorMap.containsValue(card.color.toString())) && (card.rarity != AbstractCard.CardRarity.BASIC) &&
+						((!UnlockTracker.isCardLocked(c.getKey())) || (Settings.isDailyRun))) {
+					tmpPool.add(card);
+				}
+			}
+		}
+		else if (!BaseMod.isBaseGameCharacter(chosenClass)) {
 			String color = BaseMod.getColor(chosenClass.toString());
-			AbstractCard card;
 			for (Map.Entry<String, AbstractCard> c : CardLibrary.cards.entrySet()) {
 				card = c.getValue();
 				if ((card.color.toString().equals(color)) && (card.rarity != AbstractCard.CardRarity.BASIC) && (
