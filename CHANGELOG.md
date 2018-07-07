@@ -317,3 +317,5 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 * Add modded characters to the Custom mode screen (kiooeht)
 
 #### dev ####
+* Add debug command (Blank the Evil)
+* Fix Run History screen (kiooeht)

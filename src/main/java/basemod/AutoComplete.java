@@ -285,8 +285,8 @@ public class AutoComplete {
 	}
 
 	// if you add a new command here make sure you sort it in alphabetically
-	public static final String[] COMMANDS = { "clear", "deck", "draw", "energy", "event", "fight", "gold", "hand",
-			"help", "hp", "info", "kill", "maxhp", "potion", "power", "relic", "unlock" };
+	public static final String[] COMMANDS = { "clear", "debug", "deck", "draw", "energy", "event", "fight", "gold", "hand",
+			"help", "hp", "info", "kill", "maxhp", "potion", "power", "relic", "unlock"};
 
 	public static final int CMDS = ID_CREATOR++;
 
@@ -384,6 +384,10 @@ public class AutoComplete {
 			}
 			case "maxhp": {
 				createMaxHPSuggestions();
+				break;
+			}
+			case "debug":{
+				createDebugSuggestions();
 				break;
 			}
 			default: {
@@ -787,6 +791,23 @@ public class AutoComplete {
 			suggestions.addAll(Arrays.asList(MAX_HP_CMDS));
 		} else if (whiteSpaces == 2) {
 			mediumNumbers();
+		} else {
+			commandComplete = true;
+		}
+	}
+	
+	private static final String[] DEBUG_CMDS = {"true", "false"};
+	public static final int DEBUG = ID_CREATOR++;
+	
+	private static void createDebugSuggestions() {
+		if (whiteSpaces == 1) {
+			alreadySorted = true;
+			if(currentID == DEBUG) {
+				return;
+			}
+			currentID = DEBUG;
+			suggestions.clear();
+			suggestions.addAll(Arrays.asList(DEBUG_CMDS));
 		} else {
 			commandComplete = true;
 		}

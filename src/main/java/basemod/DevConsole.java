@@ -181,10 +181,33 @@ implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSub
 			cmdMaxHP(tokens);
 			break;
 		}
+		case "debug":{
+			cmdDebugMode(tokens);
+			break;
+		}	
 		default: {
 			log("invalid command");
 			break;
 		}
+		}
+	}
+	
+	private static void cmdDebugMode(String[] tokens) {
+		if(tokens.length == 2 && (tokens[1].equals("true") || tokens[1].equals("false"))) {
+			try {
+				Settings.isDebug = Boolean.parseBoolean(tokens[1]);
+				log("Setting debug mode to: " + Settings.isDebug);
+			} catch(Exception e) {
+				couldNotParse();
+				log("options are:");
+				log("* true");
+				log("* false");
+			}
+		}else {
+			couldNotParse();
+			log("options are:");
+			log("* true");
+			log("* false");
 		}
 	}
 

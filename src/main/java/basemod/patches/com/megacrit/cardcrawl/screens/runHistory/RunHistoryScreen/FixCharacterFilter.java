@@ -23,6 +23,7 @@ public class FixCharacterFilter {
 	
 	private static final int IRONCLAD_NAME = 0;
 	private static final int SILENT_NAME = 1;
+	private static final int DEFECT_NAME = 2;
 	private static final int ALL_CHARACTERS_TEXT = 23;
 	
 	@SpirePatch(cls="com.megacrit.cardcrawl.screens.runHistory.RunHistoryScreen", method="refreshData")
@@ -36,6 +37,7 @@ public class FixCharacterFilter {
 			charFilterOptions.add(text[ALL_CHARACTERS_TEXT]);
 			charFilterOptions.add(text[IRONCLAD_NAME]);
 			charFilterOptions.add(text[SILENT_NAME]);
+			charFilterOptions.add(text[DEFECT_NAME]);
 			for (String name : BaseMod.playerSelectTextMap.values()) {
 				charFilterOptions.add(name);
 			}
@@ -65,7 +67,9 @@ public class FixCharacterFilter {
 		public static String Postfix(String __result, Object __obj_instance, String chosenCharacter) {
 			String[] text = RunHistoryScreen.TEXT;
 			
-			if (!__result.equals(text[IRONCLAD_NAME]) && !__result.equals(text[SILENT_NAME])) {
+			if (!__result.equals(text[IRONCLAD_NAME])
+					&& !__result.equals(text[SILENT_NAME])
+					&& !__result.equals(text[DEFECT_NAME])) {
 				String possibleReturn = BaseMod.playerSelectTextMap.get(__result);
 				if (possibleReturn != null) {
 					return possibleReturn;
@@ -89,7 +93,7 @@ public class FixCharacterFilter {
 				characterFilterField.setAccessible(true);
 			
 				int selectedIndex = ((DropdownMenu) characterFilterField.get(screen)).getSelectedIndex();
-				int index = 3; // start at index 3 b/c 0,1,2 are used by base game
+				int index = 4; // start at index 4 b/c 0,1,2,3 are used by base game
 				if (selectedIndex < index) return; // don't need to filter if base game handled the filter
 				
 				String compareTo = null;

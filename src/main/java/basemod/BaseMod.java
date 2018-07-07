@@ -19,6 +19,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import basemod.interfaces.*;
+import com.megacrit.cardcrawl.rooms.MonsterRoom;
 import com.megacrit.cardcrawl.screens.custom.CustomModeCharacterButton;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -102,46 +104,6 @@ import basemod.helpers.RelicType;
 import basemod.helpers.dynamicvariables.BlockVariable;
 import basemod.helpers.dynamicvariables.DamageVariable;
 import basemod.helpers.dynamicvariables.MagicNumberVariable;
-import basemod.interfaces.EditCardsSubscriber;
-import basemod.interfaces.EditCharactersSubscriber;
-import basemod.interfaces.EditKeywordsSubscriber;
-import basemod.interfaces.EditRelicsSubscriber;
-import basemod.interfaces.EditStringsSubscriber;
-import basemod.interfaces.ISubscriber;
-import basemod.interfaces.ModelRenderSubscriber;
-import basemod.interfaces.OnCardUseSubscriber;
-import basemod.interfaces.OnPowersModifiedSubscriber;
-import basemod.interfaces.PostBattleSubscriber;
-import basemod.interfaces.PostCampfireSubscriber;
-import basemod.interfaces.PostCreateIroncladStartingDeckSubscriber;
-import basemod.interfaces.PostCreateIroncladStartingRelicsSubscriber;
-import basemod.interfaces.PostCreateShopPotionSubscriber;
-import basemod.interfaces.PostCreateShopRelicSubscriber;
-import basemod.interfaces.PostCreateSilentStartingDeckSubscriber;
-import basemod.interfaces.PostCreateSilentStartingRelicsSubscriber;
-import basemod.interfaces.PostCreateStartingDeckSubscriber;
-import basemod.interfaces.PostCreateStartingRelicsSubscriber;
-import basemod.interfaces.PostDeathSubscriber;
-import basemod.interfaces.PostDrawSubscriber;
-import basemod.interfaces.PostDungeonInitializeSubscriber;
-import basemod.interfaces.PostEnergyRechargeSubscriber;
-import basemod.interfaces.PostExhaustSubscriber;
-import basemod.interfaces.PostInitializeSubscriber;
-import basemod.interfaces.PostPotionUseSubscriber;
-import basemod.interfaces.PostPowerApplySubscriber;
-import basemod.interfaces.PostRenderSubscriber;
-import basemod.interfaces.PostUpdateSubscriber;
-import basemod.interfaces.PotionGetSubscriber;
-import basemod.interfaces.PreMonsterTurnSubscriber;
-import basemod.interfaces.PrePotionUseSubscriber;
-import basemod.interfaces.PreRenderSubscriber;
-import basemod.interfaces.PreStartGameSubscriber;
-import basemod.interfaces.PreUpdateSubscriber;
-import basemod.interfaces.RelicGetSubscriber;
-import basemod.interfaces.RenderSubscriber;
-import basemod.interfaces.SetUnlocksSubscriber;
-import basemod.interfaces.StartActSubscriber;
-import basemod.interfaces.StartGameSubscriber;
 import basemod.screens.ModalChoiceScreen;
 
 @SpireInitializer
@@ -195,6 +157,7 @@ public class BaseMod {
 	private static ArrayList<PostPowerApplySubscriber> postPowerApplySubscribers;
 	private static ArrayList<OnPowersModifiedSubscriber> onPowersModifiedSubscribers;
 	private static ArrayList<PostDeathSubscriber> postDeathSubscribers;
+	private static ArrayList<OnStartBattleSubscriber> startBattleSubscribers;
 
 	private static ArrayList<AbstractCard> redToAdd;
 	private static ArrayList<String> redToRemove;
@@ -550,6 +513,8 @@ public class BaseMod {
 		postPowerApplySubscribers = new ArrayList<>();
 		onPowersModifiedSubscribers = new ArrayList<>();
 		postDeathSubscribers = new ArrayList<>();
+		startBattleSubscribers = new ArrayList<>();
+
 	}
 
 	// initializeCardLists -
@@ -2153,6 +2118,15 @@ public class BaseMod {
 		unsubscribeLaterHelper(PostBattleSubscriber.class);
 	}
 
+	public static void publishStartBattle(MonsterRoom monsterRoom){
+		logger.info("publish start battle");
+
+		for (OnStartBattleSubscriber sub : startBattleSubscribers) {
+			sub.receiveOnBattleStart(monsterRoom);
+		}
+		unsubscribeLaterHelper(OnStartBattleSubscriber.class);
+	}
+
 	// publishPostRefresh -
 	public static void publishPostRefresh() {
 		logger.info("publish post refresh - refreshing unlocks");
@@ -2320,6 +2294,7 @@ public class BaseMod {
 		subscribeIfInstance(postPowerApplySubscribers, sub, PostPowerApplySubscriber.class);
 		subscribeIfInstance(onPowersModifiedSubscribers, sub, OnPowersModifiedSubscriber.class);
 		subscribeIfInstance(postDeathSubscribers, sub, PostDeathSubscriber.class);
+		subscribeIfInstance(startBattleSubscribers, sub, OnStartBattleSubscriber.class);
 	}
 
 	// subscribe -
@@ -2395,6 +2370,8 @@ public class BaseMod {
 			onPowersModifiedSubscribers.add((OnPowersModifiedSubscriber) sub);
 		} else if (additionClass.equals(PostDeathSubscriber.class)) {
 			postDeathSubscribers.add((PostDeathSubscriber) sub);
+		} else if (additionClass.equals(OnStartBattleSubscriber.class)) {
+			startBattleSubscribers.add((OnStartBattleSubscriber) sub);
 		}
 	}
 
@@ -2436,6 +2413,7 @@ public class BaseMod {
 		unsubscribeIfInstance(postPowerApplySubscribers, sub, PostPowerApplySubscriber.class);
 		unsubscribeIfInstance(onPowersModifiedSubscribers, sub, OnPowersModifiedSubscriber.class);
 		unsubscribeIfInstance(postDeathSubscribers, sub, PostDeathSubscriber.class);
+		unsubscribeIfInstance(startBattleSubscribers, sub, OnStartBattleSubscriber.class);
 	}
 
 	// unsubscribe -
@@ -2511,6 +2489,8 @@ public class BaseMod {
 			onPowersModifiedSubscribers.remove(sub);
 		} else if (removalClass.equals(PostDeathSubscriber.class)) {
 			postDeathSubscribers.remove(sub);
+		} else if (removalClass.equals(OnStartBattleSubscriber.class)) {
+			startBattleSubscribers.remove(sub);
 		}
 	}
 
