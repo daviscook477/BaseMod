@@ -27,13 +27,13 @@ public class InitializeCardPoolsSwitch {
 
         AbstractCard card;
 		if (DailyMods.cardMods.get("Diverse")){
-            for (Map.Entry<String, AbstractCard> c : CardLibrary.cards.entrySet()) {
-                card = c.getValue();
-                if ((BaseMod.playerColorMap.containsValue(card.color.toString())) && (card.rarity != AbstractCard.CardRarity.BASIC) &&
-                        ((!UnlockTracker.isCardLocked(c.getKey())) || (Settings.isDailyRun))) {
-                    tmpPool.add(card);
-                }
-            }
+			for (Map.Entry<String, AbstractCard> c : CardLibrary.cards.entrySet()) {
+				card = c.getValue();
+				if ((BaseMod.playerColorMap.containsValue(card.color.toString())) && (card.rarity != AbstractCard.CardRarity.BASIC) &&
+						((!UnlockTracker.isCardLocked(c.getKey())) || (Settings.isDailyRun))) {
+					tmpPool.add(card);
+				}
+			}
 		}
 		else if (!BaseMod.isBaseGameCharacter(chosenClass)) {
 			String color = BaseMod.getColor(chosenClass.toString());
