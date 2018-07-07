@@ -25,7 +25,7 @@ public class InitializeCardPoolsSwitch {
 		@SuppressWarnings("unchecked")
 		ArrayList<AbstractCard> tmpPool = (ArrayList<AbstractCard>) tmpPoolObj;
 
-        AbstractCard card;
+		AbstractCard card;
 		if (DailyMods.cardMods.get("Diverse")){
 			for (Map.Entry<String, AbstractCard> c : CardLibrary.cards.entrySet()) {
 				card = c.getValue();
