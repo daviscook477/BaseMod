@@ -1,10 +1,11 @@
-## Setting up IntelliJ for Slay The Spire Modding
+---
+id: intellij-setup
+title: IntelliJ IDEA Setup
+---
 
-IntelliJ will be the environment in which you will do all your modding. Download it here.
+IntelliJ will be the environment in which you will do all your modding. Download it [here](https://www.jetbrains.com/idea/download/)
 
-* IntelliJ: [Link](https://www.jetbrains.com/idea/download/)
-
-### Starting a new project
+## Starting a new project
 
 Once you start IntelliJ for the first time. you'll be greeted by this very important theme selection window.
 
