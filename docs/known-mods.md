@@ -12,6 +12,10 @@ Slay the Spire mod which provides a modding API and a dev console.
 
 Library for creating friendly minions for custom and base-game characters.
 
+### [StSLib](https://github.com/kiooeht/StSLib/releases)
+
+A small collection of common keywords and mechanics so each mod doesn't have to re-implement them.
+
 ## New Characters
 ### [The Seeker](https://github.com/gskleres/FruityMod-StS/releases)
 
@@ -77,6 +81,13 @@ The Disciple is a difficult and challenging custom Slay the Spire character them
 
 Contains a complete character with fully custom artwork, and a complete pool of cards, relics, and potions to accompany.
 
+### [The Beaked](https://github.com/fiiiiilth/BeakedTheCultist-StS/releases)
+
+The Beaked was blessed by the cult of the Awakened One, then cursed for stealing sacred knowledge. This cultist relies on healing and familiar techniques to power through, resorting to potent but hard to replicate spells.
+
+Adds a new character with 75 cards, 4 relics, and a new Act 2 boss - with lots more content being added over time!
+Designed by the wonderful folks in Rhapsody's Discord channel.
+
 ## Cards/Relics
 ### [Replay The Spire](https://github.com/AstroPenguin642/Replay-the-Spire/releases)
 
@@ -84,7 +95,15 @@ Contains a complete character with fully custom artwork, and a complete pool of 
 
 A mod for Slay the Spire that adds the ability to climb forever and adds a perk tree.
 
+### [Hubris](https://github.com/kiooeht/Hubris/releases)
+
+A content expansion mod that adds new cards, curses, relics, events, and bosses.
+
 ### [Hex Cores](https://github.com/cariehl/HexCores/releases)
+
+### [Blakkmod](https://github.com/blakkthunderr/Blakkmod/releases)
+
+A mod that contains relics, bosses, cards, and more. Focused on not being too game-breaking or unbalanced.
 
 ### [Spike's Relics](https://github.com/spikeof2010/SpikesRelics/releases)
 
@@ -135,9 +154,21 @@ Adds more Nicolas Cage to the game
 
 Adds the Fetch keyword. Fetch represents choosing a card from one of your piles and placing it into your hand.
 
+### [Shop Mod](https://github.com/twanvl/sts-shop-mod/releases)
+
+Modifies the merchant's shop, allowing you to buy more items.
+
 ### [Relic Sorter](https://github.com/GraysonnG/RelicSorter)
 
 Allows you to right click a relic to move it to the front of the list.
+
+### [AscensionPlus](https://github.com/will2216/Ascension-plus/releases)
+
+Adds additional levels of ascension to Slay The Spire.
+
+### ][More Monsters](https://github.com/twanvl/sts-more-monsters/releases)
+
+Adds several new monsters, elites and bosses.
 
 ## Deprecated Mods
 ### [Hybrid Character](https://github.com/twanvl/sts-hybrid-character/releases)
@@ -145,10 +176,6 @@ Allows you to right click a relic to move it to the front of the list.
 ### [Custom Climb](https://github.com/daviscook477/CustomClimb/releases)
 
 Custom Climb for Slay the Spire adds a new gameplay mode that lets you pick and choose your daily run modifiers.
-
-### [AscensionPlus](https://github.com/will2216/Ascension-plus/releases)
-
-Adds additional levels of ascension to Slay The Spire.
 
 ### [XSpire](https://github.com/XBagon/XSpire/releases)
 

@@ -4,7 +4,7 @@ title: Console (BaseMod)
 sidebar_label: Console
 ---
 
-Use the `` ` `` key to open the console. This keybind can be changed in the settings for **BaseMod**.
+Use the `` ` `` key to open the console while playing Slay the Spire with BaseMod. This can be very helpful for debugging. The keybinding can be changed in the settings for BaseMod.
 
 ## Commands
 

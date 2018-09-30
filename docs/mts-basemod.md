@@ -23,4 +23,4 @@ Future plans are to expand this API to encompass even more parts of the game .
 
 ## Should I use ModTheSpire or BaseMod?
 
-You should use both actually! BaseMod is built off of the functionality provided by ModTheSpire. ModTheSpire is what allows us to modify the base game to inject patches. BaseMod is designed to simplify the modding process by providing API hooks into the base game rather than requiring every mod to try and individually create patches. BaseMod reduces modding overhead and allow for better code reuse.
+You should use both! BaseMod is built off of the functionality provided by ModTheSpire. ModTheSpire is what allows us to modify the base game to inject patches. BaseMod is designed to simplify the modding process by providing API hooks into the base game rather than requiring every mod to try and individually create patches. BaseMod reduces modding overhead and allows for better code reuse.
