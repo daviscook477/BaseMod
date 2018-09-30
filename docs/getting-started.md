@@ -11,6 +11,8 @@ Welcome to modding Slay the Spire! This page will help you build your first Slay
 ### Install Maven
 Maven is used for dependency management and packaging any mods you create. Download it [here](https://maven.apache.org/download.cgi) and install it.
 
+> If you are having trouble installing Maven, try following [this guide](intellij-setup.md) which uses IntelliJ IDEA's built in Maven support
+
 ### Download the Skeleton Repository
 Download the [STSModSetUp](https://github.com/Kobting/STSModSetup) repository as a zip. Unzip where you want to set up your dev environment.
 
@@ -110,7 +112,7 @@ Most mods will probably be more complicated than printing something when a card 
 
 ### Looking at the Game's Source Code
 
-What else can I do with `AbstractCard`? What about `AbstractDungeon`? How does Slay the Spire work under the hood. A lot of these questions can be answered by looking at the game's source code. You can do this by decompiling the game. Follow [this guide](https://github.com/daviscook477/BaseMod/wiki/Decompiling-Your-Game) to do that.
+What else can I do with `AbstractCard`? What about `AbstractDungeon`? How does Slay the Spire work under the hood. A lot of these questions can be answered by looking at the game's source code. You can do this by decompiling the game. Follow [this guide](decompiling.md) to do that.
 
 ### Can I Make My Own Listener
 

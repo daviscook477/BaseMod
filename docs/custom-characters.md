@@ -74,7 +74,7 @@ public class MyCharacter extends AbstractPlayer {
         public static final String MY_CHARACTER_SKELETON_ATLAS = "img/char/skeleton.atlas"; // spine animation atlas
         public static final String MY_CHARACTER_SKELETON_JSON = "img/char/skeleton.json"; // spine animation json
 
-	public MyCharacter (String name, PlayerClass chonseClass) {
+	public MyCharacter (String name, PlayerClass chosenClass) {
 		super(name, setClass);
 		
 		this.dialogX = (this.drawX + 0.0F * Settings.scale); // set location for text bubbles
@@ -148,9 +148,9 @@ public class MyMod implements EditCharactersSubscriber {
 		
 		logger.info("add " + MyPlayerClassEnum.MY_PLAYER_CLASS.toString());
 		BaseMod.addCharacter(MyCharcter.class, "My Character", "character class string",
-				AbstractCardEnum.MY_CUSTOM_COLOR.toString(), "My Character",
+				AbstractCardEnum.MY_CUSTOM_COLOR, "My Character",
 				MY_CHARACTER_BUTTON , MY_CHARACTER_PORTRAIT,
-				MyPlayerClassEnum.MY_PLAYER_CLASS.toString());
+				MyPlayerClassEnum.MY_PLAYER_CLASS;
 		
 		logger.info("done editting characters");
 	}
