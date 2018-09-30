@@ -6,6 +6,8 @@ sidebar_label: Getting Started
 
 Welcome to modding Slay the Spire! This page will help you build your first Slay the Spire mod.
 
+> If you are not looking to develop mods, the guide to play other people's mods is found [here](play-with-mods.md)
+
 ## Setting Up Your Development Environment
 
 ### Install Maven
@@ -104,7 +106,7 @@ public void receivePostDraw(AbstractCard card) {
 
 Run `mvn package` and copy the packaged `.jar` file into your mods folder and run your game. You should notice the card name being printed out in the ModTheSpire console.
 
-## Going Further
+## Going Further 
 
 ### What Other Listeners Exist
 
@@ -117,5 +119,9 @@ What else can I do with `AbstractCard`? What about `AbstractDungeon`? How does S
 ### Can I Make My Own Listener
 
 You bet you can. Check out how listeners are made in BaseMod and check out the documentation about `SpirePatch` in the [ModTheSpire docs](https://github.com/kiooeht/ModTheSpire/wiki/SpirePatch)
+
+### Join The Modding Community
+
+Come hang out with us on [Discord](https://discord.gg/aj3jQp). It's a pretty active community and everyone is super friendly!
 
 Happy Modding!
