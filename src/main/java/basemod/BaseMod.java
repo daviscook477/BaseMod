@@ -145,6 +145,7 @@ public class BaseMod {
 	private static ArrayList<OnStartBattleSubscriber> startBattleSubscribers;
 	private static ArrayList<AddCustomModeModsSubscriber> addCustomModeModsSubscribers;
 	private static ArrayList<MaxHPChangeSubscriber> maxHPChangeSubscribers;
+	private static ArrayList<PreRoomRenderSubscriber> preRoomRenderSubscribers;
 
 	private static ArrayList<AbstractCard> redToAdd;
 	private static ArrayList<String> redToRemove;
@@ -442,6 +443,7 @@ public class BaseMod {
 		startBattleSubscribers = new ArrayList<>();
 		addCustomModeModsSubscribers = new ArrayList<>();
 		maxHPChangeSubscribers = new ArrayList<>();
+		preRoomRenderSubscribers = new ArrayList<>();
 	}
 
 	// initializeCardLists -
@@ -2347,6 +2349,12 @@ public class BaseMod {
 		return amount;
 	}
 
+	public static void publishPreRoomRender(SpriteBatch sb) {
+		for(PreRoomRenderSubscriber sub : preRoomRenderSubscribers) {
+			sub.receivePreRoomRender(sb);
+		}
+	}
+
 	//
 	// Subscription handlers
 	//
@@ -2417,6 +2425,7 @@ public class BaseMod {
 		subscribeIfInstance(startBattleSubscribers, sub, OnStartBattleSubscriber.class);
 		subscribeIfInstance(addCustomModeModsSubscribers, sub, AddCustomModeModsSubscriber.class);
 		subscribeIfInstance(maxHPChangeSubscribers, sub, MaxHPChangeSubscriber.class);
+		subscribeIfInstance(preRoomRenderSubscribers, sub, PreRoomRenderSubscriber.class);
 	}
 
 	// subscribe -
@@ -2506,6 +2515,8 @@ public class BaseMod {
 			addCustomModeModsSubscribers.add((AddCustomModeModsSubscriber) sub);
 		} else if (additionClass.equals(MaxHPChangeSubscriber.class)) {
 			maxHPChangeSubscribers.add((MaxHPChangeSubscriber) sub);
+		} else if (additionClass.equals(PreRoomRenderSubscriber.class)) {
+			preRoomRenderSubscribers.add((PreRoomRenderSubscriber) sub);
 		}
 	}
 
@@ -2554,6 +2565,7 @@ public class BaseMod {
 		unsubscribeIfInstance(startBattleSubscribers, sub, OnStartBattleSubscriber.class);
 		unsubscribeIfInstance(addCustomModeModsSubscribers, sub, AddCustomModeModsSubscriber.class);
 		unsubscribeIfInstance(maxHPChangeSubscribers, sub, MaxHPChangeSubscriber.class);
+		unsubscribeIfInstance(preRoomRenderSubscribers, sub, PreRoomRenderSubscriber.class);
 	}
 
 	// unsubscribe -
@@ -2643,6 +2655,8 @@ public class BaseMod {
 			addCustomModeModsSubscribers.remove(sub);
 		} else if (removalClass.equals(MaxHPChangeSubscriber.class)) {
 			maxHPChangeSubscribers.remove(sub);
+		} else if (removalClass.equals(PreRoomRenderSubscriber.class)) {
+			preRoomRenderSubscribers.remove(sub);
 		}
 	}
 
