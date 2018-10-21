@@ -10,7 +10,7 @@ import com.megacrit.cardcrawl.rooms.AbstractRoom;
 @SpirePatch(clz= AbstractRoom.class, method = "render")
 public class PreRenderHook {
 	@SpirePrefixPatch
-	public void preRoomRenderHook(AbstractRoom __instance, SpriteBatch sb) {
+	public static void preRoomRenderHook(AbstractRoom __instance, SpriteBatch sb) {
 		BaseMod.publishPreRoomRender(sb);
 	}
 }
