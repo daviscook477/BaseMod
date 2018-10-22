@@ -42,7 +42,7 @@ public abstract class CustomPlayer extends AbstractPlayer implements ModelRender
 	protected CharStat charStat;
 
 	public CustomPlayer(String name, PlayerClass playerClass, String[] orbTextures, String orbVfxPath,
-			String model, String animation) {
+						String model, String animation) {
 		this(name, playerClass, orbTextures, orbVfxPath, null, model, animation);
 	}
 
@@ -50,9 +50,9 @@ public abstract class CustomPlayer extends AbstractPlayer implements ModelRender
 						String model, String animation) {
 		this(name, playerClass, energyOrbInterface, new G3DJAnimation(model, animation));
 	}
-	
+
 	public CustomPlayer(String name, PlayerClass playerClass, String[] orbTextures, String orbVfxPath, float[] layerSpeeds,
-			String model, String animation) {
+						String model, String animation) {
 		this(name, playerClass, orbTextures, orbVfxPath, layerSpeeds, new G3DJAnimation(model, animation));
 	}
 
@@ -70,7 +70,7 @@ public abstract class CustomPlayer extends AbstractPlayer implements ModelRender
 
 		energyOrb = energyOrbInterface;
 		charStat = new CharStat(this);
-		
+
 		this.dialogX = (this.drawX + 0.0F * Settings.scale);
 		this.dialogY = (this.drawY + 220.0F * Settings.scale);
 
@@ -79,7 +79,7 @@ public abstract class CustomPlayer extends AbstractPlayer implements ModelRender
 		if (animation.type() != AbstractAnimation.Type.NONE) {
 			this.atlas = new TextureAtlas();
 		}
-		
+
 		if (animation.type() == AbstractAnimation.Type.MODEL) {
 			BaseMod.subscribe(this);
 		}
@@ -123,7 +123,7 @@ public abstract class CustomPlayer extends AbstractPlayer implements ModelRender
 		for (Map.Entry<String, AbstractCard> c : CardLibrary.cards.entrySet()) {
 			AbstractCard card = c.getValue();
 			if (card.color.equals(color) && card.rarity != AbstractCard.CardRarity.BASIC &&
-					(!UnlockTracker.isCardLocked(c.getKey()) || Settings.isDailyRun)) {
+				(!UnlockTracker.isCardLocked(c.getKey()) || Settings.isDailyRun)) {
 				tmpPool.add(card);
 			}
 		}
@@ -248,8 +248,8 @@ public abstract class CustomPlayer extends AbstractPlayer implements ModelRender
 		Pixmap pixmap = new Pixmap(Gdx.files.internal(BaseMod.getPlayerButton(chosenClass)));
 		Pixmap small = new Pixmap(128, 128, pixmap.getFormat());
 		small.drawPixmap(pixmap,
-				0, 0, pixmap.getWidth(), pixmap.getHeight(),
-				20, 20, small.getWidth()-40, small.getHeight()-40);
+			0, 0, pixmap.getWidth(), pixmap.getHeight(),
+			20, 20, small.getWidth()-40, small.getHeight()-40);
 		Texture texture = new Texture(small);
 		pixmap.dispose();
 		small.dispose();
