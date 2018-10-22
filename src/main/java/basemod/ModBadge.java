@@ -2,10 +2,6 @@ package basemod;
 
 import basemod.interfaces.PreUpdateSubscriber;
 import basemod.interfaces.RenderSubscriber;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,10 +9,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.Hitbox;
-import com.megacrit.cardcrawl.helpers.InputHelper;
 import com.megacrit.cardcrawl.helpers.TipHelper;
-import com.megacrit.cardcrawl.screens.mainMenu.MainMenuScreen;
+import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import com.megacrit.cardcrawl.screens.mainMenu.EarlyAccessPopup;
+import com.megacrit.cardcrawl.screens.mainMenu.MainMenuScreen;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ModBadge implements RenderSubscriber, PreUpdateSubscriber {
 	public static final Logger logger = LogManager.getLogger(ModBadge.class.getName());
@@ -48,8 +46,7 @@ public class ModBadge implements RenderSubscriber, PreUpdateSubscriber {
         
         logger.info("initialized mod badge for: " + modName);
         
-        BaseMod.subscribeToRender(this);
-        BaseMod.subscribeToPreUpdate(this);
+        BaseMod.subscribe(this);
         
         logger.info("setup hooks for " + modName + " mod badge");
     }

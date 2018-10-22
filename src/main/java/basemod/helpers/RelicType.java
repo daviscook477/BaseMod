@@ -1,5 +1,5 @@
 package basemod.helpers;
 
 public enum RelicType {
-	SHARED, RED, GREEN
+	SHARED, RED, GREEN, BLUE
 }

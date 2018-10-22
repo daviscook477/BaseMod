@@ -1,6 +1,7 @@
 package basemod.helpers;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public class SuperclassFinder {
 	public static Method getSuperClassMethod(Class<?> obj_class, String methodName, Class<?>... parameterTypes) throws NoSuchMethodException{

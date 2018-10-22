@@ -1,13 +1,13 @@
 package basemod.patches.com.megacrit.cardcrawl.helpers.CardLibrary;
 
-import java.util.ArrayList;
-import java.util.Map;
-
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.helpers.CardLibrary;
 import com.megacrit.cardcrawl.helpers.CardLibrary.LibraryType;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 @SpirePatch(cls="com.megacrit.cardcrawl.helpers.CardLibrary", method="getCardList")
 public class GetCardListSwitch {

@@ -1,7 +1,6 @@
 package basemod.patches.com.megacrit.cardcrawl.rooms.CampfireUI;
 
 import basemod.ReflectionHacks;
-
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;

@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.Hitbox;
-import com.megacrit.cardcrawl.helpers.InputHelper;
+import com.megacrit.cardcrawl.helpers.input.InputHelper;
 
 import java.util.function.Consumer;
 
-public class ModColorDisplay {
+public class ModColorDisplay implements IUIElement {
     public float hbShrink = 16.0f;
     
     public float r = 1.0f;
@@ -96,4 +96,14 @@ public class ModColorDisplay {
     private void onClick() {
         click.accept(this);
     }
+
+	@Override
+	public int renderLayer() {
+		return ModPanel.MIDDLE_LAYER;
+	}
+
+	@Override
+	public int updateOrder() {
+		return ModPanel.DEFAULT_UPDATE;
+	}
 }

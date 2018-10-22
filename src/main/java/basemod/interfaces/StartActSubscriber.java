@@ -1,5 +1,5 @@
 package basemod.interfaces;
 
-public interface StartActSubscriber {
+public interface StartActSubscriber extends ISubscriber {
     void receiveStartAct();
 }

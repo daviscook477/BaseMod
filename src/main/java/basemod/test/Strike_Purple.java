@@ -1,5 +1,6 @@
 package basemod.test;
 
+import basemod.abstracts.CustomCard;
 import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.DamageInfo;
@@ -7,8 +8,6 @@ import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.localization.CardStrings;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
-
-import basemod.abstracts.CustomCard;
 
 public class Strike_Purple extends CustomCard {
 	public static final String ID = "Strike_P";
@@ -18,12 +17,11 @@ public class Strike_Purple extends CustomCard {
 	private static final int COST = 1;
 	private static final int ATTACK_DMG = 6;
 	private static final int UPGRADE_PLUS_DMG = 3;
-	private static final int POOL = 0;
 
 	public Strike_Purple() {
 		super(ID, NAME, TestMod.makePath(TestMod.ASSET_FOLDER, TestMod.STRIKE_PURPLE), COST, DESCRIPTION, AbstractCard.CardType.ATTACK,
 				ColorEnumPatch.PURPLE, AbstractCard.CardRarity.BASIC,
-				AbstractCard.CardTarget.ENEMY, POOL);
+				AbstractCard.CardTarget.ENEMY);
 
 		this.baseDamage = ATTACK_DMG;
 	}
@@ -58,5 +56,9 @@ public class Strike_Purple extends CustomCard {
 			upgradeName();
 			upgradeDamage(UPGRADE_PLUS_DMG);
 		}
+	}
+
+	public boolean isStrike() {
+		return true;
 	}
 }

@@ -1,72 +1,65 @@
 package basemod;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.megacrit.cardcrawl.actions.AbstractGameAction;
-import com.megacrit.cardcrawl.actions.common.DamageAllEnemiesAction;
-import com.megacrit.cardcrawl.actions.common.DrawCardAction;
-import com.megacrit.cardcrawl.actions.common.HealAction;
-import com.megacrit.cardcrawl.actions.common.LoseHPAction;
-import com.megacrit.cardcrawl.actions.common.MakeTempCardInHandAction;
-import com.megacrit.cardcrawl.cards.AbstractCard;
-import com.megacrit.cardcrawl.cards.DamageInfo;
-import com.megacrit.cardcrawl.core.CardCrawlGame;
-import com.megacrit.cardcrawl.core.Settings;
-import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
-import com.megacrit.cardcrawl.helpers.CardLibrary;
-import com.megacrit.cardcrawl.helpers.PotionHelper;
-import com.megacrit.cardcrawl.helpers.RelicLibrary;
-import com.megacrit.cardcrawl.map.MapEdge;
-import com.megacrit.cardcrawl.map.MapRoomNode;
-import com.megacrit.cardcrawl.potions.AbstractPotion;
-import com.megacrit.cardcrawl.rooms.MonsterRoom;
-import com.megacrit.cardcrawl.ui.panels.EnergyPanel;
-import com.megacrit.cardcrawl.vfx.cardManip.ShowCardAndObtainEffect;
-
 import basemod.helpers.ConvertHelper;
 import basemod.interfaces.PostEnergyRechargeSubscriber;
 import basemod.interfaces.PostInitializeSubscriber;
 import basemod.interfaces.PostRenderSubscriber;
 import basemod.interfaces.PostUpdateSubscriber;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.megacrit.cardcrawl.actions.AbstractGameAction;
+import com.megacrit.cardcrawl.actions.GameActionManager;
+import com.megacrit.cardcrawl.actions.common.*;
+import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.cards.DamageInfo;
+import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.helpers.*;
+import com.megacrit.cardcrawl.map.MapEdge;
+import com.megacrit.cardcrawl.map.MapRoomNode;
+import com.megacrit.cardcrawl.potions.AbstractPotion;
+import com.megacrit.cardcrawl.rooms.MonsterRoom;
+import com.megacrit.cardcrawl.ui.panels.EnergyPanel;
+import com.megacrit.cardcrawl.unlock.UnlockTracker;
+import com.megacrit.cardcrawl.vfx.cardManip.ShowCardAndObtainEffect;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class DevConsole
-		implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSubscriber, PostUpdateSubscriber {
+implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSubscriber, PostUpdateSubscriber {
 	public static final Logger logger = LogManager.getLogger(DevConsole.class.getName());
 
-	private static final float CONSOLE_X = 75.0f;
-	private static final float CONSOLE_Y = 75.0f;
-	private static final float CONSOLE_W = 800.0f;
-	private static final float CONSOLE_H = 40.0f;
-	private static final float CONSOLE_PAD_X = 15.0f;
-	private static final int CONSOLE_TEXT_SIZE = 30;
+	public static final float CONSOLE_X = 200.0f;
+	public static final float CONSOLE_Y = 200.0f;
+	public static final float CONSOLE_W = 800.0f;
+	public static final float CONSOLE_H = 40.0f;
+	public static final float CONSOLE_PAD_X = 15.0f;
+	public static final int CONSOLE_TEXT_SIZE = 30;
 	private static final int MAX_LINES = 8;
-	private static final String PROMPT = "$> ";
+	// This regular expression matches any number of consecutive whitespaces (but at least 1)
+	public static final String PATTERN = "[\\s]+";
+	public static final String PROMPT = "$> ";
 
-	private static BitmapFont consoleFont = null;
-	private static Color consoleColor = new Color(0.0f, 0.0f, 0.0f, 0.4f);
+	public static BitmapFont consoleFont = null;
 	private static InputProcessor consoleInputProcessor;
 	private static InputProcessor otherInputProcessor = null;
-	private static ShapeRenderer consoleBackground = null;
+	public static Texture consoleBackground = null;
 
 	private static boolean infiniteEnergy = false;
 	public static boolean forceUnlocks = false;
 	public static int unlockLevel = -1;
 
+	public static boolean enabled = false;
 	public static boolean visible = false;
 	public static int toggleKey = Keys.GRAVE;
 	public static String currentText = "";
@@ -79,19 +72,22 @@ public class DevConsole
 	public static int commandPos;
 
 	public DevConsole() {
-		BaseMod.subscribeToPostEnergyRecharge(this);
-		BaseMod.subscribeToPostInitialize(this);
-		BaseMod.subscribeToPostRender(this);
-		BaseMod.subscribeToPostUpdate(this);
+		BaseMod.subscribe(this);
 
 		priorCommands = new ArrayList<>();
 		commandPos = -1;
 		log = new ArrayList<>();
 		prompted = new ArrayList<>();
+
+		AutoComplete.init();
 	}
 
+	// If you add, remove or change a command make sure to also do the same in the AutoComplete class
 	public static void execute() {
-		String[] tokens = currentText.split(" ");
+		// To get the tokens, we first trim the current Text (removing whitespaces from the start and end)
+		// then we split it using a pattern that matches one or more consecutive whitespaces
+		// The resulting array tokens only has Strings with no whitespaces
+		String[] tokens = currentText.trim().split(PATTERN);
 		if (priorCommands.size() == 0 || !priorCommands.get(0).equals(currentText)) {
 			priorCommands.add(0, currentText);
 		}
@@ -100,8 +96,9 @@ public class DevConsole
 		commandPos = -1;
 		currentText = "";
 
-		if (tokens.length < 1)
+		if (tokens.length < 1) {
 			return;
+		}
 		for (int i = 0; i < tokens.length; i++) {
 			tokens[i] = tokens[i].trim();
 		}
@@ -175,10 +172,33 @@ public class DevConsole
 			cmdMaxHP(tokens);
 			break;
 		}
+		case "debug":{
+			cmdDebugMode(tokens);
+			break;
+		}	
 		default: {
 			log("invalid command");
 			break;
 		}
+		}
+	}
+	
+	private static void cmdDebugMode(String[] tokens) {
+		if(tokens.length == 2 && (tokens[1].equals("true") || tokens[1].equals("false"))) {
+			try {
+				Settings.isDebug = Boolean.parseBoolean(tokens[1]);
+				log("Setting debug mode to: " + Settings.isDebug);
+			} catch(Exception e) {
+				couldNotParse();
+				log("options are:");
+				log("* true");
+				log("* false");
+			}
+		}else {
+			couldNotParse();
+			log("options are:");
+			log("* true");
+			log("* false");
 		}
 	}
 
@@ -226,22 +246,31 @@ public class DevConsole
 	}
 
 	private static void cmdPower(String[] tokens) {
+		if (tokens.length < 2)  {
+			cmdPowerHelp();
+			return;
+		}
+
 		String powerID = "";
 		int amount = 1;
 		for (int i = 1; i < tokens.length - 1; i++) {
-			powerID = powerID.concat(tokens[i]);
-			if (i != tokens.length - 2) {
-				powerID = powerID.concat(" ");
-			}
+			powerID = powerID.concat(tokens[i]).concat(" ");
 		}
 		try {
 			amount = Integer.parseInt(tokens[tokens.length - 1]);
 		} catch (Exception e) {
 			powerID = powerID.concat(tokens[tokens.length - 1]);
 		}
+		powerID = powerID.trim();
+		
+		// If the ID was written using underscores, find the original ID
+		if (BaseMod.underScorePowerIDs.containsKey(powerID)) {
+			powerID = BaseMod.underScorePowerIDs.get(powerID);
+		}
+
+		Class power;
 		try {
-			@SuppressWarnings({ "rawtypes", "unused" })
-			Class power = BaseMod.getPowerClass(powerID);
+			power = BaseMod.getPowerClass(powerID);
 		} catch (Exception e) {
 			logger.info("failed to load power " + powerID);
 			log("could not load power");
@@ -250,8 +279,7 @@ public class DevConsole
 		}
 
 		try {
-			@SuppressWarnings("unused")
-			ConsoleTargetedPower ctp = new ConsoleTargetedPower(BaseMod.getPowerClass(powerID), amount);
+			new ConsoleTargetedPower(power, amount);
 		} catch (Exception e) {
 			log("could not make power");
 			cmdPowerHelp();
@@ -262,6 +290,14 @@ public class DevConsole
 		couldNotParse();
 		log("options are:");
 		log("* [id] [amt]");
+	}
+	
+	private static String getRelicName(String[] relicNameArray) {
+		String relic = String.join(" ", relicNameArray);
+		if (BaseMod.underScoreRelicIDs.containsKey(relic)) {
+			relic = BaseMod.underScoreRelicIDs.get(relic);
+		}
+		return relic;
 	}
 
 	private static void cmdRelic(String[] tokens) {
@@ -274,25 +310,25 @@ public class DevConsole
 			if ((tokens[1].toLowerCase().equals("remove") || tokens[1].toLowerCase().equals("r"))
 					&& tokens.length > 2) {
 				String[] relicNameArray = Arrays.copyOfRange(tokens, 2, tokens.length);
-				String relicName = String.join(" ", relicNameArray);
+				String relicName = getRelicName(relicNameArray);
 				AbstractDungeon.player.loseRelic(relicName);
 			} else if ((tokens[1].toLowerCase().equals("add")  || tokens[1].toLowerCase().equals("a"))
 					&& tokens.length > 2) {
 				String[] relicNameArray = Arrays.copyOfRange(tokens, 2, tokens.length);
-				String relicName = String.join(" ", relicNameArray);
+				String relicName = getRelicName(relicNameArray);
 				AbstractDungeon.getCurrRoom().spawnRelicAndObtain(Settings.WIDTH / 2, Settings.HEIGHT / 2,
 						RelicLibrary.getRelic(relicName).makeCopy());
 			} else if (tokens[1].toLowerCase().equals("desc") && tokens.length > 2) {
 				String[] relicNameArray = Arrays.copyOfRange(tokens, 2, tokens.length);
-				String relicName = String.join(" ", relicNameArray);
+				String relicName = getRelicName(relicNameArray);
 				log(RelicLibrary.getRelic(relicName).description);
 			} else if (tokens[1].toLowerCase().equals("flavor") && tokens.length > 2) {
 				String[] relicNameArray = Arrays.copyOfRange(tokens, 2, tokens.length);
-				String relicName = String.join(" ", relicNameArray);
+				String relicName = getRelicName(relicNameArray);
 				log(RelicLibrary.getRelic(relicName).flavorText);
 			} else if (tokens[1].toLowerCase().equals("pool") && tokens.length > 2) {
 				String[] relicNameArray = Arrays.copyOfRange(tokens, 2, tokens.length);
-				String relicName = String.join(" ", relicNameArray);
+				String relicName = getRelicName(relicNameArray);
 				log(RelicLibrary.getRelic(relicName).tier.toString());
 			} else if (tokens[1].toLowerCase().equals("list")) {
 				if (tokens.length < 3) {
@@ -373,28 +409,33 @@ public class DevConsole
 				return;
 			}
 
-			int upgradeIndex = tokens.length - 1;
-			while (ConvertHelper.tryParseInt(tokens[upgradeIndex], 0) != 0) {
-				upgradeIndex--;
+			int countIndex = tokens.length - 1;
+			while (ConvertHelper.tryParseInt(tokens[countIndex], 0) != 0) {
+				countIndex--;
 			}
 
-			String[] cardNameArray = Arrays.copyOfRange(tokens, 2, upgradeIndex + 1);
+			String[] cardNameArray = Arrays.copyOfRange(tokens, 2, countIndex + 1);
 			String cardName = String.join(" ", cardNameArray);
+
+			// If the ID was written using underscores, find the original ID
+			if (BaseMod.underScoreCardIDs.containsKey(cardName)) {
+				cardName = BaseMod.underScoreCardIDs.get(cardName);
+			}
 
 			if (tokens[1].toLowerCase().equals("add") || tokens[1].toLowerCase().equals("a")) {
 				AbstractCard c = CardLibrary.getCard(cardName);
 				if (c != null) {
 					// card count
 					int count = 1;
-					if (tokens.length > 3 && ConvertHelper.tryParseInt(tokens[3], 0) != 0) {
-						count = ConvertHelper.tryParseInt(tokens[3], 0);
+					if (tokens.length > countIndex + 1 && ConvertHelper.tryParseInt(tokens[countIndex + 1], 0) != 0) {
+						count = ConvertHelper.tryParseInt(tokens[countIndex + 1], 0);
 					}
 
 					int upgradeCount = 0;
-					if (tokens.length > 4) {
-						upgradeCount = ConvertHelper.tryParseInt(tokens[4], 0);
+					if (tokens.length > countIndex + 2) {
+						upgradeCount = ConvertHelper.tryParseInt(tokens[countIndex + 2], 0);
 					}
-					
+
 					log("adding " + count + (count == 1 ? " copy of " : " copies of ") + cardName + " with " + upgradeCount + " upgrade(s)");
 
 					for (int i = 0; i < count; i++) {
@@ -420,15 +461,69 @@ public class DevConsole
 					boolean removed = false;
 					AbstractCard toRemove = null;
 					for (AbstractCard c : AbstractDungeon.player.hand.group) {
-						if (removed)
+						if (removed) {
 							break;
+						}
 						if (c.cardID.equals(cardName)) {
 							toRemove = c;
 							removed = true;
 						}
 					}
-					if (removed)
+					if (removed) {
 						AbstractDungeon.player.hand.moveToExhaustPile(toRemove);
+					}
+				}
+			} else if (tokens[1].toLowerCase().equals("discard") || tokens[1].toLowerCase().equals("d")) {
+				if (tokens[2].equals("all")) {
+					// discard all cards
+					for (AbstractCard c : new ArrayList<>(AbstractDungeon.player.hand.group)) {
+						AbstractDungeon.player.hand.moveToDiscardPile(c);
+						c.triggerOnManualDiscard();
+						GameActionManager.incrementDiscard(false);
+					}
+				} else {
+					// discard single card
+					for (AbstractCard c : AbstractDungeon.player.hand.group) {
+						if (c.cardID.equals(cardName)) {
+							AbstractDungeon.player.hand.moveToDiscardPile(c);
+							c.triggerOnManualDiscard();
+							GameActionManager.incrementDiscard(false);
+							return;
+						}
+					}
+				}
+			} else if ((tokens[1].equalsIgnoreCase("set") || tokens[1].equalsIgnoreCase("s")) &&
+			           (tokens[2].equalsIgnoreCase("damage") || tokens[2].equalsIgnoreCase("block") || tokens[2].equalsIgnoreCase("magic") || tokens[2].equalsIgnoreCase("cost") || tokens[2].equalsIgnoreCase("d") || tokens[2].equalsIgnoreCase("b") || tokens[2].equalsIgnoreCase("m") || tokens[2].equalsIgnoreCase("c")) && tokens.length == 5) {
+				try{
+					cardNameArray = Arrays.copyOfRange(tokens, 3, countIndex + 1);
+					cardName = String.join(" ", cardNameArray);
+					boolean all = tokens[3].equals("all");
+					int v = Integer.parseInt(tokens[4]);
+					for (AbstractCard c : new ArrayList<>(AbstractDungeon.player.hand.group)) {
+						if (all || c.cardID.equals(cardName)) {
+							if (tokens[2].equalsIgnoreCase("damage") || tokens[2].equalsIgnoreCase("d")) {
+								if (c.baseDamage != v) c.upgradedDamage = true;
+								c.baseDamage = v;
+							}
+							if (tokens[2].equalsIgnoreCase("block") || tokens[2].equalsIgnoreCase("b")) {
+								if (c.baseBlock != v) c.upgradedBlock = true;
+								c.baseBlock = v;
+							}
+							if (tokens[2].equalsIgnoreCase("magic") || tokens[2].equalsIgnoreCase("m")) {
+								if (c.baseMagicNumber != v) c.upgradedMagicNumber = true;
+								c.magicNumber = c.baseMagicNumber = v;
+							}
+							if (tokens[2].equalsIgnoreCase("cost") || tokens[2].equalsIgnoreCase("c")) {
+								if (c.cost != v) c.upgradedCost = true;
+								c.cost = v;
+							}
+							c.displayUpgrades();
+							c.applyPowers();
+							if (!all) break;
+						}
+					}
+				} catch (NumberFormatException e) {
+					cmdHandHelp();
 				}
 			} else {
 				cmdHandHelp();
@@ -437,13 +532,19 @@ public class DevConsole
 			log("cannot add cards when player doesn't exist");
 		}
 	}
-	
+
 	private static void cmdHandHelp() {
 		couldNotParse();
 		log("options are:");
 		log("* add [id] {count} {upgrade amt}");
 		log("* remove [id]");
 		log("* remove all");
+		log("* discard [id]");
+		log("* discard all");
+		log("* set damage [id] [amount]");
+		log("* set block [id] [amount]");
+		log("* set magic [id] [amount]");
+		log("* set cost [id] [amount]");
 	}
 
 	private static void cmdKill(String[] tokens) {
@@ -464,13 +565,13 @@ public class DevConsole
 						DamageInfo.DamageType.HP_LOSS, AbstractGameAction.AttackEffect.NONE));
 			} else if (tokens[1].toLowerCase().equals("self")) {
 				AbstractDungeon.actionManager
-						.addToTop(new LoseHPAction(AbstractDungeon.player, AbstractDungeon.player, 999));
+				.addToTop(new LoseHPAction(AbstractDungeon.player, AbstractDungeon.player, 999));
 			} else {
 				cmdKillHelp();
 			}
 		}
 	}
-	
+
 	private static void cmdKillHelp() {
 		couldNotParse();
 		log("options are:");
@@ -490,7 +591,7 @@ public class DevConsole
 			try {
 				i = Integer.parseInt(tokens[2]);
 				AbstractDungeon.actionManager
-						.addToTop(new HealAction(AbstractDungeon.player, AbstractDungeon.player, i));
+				.addToTop(new HealAction(AbstractDungeon.player, AbstractDungeon.player, i));
 			} catch (Exception e) {
 				cmdHPHelp();
 			}
@@ -631,28 +732,33 @@ public class DevConsole
 				return;
 			}
 
-			int upgradeIndex = tokens.length - 1;
-			while (ConvertHelper.tryParseInt(tokens[upgradeIndex], 0) != 0) {
-				upgradeIndex--;
+			int countIndex = tokens.length - 1;
+			while (ConvertHelper.tryParseInt(tokens[countIndex], 0) != 0) {
+				countIndex--;
 			}
 
-			String[] cardNameArray = Arrays.copyOfRange(tokens, 2, upgradeIndex + 1);
+			String[] cardNameArray = Arrays.copyOfRange(tokens, 2, countIndex + 1);
 			String cardName = String.join(" ", cardNameArray);
+
+			// If the ID was written using underscores, find the original ID
+			if (BaseMod.underScoreCardIDs.containsKey(cardName)) {
+				cardName = BaseMod.underScoreCardIDs.get(cardName);
+			}
 
 			if (tokens[1].toLowerCase().equals("add") || tokens[1].toLowerCase().equals("a")) {
 				AbstractCard c = CardLibrary.getCard(cardName);
 				if (c != null) {
 					// card count
 					int count = 1;
-					if (tokens.length > 3 && ConvertHelper.tryParseInt(tokens[3], 0) != 0) {
-						count = ConvertHelper.tryParseInt(tokens[3], 0);
+					if (tokens.length > countIndex + 1 && ConvertHelper.tryParseInt(tokens[countIndex + 1], 0) != 0) {
+						count = ConvertHelper.tryParseInt(tokens[countIndex + 1], 0);
 					}
 
 					int upgradeCount = 0;
-					if (tokens.length > 4) {
-						upgradeCount = ConvertHelper.tryParseInt(tokens[4], 0);
+					if (tokens.length > countIndex + 2) {
+						upgradeCount = ConvertHelper.tryParseInt(tokens[countIndex + 2], 0);
 					}
-					
+
 					log("adding " + count + (count == 1 ? " copy of " : " copies of ") + cardName + " with " + upgradeCount + " upgrade(s)");
 
 					for (int i = 0; i < count; i++) {
@@ -661,8 +767,9 @@ public class DevConsole
 							copy.upgrade();
 						}
 
-						AbstractDungeon.effectList.add(new ShowCardAndObtainEffect(copy, (float) Settings.WIDTH / 2.0f,
-								(float) Settings.HEIGHT / 2.0f));
+						UnlockTracker.markCardAsSeen(copy.cardID);
+						AbstractDungeon.effectList.add(new ShowCardAndObtainEffect(copy, Settings.WIDTH / 2.0f,
+								Settings.HEIGHT / 2.0f));
 					}
 				} else {
 					log("could not find card " + cardName);
@@ -684,7 +791,7 @@ public class DevConsole
 			log("cannot add cards when player doesn't exist");
 		}
 	}
-	
+
 	private static void cmdDeckHelp() {
 		couldNotParse();
 		log("options are:");
@@ -701,12 +808,12 @@ public class DevConsole
 			}
 
 			AbstractDungeon.actionManager
-					.addToTop(new DrawCardAction(AbstractDungeon.player, ConvertHelper.tryParseInt(tokens[1], 0)));
+			.addToTop(new DrawCardAction(AbstractDungeon.player, ConvertHelper.tryParseInt(tokens[1], 0)));
 		} else {
 			log("cannot draw when not in combat");
 		}
 	}
-	
+
 	private static void cmdDrawHelp() {
 		couldNotParse();
 		log("options are:");
@@ -720,7 +827,17 @@ public class DevConsole
 
 		String[] encounterArray = Arrays.copyOfRange(tokens, 1, tokens.length);
 		String encounterName = String.join(" ", encounterArray);
-		AbstractDungeon.monsterList.add(0, encounterName);
+		// If the ID was written using underscores, find the original ID
+		if (BaseMod.underScoreEncounterIDs.containsKey(encounterName)) {
+			encounterName = BaseMod.underScoreEncounterIDs.get(encounterName);
+		}
+		if (AbstractDungeon.getCurrRoom() instanceof MonsterRoom) {
+			// Note: AbstractDungeon.nextRoomTransition() will remove the encounter of the current room from the monster list
+			// so if we want the new encounter to be in the front afterwards for our new MonsterRoom, we should insert the encounter at position 1, not 0
+			AbstractDungeon.monsterList.add(1, encounterName);
+		} else {
+			AbstractDungeon.monsterList.add(0, encounterName);
+		}
 
 		MapRoomNode cur = AbstractDungeon.currMapNode;
 		MapRoomNode node = new MapRoomNode(cur.x, cur.y);
@@ -742,6 +859,18 @@ public class DevConsole
 
 		String[] eventArray = Arrays.copyOfRange(tokens, 1, tokens.length);
 		String eventName = String.join(" ", eventArray);
+
+		// If the ID was written using underscores, find the original ID
+		if (BaseMod.underScoreEventIDs.containsKey(eventName)) {
+			eventName = BaseMod.underScoreEventIDs.get(eventName);
+		}
+		
+		if (EventHelper.getEvent(eventName) == null) {
+			couldNotParse();
+			log(eventName + " is not an event ID");
+			return;
+		}
+
 		AbstractDungeon.eventList.add(0, eventName);
 
 		MapRoomNode cur = AbstractDungeon.currMapNode;
@@ -759,9 +888,6 @@ public class DevConsole
 		AbstractDungeon.closeCurrentScreen();
 		AbstractDungeon.topPanel.unhoverHitboxes();
 		AbstractDungeon.fadeIn();
-		AbstractDungeon.genericEventDialog.clear();
-		AbstractDungeon.dialog.hide();
-		AbstractDungeon.dialog.clear();
 		AbstractDungeon.effectList.clear();
 		AbstractDungeon.topLevelEffects.clear();
 		AbstractDungeon.topLevelEffectsQueue.clear();
@@ -775,7 +901,7 @@ public class DevConsole
 	}
 
 	private static void cmdPotion(String[] tokens) {
-		if (tokens.length < 3) {
+		if (tokens.length < 2) {
 			cmdPotionHelp();
 			return;
 		}
@@ -787,7 +913,7 @@ public class DevConsole
 			// check if we want to list potions
 			if (tokens[1].equals("list")) {
 				Collections.sort(PotionHelper.potions);
-				logger.info(PotionHelper.potions);
+				log(PotionHelper.potions);
 			} else {
 				cmdPotionHelp();
 			}
@@ -800,6 +926,10 @@ public class DevConsole
 			if (k != tokens.length - 1) {
 				potionID = potionID.concat(" ");
 			}
+		}
+		// If the ID was written using underscores, find the original ID
+		if (BaseMod.underScorePotionIDs.containsKey(potionID)) {
+			potionID = BaseMod.underScorePotionIDs.get(potionID);
 		}
 
 		AbstractPotion p = null;
@@ -816,14 +946,7 @@ public class DevConsole
 			return;
 		}
 
-		CardCrawlGame.sound.play("POTION_1");
-		p.moveInstantly(AbstractDungeon.player.potions[i].currentX, AbstractDungeon.player.potions[i].currentY);
-		BaseMod.publishPotionGet(p);
-		p.isObtained = true;
-		p.isDone = true;
-		p.isAnimating = false;
-		p.flash();
-		AbstractDungeon.player.potions[i] = p;
+		AbstractDungeon.player.obtainPotion(i, p);
 	}
 
 	public static void cmdPotionHelp() {
@@ -833,12 +956,14 @@ public class DevConsole
 		log("* [slot] [id]");
 	}
 
+	@Override
 	public void receivePostEnergyRecharge() {
 		if (infiniteEnergy) {
 			EnergyPanel.setEnergy(9999);
 		}
 	}
 
+	@Override
 	public void receivePostInitialize() {
 		consoleInputProcessor = new ConsoleInputProcessor();
 
@@ -848,6 +973,10 @@ public class DevConsole
 		parameter.size = (int) (CONSOLE_TEXT_SIZE * Settings.scale);
 		consoleFont = generator.generateFont(parameter);
 		generator.dispose();
+
+		consoleBackground = ImageMaster.loadImage("img/ConsoleBackground.png");
+
+		AutoComplete.postInit();
 	}
 
 	public static void log(String text) {
@@ -861,33 +990,24 @@ public class DevConsole
 		}
 	}
 
+	@Override
 	public void receivePostRender(SpriteBatch sb) {
 		if (visible && consoleFont != null) {
-			// Since we need a shape renderer, need to end then restart the
-			// SpriteBatch
-			// Should probably just make a background texture for the console so
-			// this doesn't need to be done
-			sb.end();
-
-			if (consoleBackground == null) {
-				consoleBackground = new ShapeRenderer();
-			}
-
 			int sizeToDraw = log.size() + 1;
 			if (sizeToDraw > MAX_LINES) {
 				sizeToDraw = MAX_LINES;
 			}
 
-			consoleBackground.begin(ShapeType.Filled);
-			consoleBackground.setColor(consoleColor);
-			consoleBackground.rect(CONSOLE_X, CONSOLE_Y, (CONSOLE_W * Settings.scale),
+			sb.draw(consoleBackground, CONSOLE_X * Settings.scale, CONSOLE_Y * Settings.scale,
+					(CONSOLE_W * Settings.scale),
 					(CONSOLE_H * Settings.scale + (CONSOLE_TEXT_SIZE * Settings.scale * (sizeToDraw - 1))));
-			consoleBackground.end();
 
-			sb.begin();
+			if (AutoComplete.enabled) {
+				AutoComplete.render(sb);
+			}
 
-			float x = (CONSOLE_X + (CONSOLE_PAD_X * Settings.scale));
-			float y = (CONSOLE_Y + (float) Math.floor(CONSOLE_TEXT_SIZE * Settings.scale));
+			float x = (CONSOLE_X * Settings.scale + (CONSOLE_PAD_X * Settings.scale));
+			float y = (CONSOLE_Y * Settings.scale + (float) Math.floor(CONSOLE_TEXT_SIZE * Settings.scale));
 			consoleFont.draw(sb, PROMPT + currentText, x, y);
 			for (int i = 0; i < sizeToDraw - 1; i++) {
 				y += (float) Math.floor(CONSOLE_TEXT_SIZE * Settings.scale);
@@ -896,37 +1016,78 @@ public class DevConsole
 		}
 	}
 
+	@Override
 	public void receivePostUpdate() {
 		if (Gdx.input.isKeyJustPressed(toggleKey)) {
+			AutoComplete.reset();
 			if (visible) {
 				currentText = "";
 				commandPos = -1;
 			} else {
 				otherInputProcessor = Gdx.input.getInputProcessor();
+				
+				if (AutoComplete.enabled) {
+					AutoComplete.suggest(false);
+				}
 			}
 
-			Gdx.input.setInputProcessor(visible ? otherInputProcessor : consoleInputProcessor);
-			visible = !visible;
+			// only allow opening console when enabled but allow closing the console anytime
+			if (visible || enabled) {
+				Gdx.input.setInputProcessor(visible ? otherInputProcessor : consoleInputProcessor);
+				visible = !visible;
+			}
 		}
+		
+		//	If AutoComplete is enabled and the key to select a suggestion is pressed
+		//	select the next or previous suggestion
+		if (AutoComplete.enabled && Gdx.input.isKeyPressed(AutoComplete.selectKey)) {
 
-		// get previous commands
-		if (Gdx.input.isKeyJustPressed(priorKey)) {
-			if (visible) {
-				if (commandPos + 1 < priorCommands.size()) {
-					commandPos++;
-					currentText = priorCommands.get(commandPos);
+			if (Gdx.input.isKeyJustPressed(priorKey) ) {
+				if (visible) {
+					AutoComplete.selectUp();
+				}
+			}
+			if (Gdx.input.isKeyJustPressed(nextKey)) {
+				if (visible) {
+					AutoComplete.selectDown();
+				}
+			}
+
+		} else {
+			// get previous commands
+			if (Gdx.input.isKeyJustPressed(priorKey)) {
+				if (visible) {
+					if (commandPos + 1 < priorCommands.size()) {
+						commandPos++;
+						currentText = priorCommands.get(commandPos);
+						AutoComplete.resetAndSuggest();
+					}
+				}
+			}
+			if (Gdx.input.isKeyJustPressed(nextKey)) {
+				if (visible) {
+					if (commandPos - 1 < 0) {
+						currentText = "";
+						commandPos = -1;
+					} else {
+						commandPos--;
+						currentText = priorCommands.get(commandPos);
+					}
+					AutoComplete.resetAndSuggest();
 				}
 			}
 		}
-		if (Gdx.input.isKeyJustPressed(nextKey)) {
-			if (visible) {
-				if (commandPos - 1 < 0) {
-					currentText = "";
-					commandPos = -1;
-				} else {
-					commandPos--;
-					currentText = priorCommands.get(commandPos);
-				}
+		// If the fill in key is pressed automaticallly fill in what the user wants
+		if (AutoComplete.enabled && (Gdx.input.isKeyJustPressed(AutoComplete.fillKey1)
+				|| Gdx.input.isKeyJustPressed(AutoComplete.fillKey2))) {
+			AutoComplete.fillInSuggestion();
+		}
+
+		// if the key to delete the last token is pressed, delete the rightmost token
+		if (Gdx.input.isKeyJustPressed(AutoComplete.deleteTokenKey)) {
+			currentText = AutoComplete.getTextWithoutRightmostToken(true);
+			if (AutoComplete.enabled) {
+				AutoComplete.suggest(false);
 			}
 		}
 	}

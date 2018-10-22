@@ -1,5 +1,5 @@
 package basemod.interfaces;
 
-public interface OnPowersModifiedSubscriber {
+public interface OnPowersModifiedSubscriber extends ISubscriber {
 	void receivePowersModified();
 }

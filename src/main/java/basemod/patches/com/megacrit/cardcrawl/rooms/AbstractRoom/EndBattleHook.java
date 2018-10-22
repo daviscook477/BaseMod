@@ -1,9 +1,8 @@
 package basemod.patches.com.megacrit.cardcrawl.rooms.AbstractRoom;
 
+import basemod.BaseMod;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
-
-import basemod.BaseMod;
 
 @SpirePatch(cls="com.megacrit.cardcrawl.rooms.AbstractRoom", method="endBattle")
 public class EndBattleHook {

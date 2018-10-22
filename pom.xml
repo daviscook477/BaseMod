@@ -1,39 +1,54 @@
-<?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>basemod</groupId>
   <artifactId>BaseMod</artifactId>
-  <version>1.6.5</version>
+  <version>5.0.1</version>
   <packaging>jar</packaging>
   
   <name>BaseMod</name>
   <description>Slay the Spire mod which tests BaseMod.</description>
+
+  <properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <SlayTheSpire.version>10-18-2018</SlayTheSpire.version>
+    <ModTheSpire.version>3.3.0</ModTheSpire.version>
+  </properties>
   
   <dependencies>
     <dependency>
       <groupId>com.megacrit.cardcrawl</groupId>
       <artifactId>slaythespire</artifactId>
-      <version>016</version>
+      <version>${SlayTheSpire.version}</version>
       <scope>system</scope>
       <systemPath>${basedir}/../lib/desktop-1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>com.evacipated.cardcrawl</groupId>
       <artifactId>ModTheSpire</artifactId>
-      <version>2.2.1</version>
+      <version>${ModTheSpire.version}</version>
       <scope>system</scope>
       <systemPath>${basedir}/../lib/ModTheSpire.jar</systemPath>
     </dependency>
+    <dependency>
+      <groupId>com.github.trixt0r</groupId>
+      <artifactId>Spriter</artifactId>
+      <version>1.1</version>
+    </dependency>
   </dependencies>
-  
-  <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-  </properties>
   
   <build>
     <finalName>BaseMod</finalName>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -105,7 +120,7 @@
             <phase>package</phase>
             <configuration>
               <target>
-                <copy file="target/BaseMod.jar" tofile="../_ModTheSpire/mods/BaseMod.jar"/>
+                <copy file="target/${name}.jar" tofile="../_ModTheSpire/mods/${name}.jar"/>
                 <copy file="target/TestMod.jar" tofile="../_ModTheSpire/mods/TestMod.jar"/>
               </target>
             </configuration>

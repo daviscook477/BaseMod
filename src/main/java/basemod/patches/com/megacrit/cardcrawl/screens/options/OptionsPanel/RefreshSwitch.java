@@ -1,10 +1,6 @@
 package basemod.patches.com.megacrit.cardcrawl.screens.options.OptionsPanel;
 
-import java.lang.reflect.Field;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import basemod.BaseMod;
 import com.badlogic.gdx.Gdx;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
@@ -12,8 +8,10 @@ import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.screens.options.ExitGameButton;
 import com.megacrit.cardcrawl.screens.options.OptionsPanel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import basemod.BaseMod;
+import java.lang.reflect.Field;
 
 @SpirePatch(cls="com.megacrit.cardcrawl.screens.options.OptionsPanel", method="refresh")
 public class RefreshSwitch {
@@ -23,8 +21,7 @@ public class RefreshSwitch {
 		OptionsPanel panel = (OptionsPanel) __obj_instance;
 		if (!Settings.isDailyRun) {
 			AbstractPlayer.PlayerClass selection = AbstractDungeon.player.chosenClass;
-			if (!selection.toString().equals("IRONCLAD") && !selection.toString().equals("THE_SILENT") &&
-					!selection.toString().equals("CROWBOT")) {
+			if (!BaseMod.isBaseGameCharacter(selection)) {
 				System.out.println("looking for file: " + (BaseMod.save_path + selection.name() + ".autosave"));
 				if (!Gdx.files.local(BaseMod.save_path + selection.name() + ".autosave").exists()) {
 					try {
