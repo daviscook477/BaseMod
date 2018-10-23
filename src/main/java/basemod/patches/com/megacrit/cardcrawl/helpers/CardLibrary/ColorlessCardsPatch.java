@@ -1,12 +1,15 @@
 package basemod.patches.com.megacrit.cardcrawl.helpers.CardLibrary;
 
+import basemod.BaseMod;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.helpers.CardLibrary;
 
-import basemod.BaseMod;
-
-@SpirePatch(cls="com.megacrit.cardcrawl.helpers.CardLibrary", method="addColorlessCards")
+@SpirePatch(
+		clz=CardLibrary.class,
+		method="addColorlessCards",
+		paramtypez={}
+)
 public class ColorlessCardsPatch {
 
     public static void Postfix() {

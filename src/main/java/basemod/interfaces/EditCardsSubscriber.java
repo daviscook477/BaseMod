@@ -1,5 +1,5 @@
 package basemod.interfaces;
 
-public interface EditCardsSubscriber {
+public interface EditCardsSubscriber extends ISubscriber {
 	void receiveEditCards();
 }

@@ -1,8 +1,10 @@
 package basemod;
 
-import java.util.function.Consumer;
-
+import basemod.interfaces.PostUpdateSubscriber;
+import basemod.interfaces.RenderSubscriber;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Interpolation;
@@ -12,14 +14,12 @@ import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
-import com.megacrit.cardcrawl.helpers.InputHelper;
-import com.megacrit.cardcrawl.helpers.ScrollInputProcessor;
-import com.megacrit.cardcrawl.helpers.TypeHelper;
+import com.megacrit.cardcrawl.helpers.input.InputHelper;
+import com.megacrit.cardcrawl.screens.mainMenu.MainMenuScreen;
 
-import basemod.interfaces.PreUpdateSubscriber;
-import basemod.interfaces.RenderSubscriber;
+import java.util.function.Consumer;
 
-public class ModTextPanel implements RenderSubscriber, PreUpdateSubscriber {
+public class ModTextPanel implements RenderSubscriber, PostUpdateSubscriber {
 	private String prevName;
 	public static String textField;
 	public Hitbox yesHb;
@@ -28,8 +28,8 @@ public class ModTextPanel implements RenderSubscriber, PreUpdateSubscriber {
 	public Consumer<ModTextPanel> cancel = null;
 	public String defaultName;
 	public String explanationText;
-	public static final String CONFIRM = "Confirm";
-	public static final String CANCEL = "Cancel";
+	public static final String CANCEL_TEXT = "Cancel";
+	public static final String CONFIRM_TEXT = "Confirm";
 	private static final int CONFIRM_W = 360;
 	private static final int CONFIRM_H = 414;
 	private static final int YES_W = 173;
@@ -42,23 +42,25 @@ public class ModTextPanel implements RenderSubscriber, PreUpdateSubscriber {
 	private static final float ANIM_TIME = 0.25f;
 	public boolean shown;
 	private static final float SCREEN_DARKNESS = 0.75f;
+	private InputProcessor oldInputProcessor;
+	private ModPanel panel;
 
 	public ModTextPanel() {
 		this.prevName = "";
-		this.yesHb = new Hitbox(160.0f * Settings.scale, 70.0f * Settings.scale);
-		this.noHb = new Hitbox(160.0f * Settings.scale, 70.0f * Settings.scale);
+		this.yesHb = null;
+		this.noHb = null;
 		this.screenColor = new Color(0.0f, 0.0f, 0.0f, 0.0f);
 		this.uiColor = new Color(1.0f, 1.0f, 1.0f, 0.0f);
 		this.animTimer = 0.0f;
 		this.waitTimer = 0.0f;
 		this.shown = false;
 
-		BaseMod.subscribeToRender(this);
-		BaseMod.subscribeToPreUpdate(this);
+		BaseMod.subscribe(this);
 	}
 
-	public void receivePreUpdate() {
-		if (!this.shown) return;
+	public void receivePostUpdate() {
+		if (!this.shown)
+			return;
 		
 		if (Gdx.input.isKeyPressed(67) && !ModTextPanel.textField.equals("") && this.waitTimer <= 0.0f) {
 			ModTextPanel.textField = ModTextPanel.textField.substring(0, ModTextPanel.textField.length() - 1);
@@ -125,9 +127,19 @@ public class ModTextPanel implements RenderSubscriber, PreUpdateSubscriber {
 		}
 	}
 
-	public void show(final String curName, String defaultValue, Consumer<ModTextPanel> cancel,
+	public void show(ModPanel panel, final String curName, String defaultValue, String explanationText, Consumer<ModTextPanel> cancel,
 			Consumer<ModTextPanel> confirm) {
-		Gdx.input.setInputProcessor(new TypeHelper());
+		this.panel = panel;
+		panel.isUp = false;
+		this.oldInputProcessor = Gdx.input.getInputProcessor();
+		Gdx.input.setInputProcessor(new ModTextPanelInputHelper());
+		System.out.println("setting new input processor");
+		if (this.yesHb == null) {
+			this.yesHb = new Hitbox(160.0f * Settings.scale, 70.0f * Settings.scale);
+		}
+		if (this.noHb == null) {
+			this.noHb = new Hitbox(160.0f * Settings.scale, 70.0f * Settings.scale);
+		}
 		this.yesHb.move(860.0f * Settings.scale, Settings.OPTION_Y - 118.0f * Settings.scale);
 		this.noHb.move(1062.0f * Settings.scale, Settings.OPTION_Y - 118.0f * Settings.scale);
 		this.shown = true;
@@ -137,49 +149,61 @@ public class ModTextPanel implements RenderSubscriber, PreUpdateSubscriber {
 		this.cancel = cancel;
 		this.confirm = confirm;
 		this.defaultName = defaultValue;
+		this.explanationText = explanationText;
 	}
 
 	private void removeListeners() {
 		this.confirm = null;
 		this.cancel = null;
 	}
+	
+	private void resetToSettings() {
+		this.panel.isUp = true;
+		CardCrawlGame.mainMenuScreen.darken();
+        CardCrawlGame.mainMenuScreen.hideMenuButtons();
+        CardCrawlGame.mainMenuScreen.screen = MainMenuScreen.CurScreen.SETTINGS;
+        CardCrawlGame.cancelButton.show("Close");
+	}
 
 	public void confirm() {
 		ModTextPanel.textField = ModTextPanel.textField.trim();
 		if (ModTextPanel.textField.equals("")) {
 			ModTextPanel.textField = defaultName;
-			this.confirm.accept(this);
-			removeListeners();
 		}
+		this.confirm.accept(this);
+		removeListeners();
+		resetToSettings();
 		this.yesHb.move(-1000.0f, -1000.0f);
 		this.noHb.move(-1000.0f, -1000.0f);
 		this.shown = false;
 		this.animTimer = ANIM_TIME;
-		Gdx.input.setInputProcessor(new ScrollInputProcessor());
+		Gdx.input.setInputProcessor(this.oldInputProcessor);
 	}
 
 	public void cancel() {
 		ModTextPanel.textField = this.prevName;
 		if (ModTextPanel.textField.equals("")) {
 			ModTextPanel.textField = defaultName;
-			this.cancel.accept(this);
-			removeListeners();
 		}
+		this.cancel.accept(this);
+		removeListeners();
+		resetToSettings();
 		this.yesHb.move(-1000.0f, -1000.0f);
 		this.noHb.move(-1000.0f, -1000.0f);
 		this.shown = false;
 		this.animTimer = ANIM_TIME;
-		Gdx.input.setInputProcessor(new ScrollInputProcessor());
+		Gdx.input.setInputProcessor(this.oldInputProcessor);
 	}
 
 	public void receiveRender(final SpriteBatch sb) {
-		if (!this.shown) return;
-		
+		if (!this.shown)
+			return;
+
 		sb.setColor(this.screenColor);
 		sb.draw(ImageMaster.WHITE_SQUARE_IMG, 0.0f, 0.0f, Settings.WIDTH, Settings.HEIGHT);
 		sb.setColor(this.uiColor);
 		sb.draw(ImageMaster.OPTION_CONFIRM, Settings.WIDTH / 2.0f - 180.0f, Settings.OPTION_Y - 207.0f, 180.0f, 207.0f,
-				360.0f, 414.0f, Settings.scale, Settings.scale, 0.0f, 0, 0, 360, 414, false, false);
+				CONFIRM_W, CONFIRM_H, Settings.scale, Settings.scale, 0.0f, 0, 0, 360, 414, false, false);
 		sb.draw(ImageMaster.RENAME_BOX, Settings.WIDTH / 2.0f - 160.0f, Settings.OPTION_Y - 160.0f, 160.0f, 160.0f,
 				320.0f, 320.0f, Settings.scale, Settings.scale, 0.0f, 0, 0, 320, 320, false, false);
 		FontHelper.renderSmartText(sb, FontHelper.cardTitleFont_small_N, ModTextPanel.textField,
@@ -199,19 +223,19 @@ public class ModTextPanel implements RenderSubscriber, PreUpdateSubscriber {
 		if (this.yesHb.clickStarted) {
 			sb.setColor(new Color(1.0f, 1.0f, 1.0f, this.uiColor.a * 0.9f));
 			sb.draw(ImageMaster.OPTION_YES, Settings.WIDTH / 2.0f - 86.5f - 100.0f * Settings.scale,
-					Settings.OPTION_Y - 37.0f - 120.0f * Settings.scale, 86.5f, 37.0f, 173.0f, 74.0f, Settings.scale,
+					Settings.OPTION_Y - 37.0f - 120.0f * Settings.scale, 86.5f, 37.0f, YES_W, BUTTON_H, Settings.scale,
 					Settings.scale, 0.0f, 0, 0, 173, 74, false, false);
 			sb.setColor(new Color(this.uiColor));
 		} else {
 			sb.draw(ImageMaster.OPTION_YES, Settings.WIDTH / 2.0f - 86.5f - 100.0f * Settings.scale,
-					Settings.OPTION_Y - 37.0f - 120.0f * Settings.scale, 86.5f, 37.0f, 173.0f, 74.0f, Settings.scale,
+					Settings.OPTION_Y - 37.0f - 120.0f * Settings.scale, 86.5f, 37.0f, YES_W, BUTTON_H, Settings.scale,
 					Settings.scale, 0.0f, 0, 0, 173, 74, false, false);
 		}
 		if (!this.yesHb.clickStarted && this.yesHb.hovered) {
 			sb.setColor(new Color(1.0f, 1.0f, 1.0f, this.uiColor.a * ANIM_TIME));
 			sb.setBlendFunction(770, 1);
 			sb.draw(ImageMaster.OPTION_YES, Settings.WIDTH / 2.0f - 86.5f - 100.0f * Settings.scale,
-					Settings.OPTION_Y - 37.0f - 120.0f * Settings.scale, 86.5f, 37.0f, 173.0f, 74.0f, Settings.scale,
+					Settings.OPTION_Y - 37.0f - 120.0f * Settings.scale, 86.5f, 37.0f, YES_W, BUTTON_H, Settings.scale,
 					Settings.scale, 0.0f, 0, 0, 173, 74, false, false);
 			sb.setBlendFunction(770, 771);
 			sb.setColor(this.uiColor);
@@ -224,16 +248,16 @@ public class ModTextPanel implements RenderSubscriber, PreUpdateSubscriber {
 			c = Settings.GOLD_COLOR.cpy();
 		}
 		c.a = this.uiColor.a;
-		FontHelper.renderFontCentered(sb, FontHelper.cardTitleFont_small_N, CANCEL,
+		FontHelper.renderFontCentered(sb, FontHelper.cardTitleFont_small_N, CONFIRM_TEXT,
 				Settings.WIDTH / 2.0f - 110.0f * Settings.scale, Settings.OPTION_Y - 118.0f * Settings.scale, c, 1.0f);
 		sb.draw(ImageMaster.OPTION_NO, Settings.WIDTH / 2.0f - 80.5f + 106.0f * Settings.scale,
-				Settings.OPTION_Y - 37.0f - 120.0f * Settings.scale, 80.5f, 37.0f, 161.0f, 74.0f, Settings.scale,
+				Settings.OPTION_Y - 37.0f - 120.0f * Settings.scale, 80.5f, 37.0f, NO_W, BUTTON_H, Settings.scale,
 				Settings.scale, 0.0f, 0, 0, 161, 74, false, false);
 		if (!this.noHb.clickStarted && this.noHb.hovered) {
 			sb.setColor(new Color(1.0f, 1.0f, 1.0f, this.uiColor.a * ANIM_TIME));
 			sb.setBlendFunction(770, 1);
 			sb.draw(ImageMaster.OPTION_NO, Settings.WIDTH / 2.0f - 80.5f + 106.0f * Settings.scale,
-					Settings.OPTION_Y - 37.0f - 120.0f * Settings.scale, 80.5f, 37.0f, 161.0f, 74.0f, Settings.scale,
+					Settings.OPTION_Y - 37.0f - 120.0f * Settings.scale, 80.5f, 37.0f, NO_W, BUTTON_H, Settings.scale,
 					Settings.scale, 0.0f, 0, 0, 161, 74, false, false);
 			sb.setBlendFunction(770, 771);
 			sb.setColor(this.uiColor);
@@ -246,11 +270,84 @@ public class ModTextPanel implements RenderSubscriber, PreUpdateSubscriber {
 			c = Settings.GOLD_COLOR.cpy();
 		}
 		c.a = this.uiColor.a;
-		FontHelper.renderFontCentered(sb, FontHelper.cardTitleFont_small_N, CONFIRM,
+		FontHelper.renderFontCentered(sb, FontHelper.cardTitleFont_small_N, CANCEL_TEXT,
 				Settings.WIDTH / 2.0f + 110.0f * Settings.scale, Settings.OPTION_Y - 118.0f * Settings.scale, c, 1.0f);
 		if (this.shown) {
 			this.yesHb.render(sb);
 			this.noHb.render(sb);
 		}
 	}
+}
+
+class ModTextPanelInputHelper implements InputProcessor {
+
+	@Override
+	public boolean keyDown(int keycode) {
+		System.out.println("keydown and key was " + keycode);
+		String tmp = Input.Keys.toString(keycode);
+		if ((tmp.equals("Space")) && (tmp.length() != 0)) {
+			ModTextPanel.textField += ' ';
+			return false;
+		}
+		if (tmp.length() != 1)
+			return false;
+		if (FontHelper.getSmartWidth(FontHelper.cardTitleFont_small_N, ModTextPanel.textField, 1.0E7F, 0.0F) >= 240.0F
+				* Settings.scale) {
+
+			return false;
+		}
+
+		if ((!Gdx.input.isKeyPressed(59)) && (!Gdx.input.isKeyPressed(60))) {
+			tmp = tmp.toLowerCase();
+		}
+
+		char tmp2 = tmp.charAt(0);
+		if ((Character.isDigit(tmp2)) || (Character.isLetter(tmp2))) {
+			ModTextPanel.textField += tmp2;
+		}
+		return true;
+	}
+
+	@Override
+	public boolean keyTyped(char arg0) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean keyUp(int arg0) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean mouseMoved(int arg0, int arg1) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean scrolled(int arg0) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean touchDown(int arg0, int arg1, int arg2, int arg3) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean touchDragged(int arg0, int arg1, int arg2) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean touchUp(int arg0, int arg1, int arg2, int arg3) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

@@ -1,13 +1,12 @@
 package basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen;
 
-import java.util.ArrayList;
-
+import basemod.BaseMod;
+import basemod.ReflectionHacks;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.shop.ShopScreen;
 import com.megacrit.cardcrawl.shop.StoreRelic;
 
-import basemod.BaseMod;
-import basemod.ReflectionHacks;
+import java.util.ArrayList;
 
 @SpirePatch(cls="com.megacrit.cardcrawl.shop.ShopScreen", method="initRelics")
 public class PostCreateShopRelicHook {

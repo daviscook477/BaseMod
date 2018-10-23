@@ -1,5 +1,5 @@
 package basemod.interfaces;
 
-public interface SetUnlocksSubscriber {
+public interface SetUnlocksSubscriber extends ISubscriber {
 	void receiveSetUnlocks();
 }

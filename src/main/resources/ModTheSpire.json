@@ -1,0 +1,11 @@
+{
+  "modid": "basemod",
+  "name": "${project.name}",
+  "author_list": ["kiooeht", "test447"],
+  "description": "Unofficial modding API for Slay the Spire. Also a Dev Console.",
+  "credits": "t-larson: Original creator of BaseMod.\nContributors: test447, Haashi, kiooeht, Blank The Evil, robojumper, FlipskiZ, DemoXinMC, Skrelpoid, kobting, twanvl, Moocowsgomoo",
+  "version": "${project.version}",
+  "sts_version": "${SlayTheSpire.version}",
+  "mts_version": "${ModTheSpire.version}",
+  "update_json": "https://api.github.com/repos/daviscook477/BaseMod/releases/latest"
+}

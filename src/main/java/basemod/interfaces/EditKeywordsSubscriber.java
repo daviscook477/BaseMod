@@ -1,5 +1,5 @@
 package basemod.interfaces;
 
-public interface EditKeywordsSubscriber {
+public interface EditKeywordsSubscriber extends ISubscriber {
 	void receiveEditKeywords();
 }

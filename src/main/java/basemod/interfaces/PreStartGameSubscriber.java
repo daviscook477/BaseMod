@@ -1,5 +1,5 @@
 package basemod.interfaces;
 
-public interface PreStartGameSubscriber {
+public interface PreStartGameSubscriber extends ISubscriber {
     void receivePreStartGame();
 }

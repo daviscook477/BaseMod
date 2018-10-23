@@ -1,5 +1,5 @@
 package basemod.interfaces;
 
-public interface EditRelicsSubscriber {
+public interface EditRelicsSubscriber extends ISubscriber {
 	void receiveEditRelics();
 }

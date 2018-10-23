@@ -8,7 +8,8 @@ public class CustomEventRoom extends EventRoom {
 	@Override
 	public void onPlayerEntry() {
 		AbstractDungeon.overlayMenu.proceedButton.hide();
-		this.event = EventHelper.getEvent(AbstractDungeon.eventList.remove(0));
+		String eventName = AbstractDungeon.eventList.remove(0);
+		this.event = EventHelper.getEvent(eventName);
 		this.event.onEnterRoom();
 	}
 }

@@ -1,25 +1,48 @@
 package basemod.patches.com.megacrit.cardcrawl.helpers.CardLibrary;
 
-import com.evacipated.cardcrawl.modthespire.lib.SpireInsertPatch;
-import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
+import basemod.BaseMod;
+import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.AbstractCard.CardColor;
+import com.megacrit.cardcrawl.helpers.CardLibrary;
 import com.megacrit.cardcrawl.unlock.UnlockTracker;
+import javassist.CtBehavior;
 
-import basemod.BaseMod;
-
-@SpirePatch(cls = "com.megacrit.cardcrawl.helpers.CardLibrary", method = "add")
-public class AddSwitch {
-	@SpireInsertPatch(rloc = 37)
-	public static void Insert(Object cardObj) {
-		AbstractCard card = (AbstractCard) cardObj;
+@SpirePatch(
+		clz=CardLibrary.class,
+		method="add"
+)
+public class AddSwitch
+{
+	@SpireInsertPatch(
+			locator=Locator.class
+	)
+	public static void Insert(AbstractCard card)
+	{
 		CardColor color = card.color;
-		if (!color.toString().equals("RED") && !color.toString().equals("GREEN") && !color.toString().equals("BLUE")
-				&& !color.toString().equals("COLORLESS") && !color.toString().equals("CURSE")) {
-			BaseMod.incrementCardCount(color.toString());
-			if (UnlockTracker.isCardSeen(card.cardID)) {
-				BaseMod.incrementSeenCardCount(color.toString());
-			}
+		switch (color) {
+			case RED:
+			case GREEN:
+			case BLUE:
+			case COLORLESS:
+			case CURSE:
+				break;
+			default:
+				BaseMod.incrementCardCount(color);
+				if (UnlockTracker.isCardSeen(card.cardID)) {
+					BaseMod.incrementSeenCardCount(color);
+				}
+		}
+	}
+
+	private static class Locator extends SpireInsertLocator
+	{
+		@Override
+		public int[] Locate(CtBehavior ctMethodToPatch) throws Exception
+		{
+			Matcher finalMatcher = new Matcher.MethodCallMatcher(UnlockTracker.class, "isCardSeen");
+			int[] lines = LineFinder.findAllInOrder(ctMethodToPatch, finalMatcher);
+			return new int[]{lines[lines.length - 1]};
 		}
 	}
 }

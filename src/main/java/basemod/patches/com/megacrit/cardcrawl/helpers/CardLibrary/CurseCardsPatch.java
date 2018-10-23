@@ -1,18 +1,16 @@
 package basemod.patches.com.megacrit.cardcrawl.helpers.CardLibrary;
 
-import java.util.HashMap;
-
+import basemod.BaseMod;
+import basemod.ReflectionHacks;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.helpers.CardLibrary;
 
-import basemod.BaseMod;
-import basemod.ReflectionHacks;
+import java.util.HashMap;
 
 @SpirePatch(cls="com.megacrit.cardcrawl.helpers.CardLibrary", method="addCurseCards")
 public class CurseCardsPatch {
 
-	@SuppressWarnings("ConstantConditions")
     public static void Postfix() {
 		// add new cards
 		for (AbstractCard card : BaseMod.getCurseCardsToAdd()) {

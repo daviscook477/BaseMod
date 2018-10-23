@@ -1,5 +1,5 @@
 package basemod.interfaces;
 
-public interface PostDungeonInitializeSubscriber {
+public interface PostDungeonInitializeSubscriber extends ISubscriber {
     void receivePostDungeonInitialize();
 }

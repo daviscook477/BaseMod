@@ -1,12 +1,11 @@
 package basemod.patches.com.megacrit.cardcrawl.actions.common.ApplyPowerAction;
 
+import basemod.BaseMod;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.actions.common.ApplyPowerAction;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.powers.AbstractPower;
-
-import basemod.BaseMod;
 
 @SpirePatch(cls="com.megacrit.cardcrawl.actions.common.ApplyPowerAction", method="update")
 public class ApplyPowerActionPostPowerApplyHook {

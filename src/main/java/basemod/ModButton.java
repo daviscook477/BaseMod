@@ -1,18 +1,18 @@
 package basemod;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.Hitbox;
-import com.megacrit.cardcrawl.helpers.InputHelper;
+import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.helpers.input.InputHelper;
 
 import java.util.function.Consumer;
 
 // DEPRECATED
-public class ModButton {
+public class ModButton implements IUIElement{
     private static final float HB_SHRINK = 14.0f;
     
     private Consumer<ModButton> click;
@@ -26,7 +26,7 @@ public class ModButton {
     public ModPanel parent;
     
     public ModButton(float xPos, float yPos, ModPanel p, Consumer<ModButton> c) {
-    	this(xPos, yPos, new Texture(Gdx.files.internal("img/BlankButton.png")), p, c);
+    	this(xPos, yPos, ImageMaster.loadImage("img/BlankButton.png"), p, c);
     }
     
     public ModButton(float xPos, float yPos, Texture tex, ModPanel p, Consumer<ModButton> c) {
@@ -70,4 +70,14 @@ public class ModButton {
     private void onClick() {
         click.accept(this);
     }
+
+	@Override
+	public int renderLayer() {
+		return ModPanel.MIDDLE_LAYER;
+	}
+
+	@Override
+	public int updateOrder() {
+		return ModPanel.DEFAULT_UPDATE;
+	}
 }

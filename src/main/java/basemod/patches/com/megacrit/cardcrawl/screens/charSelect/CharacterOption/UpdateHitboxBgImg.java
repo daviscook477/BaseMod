@@ -1,24 +1,42 @@
 package basemod.patches.com.megacrit.cardcrawl.screens.charSelect.CharacterOption;
 
+import basemod.BaseMod;
 import com.badlogic.gdx.graphics.Texture;
-import com.evacipated.cardcrawl.modthespire.lib.SpireInsertPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
+import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.screens.charSelect.CharacterOption;
+import javassist.CannotCompileException;
+import javassist.expr.ExprEditor;
+import javassist.expr.FieldAccess;
 
-import basemod.BaseMod;
-
-@SpirePatch(cls="com.megacrit.cardcrawl.screens.charSelect.CharacterOption", method="updateHitbox")
+@SpirePatch(
+		clz=CharacterOption.class,
+		method="updateHitbox"
+)
 public class UpdateHitboxBgImg {
 
-	@SpireInsertPatch(rloc=49)
-	public static void Insert(Object __obj_instance) {
+	public static ExprEditor Instrument()
+	{
+		return new ExprEditor() {
+			@Override
+			public void edit(FieldAccess f) throws CannotCompileException {
+				if (f.getFieldName().equals("bgCharImg") && f.isWriter()) {
+					f.replace("$proceed(" + UpdateHitboxBgImg.class.getName() + ".getPlayerPortrait($1));");
+				}
+			}
+		};
+	}
+
+	@SuppressWarnings("unused")
+	public static Texture getPlayerPortrait(Object original)
+	{
 		AbstractPlayer.PlayerClass chosenClass = CardCrawlGame.chosenCharacter;
-		if (!chosenClass.toString().equals("IRONCLAD") && !chosenClass.toString().equals("THE_SILENT") &&
-				!chosenClass.toString().equals("CROWBOT")) {
-			CardCrawlGame.mainMenuScreen.charSelectScreen.bgCharImg =
-					new Texture(BaseMod.getPlayerPortrait(chosenClass.toString()));
+		if (BaseMod.isBaseGameCharacter(chosenClass)) {
+			return (Texture)original;
+		} else {
+			return ImageMaster.loadImage(BaseMod.getPlayerPortrait(chosenClass));
 		}
 	}
-	
 }

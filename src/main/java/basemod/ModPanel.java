@@ -7,21 +7,54 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
-import com.megacrit.cardcrawl.helpers.InputHelper;
+import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import com.megacrit.cardcrawl.screens.mainMenu.MainMenuScreen;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
 public class ModPanel {
     
+	public static final int BACKGROUND_LAYER = 0;
+	public static final int MIDDLE_LAYER = 1;
+	public static final int TEXT_LAYER = 2;
+	
+	public static final int PRIORITY_UPDATE = 0;
+	public static final int DEFAULT_UPDATE = 1;
+	public static final int LATE_UPDATE = 2;
+	
     private static Texture background;
-    private ArrayList<ModButton> buttons;
-    private ArrayList<ModLabel> labels;
-    private ArrayList<ModSlider> sliders;
-    private ArrayList<ModColorDisplay> colorDisplays;
-    private ArrayList<ModImage> images;
+    
+    /*
+     * we use ArrayList with Collections.sort on every insert instead of a TreeSet
+     * for maintaining an ordered list because TreeSet has the unfortunate set property
+     * of ignoring duplicates which it defines by things that are equal using its comparator
+     * 
+     * we use 2 ArrayLists so we can have separate render orderings and update orderings
+     * for the IUIElement(s)
+     */
+    private static Comparator<IUIElement> renderComparator = new Comparator<IUIElement>() {
+
+		@Override
+		public int compare(IUIElement obj0, IUIElement obj1) {
+			return (obj0.renderLayer() - obj1.renderLayer());
+		}
+    	
+    };
+    private static Comparator<IUIElement> updateComparator = new Comparator<IUIElement>() {
+
+		@Override
+		public int compare(IUIElement obj0, IUIElement obj1) {
+			return (obj0.updateOrder() - obj1.updateOrder());
+		}
+    	
+    };
+    private ArrayList<IUIElement> uiElementsRender;
+    private ArrayList<IUIElement> uiElementsUpdate;
     
     private Consumer<ModPanel> createFunc;
     
@@ -38,12 +71,10 @@ public class ModPanel {
     }
     
     public ModPanel(Consumer<ModPanel> createFunc) {
-        background = new Texture(Gdx.files.internal("img/ModPanelBg.png"));
-        buttons = new ArrayList<>();
-        labels = new ArrayList<>();
-        sliders = new ArrayList<>();
-        colorDisplays = new ArrayList<>();
-        images = new ArrayList<>();
+        background = ImageMaster.loadImage("img/ModPanelBg.png");
+        
+        uiElementsRender = new ArrayList<>();
+        uiElementsUpdate = new ArrayList<>();
         
         state = new HashMap<>();
         
@@ -60,58 +91,24 @@ public class ModPanel {
     	}
     }
     
-    // DEPRECATED
-    public void addButton(float x, float y, Consumer<ModButton> click) {
-        buttons.add(new ModButton(x, y, this, click));
-    }
-    
-    // DEPRECATED
-    public void addLabel(String text, float x, float y, Consumer<ModLabel> update) {
-        labels.add(new ModLabel(text, x, y, this, update));
-    }
-    
-    // DEPRECATED
-    public void addSlider(String label, float x, float y, float multi, String suffix, Consumer<ModSlider> change) {
-        sliders.add(new ModSlider(label, x, y, multi, suffix, this, change));
-    }
-    
-    // DEPRECATED
-    public void addColorDisplay(float x, float y, Texture texture, Texture outline, Consumer<ModColorDisplay> update) {
-        colorDisplays.add(new ModColorDisplay(x, y, texture, outline, update));
-    }
-    
-    public void addButton(ModButton button) {
-    	buttons.add(button);
-    }
-    
-    public void addLabel(ModLabel label) {
-    	labels.add(label);
-    }
-    
-    public void addSlider(ModSlider slider) {
-        sliders.add(slider);
-    }
-    
-    public void addColorDisplay(ModColorDisplay mcd) {
-        colorDisplays.add(mcd);
-    }
-    
-    public void addImage(ModImage img) {
-        images.add(img);
+    public void addUIElement(IUIElement element) {
+    	uiElementsRender.add(element);
+    	Collections.sort(uiElementsRender, renderComparator);
+    	uiElementsUpdate.add(element);
+    	Collections.sort(uiElementsUpdate, updateComparator);
     }
     
     public void render(SpriteBatch sb) {
-        // Bottom layer
+        // Background pane
         renderBg(sb);
-        renderImages(sb);
         
-        // Middle layer
-        renderButtons(sb);
-        renderSliders(sb);
-        renderColorDisplays(sb);
-        
-        // Top layer
-        renderText(sb);
+        // Render UI elements
+        // TreeSet maintains an ordering on inserted elements at insertion time
+        // and IUIElement specifies a layer so iterating through and rendering each
+        // element in turn will render the smallest layers first and then the higher layers
+        for (IUIElement elem : uiElementsRender) {
+        	elem.render(sb);
+        }
     }
     
     public void renderBg(SpriteBatch sb) {
@@ -119,41 +116,14 @@ public class ModPanel {
         sb.draw(background, (float)Settings.WIDTH / 2.0f - 682.0f, Settings.OPTION_Y - 376.0f, 682.0f, 376.0f, 1364.0f, 752.0f, Settings.scale, Settings.scale, 0.0f, 0, 0, 1364, 752, false, false);
     }
     
-    public void renderText(SpriteBatch sb) {
-        for (ModLabel label : labels) {
-            label.render(sb);
-        }
-    }
-    
-    public void renderButtons(SpriteBatch sb) {
-        for (ModButton button : buttons) {
-            button.render(sb);
-        }
-    }
-    
-    public void renderSliders(SpriteBatch sb) {
-        for (ModSlider slider : sliders) {
-            slider.render(sb);
-        }
-    }
-    
-    public void renderColorDisplays(SpriteBatch sb) {
-        for (ModColorDisplay cd : colorDisplays) {
-            cd.render(sb);
-        }
-    }
-    
-    public void renderImages(SpriteBatch sb) {
-        for (ModImage img : images) {
-            img.render(sb);
-        }
-    }
-    
     public void update() {
-        updateText();
-        updateButtons();
-        updateSliders();
-        updateColorDisplays();
+        // Update UI elements
+        // TreeSet maintains an ordering on inserted elements at insertion time
+        // and IUIElement specifies a layer so iterating through and updating each
+        // element in turn will update the smallest layers first and then the higher layers
+        for (IUIElement elem : uiElementsUpdate) {
+        	elem.update();
+        }
         
         if (InputHelper.pressedEscape) {
             InputHelper.pressedEscape = false;
@@ -167,30 +137,6 @@ public class ModPanel {
             CardCrawlGame.mainMenuScreen.screen = MainMenuScreen.CurScreen.MAIN_MENU;
             CardCrawlGame.cancelButton.hideInstantly();
             isUp = false;
-        }
-    }
-    
-    private void updateText() {
-        for (ModLabel label : labels) {
-            label.update();
-        }
-    }
-    
-    private void updateButtons() {
-        for (ModButton button : buttons) {
-            button.update();
-        }
-    }
-    
-    private void updateSliders() {
-        for (ModSlider slider : sliders) {
-            slider.update();
-        }
-    }
-    
-    private void updateColorDisplays() {
-        for (ModColorDisplay cd : colorDisplays) {
-            cd.update();
         }
     }
 }

@@ -1,8 +1,7 @@
 package basemod.patches.com.megacrit.cardcrawl.helpers.CardLibrary;
 
-import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
-
 import basemod.BaseMod;
+import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 
 @SpirePatch(cls="com.megacrit.cardcrawl.helpers.CardLibrary", method="initialize")
 public class EditCardsPatch {

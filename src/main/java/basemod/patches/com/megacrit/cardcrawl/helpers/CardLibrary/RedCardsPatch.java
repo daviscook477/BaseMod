@@ -1,12 +1,15 @@
 package basemod.patches.com.megacrit.cardcrawl.helpers.CardLibrary;
 
+import basemod.BaseMod;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.helpers.CardLibrary;
 
-import basemod.BaseMod;
-
-@SpirePatch(cls="com.megacrit.cardcrawl.helpers.CardLibrary", method="addRedCards")
+@SpirePatch(
+		clz=CardLibrary.class,
+		method="addRedCards",
+		paramtypez={}
+)
 public class RedCardsPatch {
 	public static void Postfix() {
 		// add new cards

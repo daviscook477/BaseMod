@@ -1,8 +1,7 @@
 package basemod.patches.com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 
-import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
-
 import basemod.BaseMod;
+import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 
 @SpirePatch(cls="com.megacrit.cardcrawl.dungeons.AbstractDungeon", method="onModifyPower")
 public class PowersModified {

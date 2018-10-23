@@ -1,5 +1,5 @@
 package basemod.interfaces;
 
-public interface PostInitializeSubscriber {
+public interface PostInitializeSubscriber extends ISubscriber {
     void receivePostInitialize();
 }

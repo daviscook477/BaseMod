@@ -1,24 +1,22 @@
 package basemod.test;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import basemod.BaseMod;
+import basemod.ModLabel;
+import basemod.ModPanel;
+import basemod.interfaces.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.cards.CardGroup;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.CardHelper;
+import com.megacrit.cardcrawl.helpers.CardLibrary;
+import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.helpers.RelicLibrary;
 import com.megacrit.cardcrawl.localization.CardStrings;
 import com.megacrit.cardcrawl.localization.RelicStrings;
@@ -27,40 +25,22 @@ import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.shop.ShopScreen;
 import com.megacrit.cardcrawl.shop.StorePotion;
 import com.megacrit.cardcrawl.shop.StoreRelic;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import basemod.BaseMod;
-import basemod.ModPanel;
-import basemod.interfaces.EditCardsSubscriber;
-import basemod.interfaces.EditCharactersSubscriber;
-import basemod.interfaces.EditRelicsSubscriber;
-import basemod.interfaces.EditStringsSubscriber;
-import basemod.interfaces.PostCampfireSubscriber;
-import basemod.interfaces.PostCreateIroncladStartingDeckSubscriber;
-import basemod.interfaces.PostCreateIroncladStartingRelicsSubscriber;
-import basemod.interfaces.PostCreateShopPotionSubscriber;
-import basemod.interfaces.PostCreateShopRelicSubscriber;
-import basemod.interfaces.PostCreateSilentStartingDeckSubscriber;
-import basemod.interfaces.PostCreateSilentStartingRelicsSubscriber;
-import basemod.interfaces.PostDrawSubscriber;
-import basemod.interfaces.PostDungeonInitializeSubscriber;
-import basemod.interfaces.PostEnergyRechargeSubscriber;
-import basemod.interfaces.PostInitializeSubscriber;
-import basemod.interfaces.PostRenderSubscriber;
-import basemod.interfaces.PostUpdateSubscriber;
-import basemod.interfaces.PreMonsterTurnSubscriber;
-import basemod.interfaces.PreStartGameSubscriber;
-import basemod.interfaces.PreUpdateSubscriber;
-import basemod.interfaces.RenderSubscriber;
-import basemod.interfaces.StartActSubscriber;
-import basemod.interfaces.StartGameSubscriber;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 @SpireInitializer
 public class TestMod implements
 	EditCardsSubscriber, EditCharactersSubscriber, EditRelicsSubscriber,
-	EditStringsSubscriber, PostCampfireSubscriber, PostCreateIroncladStartingDeckSubscriber,
-	PostCreateIroncladStartingRelicsSubscriber, PostCreateShopPotionSubscriber,
-	PostCreateShopRelicSubscriber, PostCreateSilentStartingDeckSubscriber,
-	PostCreateSilentStartingRelicsSubscriber, PostDrawSubscriber,
+	EditStringsSubscriber, PostCampfireSubscriber, PostCreateStartingDeckSubscriber,
+	PostCreateStartingRelicsSubscriber, PostCreateShopPotionSubscriber,
+	PostCreateShopRelicSubscriber, PostDrawSubscriber,
 	PostDungeonInitializeSubscriber, PostEnergyRechargeSubscriber,
 	PostInitializeSubscriber, PostRenderSubscriber, PostUpdateSubscriber,
 	PreMonsterTurnSubscriber, PreStartGameSubscriber,
@@ -73,27 +53,6 @@ public class TestMod implements
 	private static final String MODNAME = "TestMod";
 	private static final String AUTHOR = "Test447";
 	private static final String DESCRIPTION = "v1.6.4";
-	
-	//
-	// Subscriptions
-	//
-	
-	private static interface SubInterface {
-		void doSubscribe();
-	}
-	
-	private static void subscribe(String msg, SubInterface subCall) {
-		logger.info("registering subscriber: " + msg);
-		try {
-			subCall.doSubscribe();
-		} catch (Exception e) {
-			logger.info("failed");
-			loudWrite(writer, "subscribe to " + msg + ": 0/1");
-			return;
-		}
-		logger.info("done");
-		loudWrite(writer, "subscribe to " + msg + ": 1/1");
-	}
 	
 	//
 	// Logging
@@ -173,7 +132,7 @@ public class TestMod implements
     private static final String PURPLECLAD_PORTRAIT = "charSelect/purplecladPortrait.jpg";
     
     public static Texture getArcanoSphereTexture() {
-    	return new Texture(makePath(ASSET_FOLDER,ARCANOSPHERE_RELIC));
+    	return ImageMaster.loadImage(makePath(ASSET_FOLDER,ARCANOSPHERE_RELIC));
     }
     
 	private static BufferedWriter writer = null;
@@ -187,33 +146,14 @@ public class TestMod implements
     	return folder + "/" + resource;
     }
 	
+	@SuppressWarnings("deprecation")
 	public TestMod() {
 		loudWrite(writer, "Begin subscribing to hooks");
-		subscribe("editCards", () -> BaseMod.subscribeToEditCards(this));
-		subscribe("editCharacters", () -> BaseMod.subscribeToEditCharacters(this));
-		subscribe("editRelics", () -> BaseMod.subscribeToEditRelics(this));
-		subscribe("editStrings", () -> BaseMod.subscribeToEditStrings(this));
-		subscribe("postCampfire", () -> BaseMod.subscribeToPostCampfire(this));
-		subscribe("postCreateShopPotion", () -> BaseMod.subscribeToPostCreateShopPotion(this));
-		subscribe("postCreateShopRelic", () -> BaseMod.subscribeToPostCreateShopRelic(this));
-		subscribe("postCreateStartingDeck", () -> BaseMod.subscribeToPostCreateStartingDeck(this));
-		subscribe("postCreateStartingRelics", () -> BaseMod.subscribeToPostCreateStartingRelics(this));
-		subscribe("postDraw", () -> BaseMod.subscribeToPostDraw(this));
-		subscribe("postDungeonInitialize", () -> BaseMod.subscribeToPostDungeonInitialize(this));
-		subscribe("postEnergyRecharge", () -> BaseMod.subscribeToPostEnergyRecharge(this));
-		subscribe("postInitialize", () -> BaseMod.subscribeToPostInitialize(this));
-		subscribe("postRender", () -> BaseMod.subscribeToPostRender(this));
-		subscribe("postUpdate", () -> BaseMod.subscribeToPostUpdate(this));
-		subscribe("preMonsterTurn", () -> BaseMod.subscribeToPreMonsterTurn(this));
-		subscribe("postEnergyRecharge", () -> BaseMod.subscribeToPreStartGame(this));
-		subscribe("postInitialize", () -> BaseMod.subscribeToPreUpdate(this));
-		subscribe("postRender", () -> BaseMod.subscribeToRender(this));
-		subscribe("postUpdate", () -> BaseMod.subscribeToRender(this));
-		subscribe("preMonsterTurn", () -> BaseMod.subscribeToPreUpdate(this));
+		BaseMod.subscribe(this);
 		loudWrite(writer, "End subscribing to hooks");
 		
 		loudWrite(writer, "Setup new colors");
-		BaseMod.addColor(ColorEnumPatch.PURPLE.toString(),
+		BaseMod.addColor(ColorEnumPatch.PURPLE,
         		PURPLE, PURPLE, PURPLE, PURPLE, PURPLE, PURPLE, PURPLE,
         		makePath(ASSET_FOLDER, ATTACK_PURPLE), 
         		makePath(ASSET_FOLDER, SKILL_PURPLE),
@@ -253,20 +193,18 @@ public class TestMod implements
 	private static final String CARD_2 = "Panacea";
 	private static final String CARD_3 = "Panache";
 
-	private static void addCardToStartingDeck(ArrayList<String> addCardsToMe, String card) {
+	private static void addCardToStartingDeck(CardGroup cards, String card) {
 		loudWrite(writer, "Adding card " + card + " to deck: 1/1");
-		addCardsToMe.add(card);
+		cards.addToTop(CardLibrary.getCard(card).makeCopy());
 	}
 	
 	@Override
-	public boolean receivePostCreateStartingDeck(ArrayList<String> addCardsToMe) {
+	public void receivePostCreateStartingDeck(AbstractPlayer.PlayerClass chosenClass, CardGroup cards) {
 		// add one copy of Transmutation, Panacea, and Panache
 		// to the starting deck
-		addCardToStartingDeck(addCardsToMe, CARD_1);
-		addCardToStartingDeck(addCardsToMe, CARD_2);
-		addCardToStartingDeck(addCardsToMe, CARD_3);
-		// overwrite the starting deck
-		return true;
+		addCardToStartingDeck(cards, CARD_1);
+		addCardToStartingDeck(cards, CARD_2);
+		addCardToStartingDeck(cards, CARD_3);
 	}
 	
 	private static void addRelicToStartingSet(ArrayList<String> addRelicsToMe, String relic) {
@@ -279,13 +217,11 @@ public class TestMod implements
 	private static final String RELIC_2 = "Velvet Choker";
 	
 	@Override
-	public boolean receivePostCreateStartingRelics(ArrayList<String> addRelicsToMe) {
+	public void receivePostCreateStartingRelics(AbstractPlayer.PlayerClass chosenClass, ArrayList<String> addRelicsToMe) {
 		// add one Snecko Eye, and Velvet Choker
 		// to the starting relics
 		addRelicToStartingSet(addRelicsToMe, RELIC_1);
 		addRelicToStartingSet(addRelicsToMe, RELIC_2);
-		// overwrite the starting relics
-		return true;
 	}
 
 	private static boolean hasCard(String card) {
@@ -311,7 +247,7 @@ public class TestMod implements
 	@Override
 	public void receiveStartGame() {
 		if (receivedStartGame) {
-			unexpectedCrash("RECEIVED START GAME HOOK MORE THAN ONCE");
+			//unexpectedCrash("RECEIVED START GAME HOOK MORE THAN ONCE");
 		}
 		receivedStartGame = true;
 		
@@ -388,13 +324,14 @@ public class TestMod implements
 		
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void receivePostInitialize() {
         try {
         	// setup ModBadge for TestMod
-            Texture badgeTexture = new Texture(Gdx.files.internal("img/BaseModBadge.png"));
+            Texture badgeTexture = ImageMaster.loadImage("img/BaseModBadge.png");
             ModPanel settingsPanel = new ModPanel();
-            settingsPanel.addLabel("Test Mod - no settings", 400.0f, 700.0f, (me) -> {});
+            settingsPanel.addUIElement(new ModLabel("Test Mod - no settings", 400.0f, 700.0f, settingsPanel, (me) -> {}));
             BaseMod.registerModBadge(badgeTexture, MODNAME, AUTHOR, DESCRIPTION, settingsPanel);
         } catch (Exception e) {
         	couldNotCrash("CREATE MOD BADGE", e);
@@ -468,12 +405,11 @@ public class TestMod implements
 	@Override
 	public void receiveEditCharacters() {
 		loudWrite(writer, "begin editting characters");
-		
-		BaseMod.addCharacter(Purpleclad.class, "The Purpleclad", "Purpleclad class string",
-				ColorEnumPatch.PURPLE.toString(), "The Purpleclad",
+
+		BaseMod.addCharacter(new Purpleclad(CardCrawlGame.playerName),
 				makePath(ASSET_FOLDER, PURPLECLAD_BUTTON),
 				makePath(ASSET_FOLDER, PURPLECLAD_PORTRAIT),
-				CharacterEnumPatch.THE_PURPLECLAD.toString());
+				CharacterEnumPatch.THE_PURPLECLAD);
 		
 		loudWrite(writer, "done editting characters");
 	}

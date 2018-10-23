@@ -1,5 +1,5 @@
 package basemod.interfaces;
 
-public interface PreUpdateSubscriber {
+public interface PreUpdateSubscriber extends ISubscriber {
     void receivePreUpdate();
 }

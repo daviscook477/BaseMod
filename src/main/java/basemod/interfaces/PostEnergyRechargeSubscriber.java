@@ -1,5 +1,5 @@
 package basemod.interfaces;
 
-public interface PostEnergyRechargeSubscriber {
+public interface PostEnergyRechargeSubscriber extends ISubscriber {
     void receivePostEnergyRecharge();
 }

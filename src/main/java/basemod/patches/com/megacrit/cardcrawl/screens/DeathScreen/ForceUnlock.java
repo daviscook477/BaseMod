@@ -1,12 +1,11 @@
 package basemod.patches.com.megacrit.cardcrawl.screens.DeathScreen;
 
+import basemod.DevConsole;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.screens.DeathScreen;
 import com.megacrit.cardcrawl.unlock.UnlockTracker;
-
-import basemod.DevConsole;
 
 @SpirePatch(cls="com.megacrit.cardcrawl.screens.DeathScreen", method="calculateUnlockProgress")
 public class ForceUnlock {
