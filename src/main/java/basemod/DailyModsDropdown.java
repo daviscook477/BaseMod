@@ -82,6 +82,7 @@ public class DailyModsDropdown extends ClickableUIElement {
     private void initDailyModIcons(){
         int count = 0;
         for (AbstractDailyMod dailyMod: dailyMods) {
+            if (dailyMod == null) continue;
             float yPos = y - TOP_OFFSET_Y - (count * 64F * Settings.scale) - 31F * Settings.scale;
             DailyModIcon icon = new DailyModIcon(dailyMod.img, x + TEXT_OFFSET_X, yPos, 64F, 64F, dailyMod);
             dailyModIcons.add(icon);

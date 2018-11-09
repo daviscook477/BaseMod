@@ -10,6 +10,7 @@ BaseMod provides a number of hooks and a console.
 
 #### Development ####
 * Java 8
+* OpenJFX (If you are using OpenJDK, For the reason: https://gist.github.com/androidfred/bc64da9e6a355b984d37439ed63ae16b)
 * Maven
 * ModTheSpire (https://github.com/kiooeht/ModTheSpire)
 
