@@ -1,0 +1,38 @@
+{
+  "docs": {
+    "Playing With Mods": [
+      "play-with-mods",
+      "known-mods",
+      "troubleshooting"
+    ],
+    "Modding Basics": [
+      "getting-started",
+      "mts-basemod",
+      "subscribers",
+      "patches",
+      "decompiling",
+      "console"
+    ],
+    "Custom (BaseMod)": [
+      "custom-cards",
+      "card-tags",
+      "custom-characters",
+      "custom-character-animations",
+      "custom-colors",
+      "custom-events",
+      "custom-keywords",
+      "custom-monsters",
+      "custom-potions",
+      "custom-relics",
+      "mod-badges",
+      "modal-card-choices"
+    ],
+    "IDs (BaseMod)": [
+      "id-cards",
+      "id-encounters",
+      "id-events",
+      "id-potions",
+      "id-relics"
+    ]
+  }
+}
