@@ -78,8 +78,7 @@ public class EverythingFix
 
                 AbstractCard.CardColor[] colors = AbstractCard.CardColor.values();
                 for (int icolor = AbstractCard.CardColor.CURSE.ordinal() + 1; icolor < colors.length; ++icolor) {
-                    CardGroup group = new CardGroup(CardGroup.CardGroupType.UNSPECIFIED);
-                    group.group = CardLibrary.getCardList(CardLibrary.LibraryType.valueOf(colors[icolor].name()));
+                    CardGroup group = Fields.cardGroupMap.get(colors[icolor]);
 
                     @SuppressWarnings("rawtypes")
                     Class[] cArg = new Class[1];

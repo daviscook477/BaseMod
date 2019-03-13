@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>basemod</groupId>
   <artifactId>BaseMod-root</artifactId>
-  <version>5.12.0</version>
+  <version>5.12.1</version>
   <modules>
     <module>mod</module>
     <module>testmod</module>

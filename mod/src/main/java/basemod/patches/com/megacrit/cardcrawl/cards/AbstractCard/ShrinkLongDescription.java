@@ -56,6 +56,13 @@ public class ShrinkLongDescription
 		private static final int MAX_DEPTH = 10;
 		private static int depth = 0;
 
+		public static void Prefix(AbstractCard __instance)
+		{
+			if (depth == 0) {
+				Scale.descriptionScale.set(__instance, 1.0f);
+			}
+		}
+
 		public static void Postfix(AbstractCard __instance)
 		{
 			float descHeight = descriptionHeight(FontHelper.cardDescFont_N, __instance.description);
