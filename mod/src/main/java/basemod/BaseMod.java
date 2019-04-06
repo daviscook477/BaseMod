@@ -974,6 +974,7 @@ public class BaseMod {
 	//
 
 	// add relic -
+	@Deprecated
 	public static void addRelic(AbstractRelic relic, RelicType type) {
 		switch (type) {
 			case SHARED:
@@ -999,6 +1000,7 @@ public class BaseMod {
 	}
 
 	// remove relic -
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static void removeRelic(AbstractRelic relic, RelicType type) {
 		// note that this has to use reflection hacks to change the private
@@ -1052,35 +1054,55 @@ public class BaseMod {
 	}
 
 	// remove custom relic -
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static void removeRelicFromCustomPool(AbstractRelic relic, AbstractCard.CardColor color) {
+		_internal_RemoveRelicFromCustomPool(relic, color);
+	}
+
+	public static void _internal_RemoveRelicFromCustomPool(AbstractRelic relic, AbstractCard.CardColor color) {
 		if (relic == null) return;
-		if (customRelicPools.containsKey(color)){
+		if (customRelicPools.containsKey(color)) {
 			if (customRelicPools.get(color).containsKey(relic.relicId)) {
 				customRelicPools.get(color).remove(relic.relicId);
 				--RelicLibrary.totalRelicCount;
 				removeRelicFromTierList(relic);
 			}
 		}
-		if (customRelicLists.containsKey(color)){
-			if (customRelicLists.get(color).contains(relic)){
-				customRelicLists.get(color).remove(relic);
-			}
+		if (customRelicLists.containsKey(color)) {
+			customRelicLists.get(color).remove(relic);
 		}
 	}
 
+	public static void _internal_AddBottleRelic(String relidId, Predicate<AbstractCard> isOnCard, AbstractRelic relic) {
+		customBottleRelics.put(relidId, new Pair<>(isOnCard, relic));
+	}
+
+	@Deprecated
 	public static void registerBottleRelic(Predicate<AbstractCard> isOnCard, AbstractRelic relic)
 	{
 		customBottleRelics.put(relic.relicId, new Pair<>(isOnCard, relic));
 	}
 
+	@Deprecated
 	public static void registerBottleRelic(SpireField<Boolean> isOnCard, AbstractRelic relic)
 	{
 		customBottleRelics.put(relic.relicId, new Pair<>(isOnCard::get, relic));
 	}
 
 	// addRelicToCustomPool -
+	@Deprecated
 	public static void addRelicToCustomPool(AbstractRelic relic, AbstractCard.CardColor color) {
+		_internal_AddRelicToCustomPool(relic, color);
+
+		if (customRelicPools.containsKey(color)) {
+			if (relic instanceof CustomBottleRelic) {
+				registerBottleRelic(((CustomBottleRelic) relic).isOnCard(), relic);
+			}
+		}
+	}
+
+	public static void _internal_AddRelicToCustomPool(AbstractRelic relic, AbstractCard.CardColor color) {
 		if (customRelicPools.containsKey(color)) {
 			if (UnlockTracker.isRelicSeen(relic.relicId)) {
 				RelicLibrary.seenRelics++;
@@ -1089,10 +1111,6 @@ public class BaseMod {
 			customRelicPools.get(color).put(relic.relicId, relic);
 			RelicLibrary.addToTierList(relic);
 			customRelicLists.get(color).add(relic);
-
-			if (relic instanceof CustomBottleRelic) {
-				registerBottleRelic(((CustomBottleRelic) relic).isOnCard(), relic);
-			}
 		} else {
 			logger.error("could not add relic to non existent custom pool: " + color);
 		}
@@ -1123,6 +1141,7 @@ public class BaseMod {
 		return customBottleRelics.values();
 	}
 
+	@Deprecated
 	private static void removeRelicFromTierList(AbstractRelic relic) {
 		switch (relic.tier) {
 			case STARTER:
@@ -1155,6 +1174,7 @@ public class BaseMod {
 	}
 
 	// force remove relic -
+	@Deprecated
 	public static void removeRelic(AbstractRelic relic) {
 		removeRelic(relic, RelicType.SHARED);
 		removeRelic(relic, RelicType.RED);
