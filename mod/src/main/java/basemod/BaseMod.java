@@ -112,7 +112,7 @@ public class BaseMod {
 	private static ArrayList<OnCardUseSubscriber> onCardUseSubscribers;
 	private static ArrayList<PostDungeonInitializeSubscriber> postDungeonInitializeSubscribers;
 	private static ArrayList<PostEnergyRechargeSubscriber> postEnergyRechargeSubscribers;
-	// Done
+	@Deprecated
 	private static ArrayList<PostInitializeSubscriber> postInitializeSubscribers;
 	private static ArrayList<PreMonsterTurnSubscriber> preMonsterTurnSubscribers;
 	private static ArrayList<RenderSubscriber> renderSubscribers;
@@ -131,17 +131,17 @@ public class BaseMod {
 	private static ArrayList<PostCreateStartingRelicsSubscriber> postCreateStartingRelicsSubscribers;
 	private static ArrayList<PostCreateShopRelicSubscriber> postCreateShopRelicSubscribers;
 	private static ArrayList<PostCreateShopPotionSubscriber> postCreateShopPotionSubscribers;
-	// Done
+	@Deprecated
 	private static ArrayList<EditCardsSubscriber> editCardsSubscribers;
-	// Done
+	@Deprecated
 	private static ArrayList<EditRelicsSubscriber> editRelicsSubscribers;
-	// Done
+	@Deprecated
 	private static ArrayList<EditCharactersSubscriber> editCharactersSubscribers;
-	// Done
+	@Deprecated
 	private static ArrayList<EditStringsSubscriber> editStringsSubscribers;
 	@Deprecated
 	private static ArrayList<AddAudioSubscriber> addAudioSubscribers;
-	// Done
+	@Deprecated
 	private static ArrayList<EditKeywordsSubscriber> editKeywordsSubscribers;
 	private static ArrayList<PostBattleSubscriber> postBattleSubscribers;
 	private static ArrayList<SetUnlocksSubscriber> setUnlocksSubscribers;
@@ -2139,6 +2139,7 @@ public class BaseMod {
 	}
 
 	// publishPostInitialize -
+	@Deprecated
 	public static void publishPostInitialize() {
 		logger.info("publishPostInitialize");
 
@@ -2363,6 +2364,7 @@ public class BaseMod {
 	}
 
 	// publishEditCards -
+	@Deprecated
 	public static void publishEditCards() {
 		logger.info("begin editing cards");
 
@@ -2377,6 +2379,7 @@ public class BaseMod {
 	}
 
 	// publishEditRelics -
+	@Deprecated
 	public static void publishEditRelics() {
 		logger.info("begin editing relics");
 
@@ -2387,6 +2390,7 @@ public class BaseMod {
 	}
 
 	// publishEditCharacters -
+	@Deprecated
 	public static void publishEditCharacters() {
 		logger.info("begin editing characters");
 
@@ -2399,6 +2403,7 @@ public class BaseMod {
 	}
 
 	// publishEditStrings -
+	@Deprecated
 	public static void publishEditStrings() {
 		logger.info("begin editing localization strings");
 
@@ -2512,6 +2517,7 @@ public class BaseMod {
 	}
 
 	// publishEditKeywords
+	@Deprecated
 	public static void publishEditKeywords() {
 		logger.info("editting keywords");
 
