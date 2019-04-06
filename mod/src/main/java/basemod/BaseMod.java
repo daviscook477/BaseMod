@@ -1471,14 +1471,17 @@ public class BaseMod {
 	// Keywords
 	//
 
+	@Deprecated
 	public static void addKeyword(String[] names, String description) {
 		addKeyword(null, names, description);
 	}
 
+	@Deprecated
 	public static void addKeyword(String proper, String[] names, String description) {
 		addKeyword(null, proper, names, description);
 	}
 
+	@Deprecated
 	public static void addKeyword(String modID, String proper, String[] names, String description) {
 		if (modID != null && !modID.isEmpty()) {
 			if (!modID.endsWith(":")) {
@@ -1503,6 +1506,18 @@ public class BaseMod {
 			GameDictionary.keywords.put(name, description);
 			GameDictionary.parentWord.put(name, parent);
 		}
+	}
+
+	public static void _internal_AddKeywordProperName(String keyword, String proper) {
+		keywordProperNames.put(keyword, proper);
+	}
+
+	public static void _internal_AddKeywordUnique(String keyword, String unique) {
+		keywordUniqueNames.put(keyword, unique);
+	}
+
+	public static void _internal_AddKeywordPrefix(String keyword, String prefix) {
+		keywordUniquePrefixes.put(keyword, prefix);
 	}
 
 	public static String getKeywordProper(String keyword)
