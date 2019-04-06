@@ -140,6 +140,7 @@ public class BaseMod {
 	// Done
 	private static ArrayList<EditStringsSubscriber> editStringsSubscribers;
 	private static ArrayList<AddAudioSubscriber> addAudioSubscribers;
+	// Done
 	private static ArrayList<EditKeywordsSubscriber> editKeywordsSubscribers;
 	private static ArrayList<PostBattleSubscriber> postBattleSubscribers;
 	private static ArrayList<SetUnlocksSubscriber> setUnlocksSubscribers;
