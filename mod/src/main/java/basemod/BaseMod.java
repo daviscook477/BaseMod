@@ -131,6 +131,7 @@ public class BaseMod {
 	private static ArrayList<PostCreateStartingRelicsSubscriber> postCreateStartingRelicsSubscribers;
 	private static ArrayList<PostCreateShopRelicSubscriber> postCreateShopRelicSubscribers;
 	private static ArrayList<PostCreateShopPotionSubscriber> postCreateShopPotionSubscribers;
+	// Done
 	private static ArrayList<EditCardsSubscriber> editCardsSubscribers;
 	private static ArrayList<EditRelicsSubscriber> editRelicsSubscribers;
 	private static ArrayList<EditCharactersSubscriber> editCharactersSubscribers;
