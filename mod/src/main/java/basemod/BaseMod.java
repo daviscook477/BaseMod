@@ -139,6 +139,7 @@ public class BaseMod {
 	private static ArrayList<EditCharactersSubscriber> editCharactersSubscribers;
 	// Done
 	private static ArrayList<EditStringsSubscriber> editStringsSubscribers;
+	@Deprecated
 	private static ArrayList<AddAudioSubscriber> addAudioSubscribers;
 	// Done
 	private static ArrayList<EditKeywordsSubscriber> editKeywordsSubscribers;
@@ -594,6 +595,7 @@ public class BaseMod {
 	}
 
 	// Add Sfx in audio map to SoundMaster
+	@Deprecated
 	private static void addAudioToSoundMaster(SoundMaster __instance) {
 		@SuppressWarnings("unchecked")
 		HashMap<String, Sfx> map = (HashMap<String, Sfx>) ReflectionHacks.getPrivate(__instance, SoundMaster.class, "map");
@@ -857,6 +859,7 @@ public class BaseMod {
 	}
 
 	// add audio to add
+	@Deprecated
 	public static void addAudio(String audioKey, String file)
 	{
 		FileHandle sfxFile = Gdx.files.internal(file); // Ensure audio is valid file
@@ -2408,6 +2411,7 @@ public class BaseMod {
 	}
 
 	// publishAddAudio -
+	@Deprecated
 	public static void publishAddAudio(SoundMaster __instance) {
 		logger.info("begin adding custom sounds");
 

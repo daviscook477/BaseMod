@@ -1,6 +1,8 @@
 package basemod.patches.com.megacrit.cardcrawl.audio.SoundMaster;
 
 import basemod.BaseMod;
+import basemod6.BaseMod6;
+import basemod6.events.AddAudioEvent;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.audio.SoundMaster;
 
@@ -9,7 +11,8 @@ import com.megacrit.cardcrawl.audio.SoundMaster;
         method=SpirePatch.CONSTRUCTOR
 )
 public class AddAudio {
-    public static void Postfix(SoundMaster __obj_instance) {
-        BaseMod.publishAddAudio(__obj_instance);
+    public static void Postfix(SoundMaster __instance) {
+        BaseMod6.EVENT_BUS.post(new AddAudioEvent(__instance));
+        BaseMod.publishAddAudio(__instance);
     }
 }
