@@ -135,6 +135,7 @@ public class BaseMod {
 	private static ArrayList<EditCardsSubscriber> editCardsSubscribers;
 	// Done
 	private static ArrayList<EditRelicsSubscriber> editRelicsSubscribers;
+	// Done
 	private static ArrayList<EditCharactersSubscriber> editCharactersSubscribers;
 	// Done
 	private static ArrayList<EditStringsSubscriber> editStringsSubscribers;
