@@ -400,6 +400,7 @@ public class BaseMod {
 	}
 
 	// initializeTypeTokens -
+	@Deprecated
 	private static void initializeTypeMaps() {
 		logger.info("initializeTypeMaps");
 
@@ -755,6 +756,7 @@ public class BaseMod {
 	// Localization
 	//
 
+	@Deprecated
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void loadJsonStrings(Type stringType, String jsonString) {
 		logger.info("loadJsonStrings: " + stringType.getTypeName());
@@ -781,10 +783,12 @@ public class BaseMod {
 	// loadCustomRelicStrings - loads custom RelicStrings from provided JSON
 	// should be done inside the callback of an implementation of
 	// EditStringsSubscriber
+	@Deprecated
 	public static void loadCustomStrings(Class<?> stringType, String jsonString) {
 		loadJsonStrings(stringType, jsonString);
 	}
 
+	@Deprecated
 	public static void loadCustomStringsFile(Class<?> stringType, String filepath) {
 		loadJsonStrings(stringType, Gdx.files.internal(filepath).readString(String.valueOf(StandardCharsets.UTF_8)));
 	}
