@@ -112,6 +112,7 @@ public class BaseMod {
 	private static ArrayList<OnCardUseSubscriber> onCardUseSubscribers;
 	private static ArrayList<PostDungeonInitializeSubscriber> postDungeonInitializeSubscribers;
 	private static ArrayList<PostEnergyRechargeSubscriber> postEnergyRechargeSubscribers;
+	// Done
 	private static ArrayList<PostInitializeSubscriber> postInitializeSubscribers;
 	private static ArrayList<PreMonsterTurnSubscriber> preMonsterTurnSubscribers;
 	private static ArrayList<RenderSubscriber> renderSubscribers;
@@ -133,6 +134,7 @@ public class BaseMod {
 	private static ArrayList<EditCardsSubscriber> editCardsSubscribers;
 	private static ArrayList<EditRelicsSubscriber> editRelicsSubscribers;
 	private static ArrayList<EditCharactersSubscriber> editCharactersSubscribers;
+	// Done
 	private static ArrayList<EditStringsSubscriber> editStringsSubscribers;
 	private static ArrayList<AddAudioSubscriber> addAudioSubscribers;
 	private static ArrayList<EditKeywordsSubscriber> editKeywordsSubscribers;
