@@ -195,6 +195,7 @@ public class BaseMod {
 
 	private static HashMap<String, Class<? extends AbstractPower>> powerMap;
 
+	@Deprecated
 	private static HashMap<String, Sfx> audioToAdd;
 
 	private static HashMap<String, String> keywordProperNames;
