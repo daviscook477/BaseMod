@@ -39,6 +39,7 @@ import com.megacrit.cardcrawl.cards.CardGroup;
 import com.megacrit.cardcrawl.cards.DamageInfo;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.characters.AbstractPlayer.PlayerClass;
+import com.megacrit.cardcrawl.characters.CharacterManager;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
@@ -1652,23 +1653,33 @@ public class BaseMod {
 
 	// add character - the String characterID *must* be the exact same as what
 	// you put in the PlayerClass enum
+	@Deprecated
 	public static void addCharacter(AbstractPlayer character,
 									String selectButtonPath,
 									String portraitPath,
 									PlayerClass characterID,
 									String customModeButtonPath) {
-		CardCrawlGame.characterManager.getAllCharacters().add(character);
-
-		playerSelectButtonMap.put(characterID, selectButtonPath);
-		customModeCharacterButtonMap.put(characterID, customModeButtonPath);
-		playerPortraitMap.put(characterID, portraitPath);
+		_internal_AddCharacter(CardCrawlGame.characterManager, character, selectButtonPath, portraitPath, customModeButtonPath);
 	}
 
+	@Deprecated
 	public static void addCharacter(AbstractPlayer character,
 									String selectButtonPath,
 									String portraitPath,
 									PlayerClass characterID) {
 		addCharacter(character, selectButtonPath, portraitPath, characterID, null);
+	}
+
+	public static void _internal_AddCharacter(CharacterManager characterManager,
+	                                          AbstractPlayer character,
+	                                          String selectButtonPath,
+	                                          String portraitPath,
+	                                          String customModeButtonPath) {
+		characterManager.getAllCharacters().add(character);
+
+		playerSelectButtonMap.put(character.chosenClass, selectButtonPath);
+		customModeCharacterButtonMap.put(character.chosenClass, customModeButtonPath);
+		playerPortraitMap.put(character.chosenClass, portraitPath);
 	}
 
 	public static TextureAtlas.AtlasRegion getCardSmallEnergy() {
@@ -1718,7 +1729,8 @@ public class BaseMod {
 					CardCrawlGame.characterManager.recreateCharacter(character.chosenClass),
 					// note that these will fail so we patch this in
 					// basemode.patches.com.megacrit.cardcrawl.screens.charSelect.CharacterOption.CtorSwitch
-					playerSelectButtonMap.get(character.chosenClass), playerPortraitMap.get(character.chosenClass)
+					playerSelectButtonMap.get(character.chosenClass),
+					playerPortraitMap.get(character.chosenClass)
 			);
 			options.add(option);
 		}
