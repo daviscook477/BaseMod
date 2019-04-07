@@ -1,6 +1,8 @@
 package basemod.patches.com.megacrit.cardcrawl.core.AbstractCreature;
 
 import basemod.BaseMod;
+import basemod6.BaseMod6;
+import basemod6.events.MaxHPChangeEvent;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import javassist.CtBehavior;
@@ -25,6 +27,7 @@ public class PlayerMaxHPChange
 				return SpireReturn.Continue();
 			}
 
+			BaseMod6.EVENT_BUS.post(new MaxHPChangeEvent(amount));
 			amount[0] = BaseMod.publishMaxHPChange(amount[0]);
 			if (amount[0] == 0) {
 				return SpireReturn.Return(null);
@@ -64,6 +67,8 @@ public class PlayerMaxHPChange
 				return SpireReturn.Continue();
 			}
 
+
+			BaseMod6.EVENT_BUS.post(new MaxHPChangeEvent(amount));
 			amount[0] = -BaseMod.publishMaxHPChange(-amount[0]);
 			if (amount[0] == 0) {
 				return SpireReturn.Return(null);

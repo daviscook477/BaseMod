@@ -158,6 +158,7 @@ public class BaseMod {
 	private static ArrayList<PostDeathSubscriber> postDeathSubscribers;
 	private static ArrayList<OnStartBattleSubscriber> startBattleSubscribers;
 	private static ArrayList<AddCustomModeModsSubscriber> addCustomModeModsSubscribers;
+	@Deprecated
 	private static ArrayList<MaxHPChangeSubscriber> maxHPChangeSubscribers;
 	private static ArrayList<PreRoomRenderSubscriber> preRoomRenderSubscribers;
 	private static ArrayList<OnPlayerLoseBlockSubscriber> onPlayerLoseBlockSubscribers;
@@ -2705,6 +2706,7 @@ public class BaseMod {
 		modList.add(lastIndex, mod);
 	}
 
+	@Deprecated
 	public static int publishMaxHPChange(int amount) {
 		logger.info("publishMaxHPChange");
 
