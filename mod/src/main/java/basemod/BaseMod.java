@@ -2062,10 +2062,16 @@ public class BaseMod {
 	}
 
 	// add the Potion to the map
+	@Deprecated
 	public static void addPotion(Class<? extends AbstractPotion> potionClass, Color liquidColor, Color hybridColor, Color spotsColor, String potionID) {
 		addPotion(potionClass, liquidColor, hybridColor, spotsColor, potionID, null);
 	}
+	@Deprecated
 	public static void addPotion(Class<? extends AbstractPotion> potionClass, Color liquidColor, Color hybridColor, Color spotsColor, String potionID, AbstractPlayer.PlayerClass playerClass) {
+		_internal_AddPotion(playerClass, potionClass, liquidColor, hybridColor, spotsColor, potionID);
+	}
+
+	public static void _internal_AddPotion(PlayerClass playerClass, Class<? extends AbstractPotion> potionClass, Color liquidColor, Color hybridColor, Color spotsColor, String potionID) {
 		potionClassMap.put(potionID, potionClass);
 		potionLiquidColorMap.put(potionID, liquidColor);
 		potionHybridColorMap.put(potionID, hybridColor);
