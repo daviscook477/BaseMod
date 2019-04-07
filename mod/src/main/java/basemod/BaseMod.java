@@ -159,18 +159,31 @@ public class BaseMod {
 	private static ArrayList<OnPlayerLoseBlockSubscriber> onPlayerLoseBlockSubscribers;
 	private static ArrayList<OnPlayerDamagedSubscriber> onPlayerDamagedSubscribers;
 
+	@Deprecated
 	private static ArrayList<AbstractCard> redToAdd;
+	@Deprecated
 	private static ArrayList<String> redToRemove;
+	@Deprecated
 	private static ArrayList<AbstractCard> greenToAdd;
+	@Deprecated
 	private static ArrayList<String> greenToRemove;
+	@Deprecated
 	private static ArrayList<AbstractCard> blueToAdd;
+	@Deprecated
 	private static ArrayList<String> blueToRemove;
+	@Deprecated
 	private static ArrayList<AbstractCard> colorlessToAdd;
+	@Deprecated
 	private static ArrayList<String> colorlessToRemove;
+	@Deprecated
 	private static ArrayList<AbstractCard> curseToAdd;
+	@Deprecated
 	private static ArrayList<String> curseToRemove;
+	@Deprecated
 	private static ArrayList<AbstractCard> customToAdd;
+	@Deprecated
 	private static ArrayList<String> customToRemove;
+	@Deprecated
 	private static ArrayList<AbstractCard.CardColor> customToRemoveColors;
 
 	private static HashMap<AbstractCard.CardColor, HashMap<String, AbstractRelic>> customRelicPools;
@@ -479,6 +492,7 @@ public class BaseMod {
 	}
 
 	// initializeCardLists -
+	@Deprecated
 	private static void initializeCardLists() {
 		redToAdd = new ArrayList<>();
 		redToRemove = new ArrayList<>();
@@ -799,66 +813,79 @@ public class BaseMod {
 	//
 
 	// red add -
+	@Deprecated
 	public static ArrayList<AbstractCard> getRedCardsToAdd() {
 		return redToAdd;
 	}
 
 	// red remove -
+	@Deprecated
 	public static ArrayList<String> getRedCardsToRemove() {
 		return redToRemove;
 	}
 
 	// green add -
+	@Deprecated
 	public static ArrayList<AbstractCard> getGreenCardsToAdd() {
 		return greenToAdd;
 	}
 
 	// green remove -
+	@Deprecated
 	public static ArrayList<String> getGreenCardsToRemove() {
 		return greenToRemove;
 	}
 
 	// blue add -
+	@Deprecated
 	public static ArrayList<AbstractCard> getBlueCardsToAdd() {
 		return blueToAdd;
 	}
 
 	// blue remove -
+	@Deprecated
 	public static ArrayList<String> getBlueCardsToRemove() {
 		return blueToRemove;
 	}
 
 	// colorless add -
+	@Deprecated
 	public static ArrayList<AbstractCard> getColorlessCardsToAdd() {
 		return colorlessToAdd;
 	}
 
 	// colorless remove -
+	@Deprecated
 	public static ArrayList<String> getColorlessCardsToRemove() {
 		return colorlessToRemove;
 	}
 
 	// curse add -
+	@Deprecated
 	public static ArrayList<AbstractCard> getCurseCardsToAdd() {
 		return curseToAdd;
 	}
 
 	// curse remove -
+	@Deprecated
 	public static ArrayList<String> getCurseCardsToRemove() {
 		return curseToRemove;
 	}
 
 	// custom add -
+	@Deprecated
 	public static ArrayList<AbstractCard> getCustomCardsToAdd() {
 		return customToAdd;
 	}
 
 	// custom remove -
+	@Deprecated
 	public static ArrayList<String> getCustomCardsToRemove() {
 		return customToRemove;
 	}
 
 	// custom remove colors -
+	@Deprecated
 	public static ArrayList<AbstractCard.CardColor> getCustomCardsToRemoveColors() {
 		return customToRemoveColors;
 	}
@@ -878,6 +905,7 @@ public class BaseMod {
 	}
 
 	// add card
+	@Deprecated
 	public static void addCard(AbstractCard card) {
 		switch (card.color) {
 			case RED:
@@ -902,6 +930,7 @@ public class BaseMod {
 	}
 
 	// remove card
+	@Deprecated
 	public static void removeCard(String card, AbstractCard.CardColor color) {
 		switch (color) {
 			case RED:
