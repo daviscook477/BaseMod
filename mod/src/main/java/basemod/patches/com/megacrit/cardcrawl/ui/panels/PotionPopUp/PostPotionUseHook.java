@@ -1,6 +1,8 @@
 package basemod.patches.com.megacrit.cardcrawl.ui.panels.PotionPopUp;
 
 import basemod.BaseMod;
+import basemod6.BaseMod6;
+import basemod6.events.PostPotionUseEvent;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.audio.SoundMaster;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
@@ -19,6 +21,7 @@ public class PostPotionUseHook
 	)
 	public static void Insert(PotionPopUp __instance, AbstractPotion potion)
 	{
+		BaseMod6.EVENT_BUS.post(new PostPotionUseEvent(potion));
 		BaseMod.publishPostPotionUse(potion);
 	}
 

@@ -1,6 +1,8 @@
 package basemod.patches.com.megacrit.cardcrawl.ui.panels.PotionPopUp;
 
 import basemod.BaseMod;
+import basemod6.BaseMod6;
+import basemod6.events.PostPotionUseEvent;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.ui.panels.PotionPopUp;
@@ -20,6 +22,7 @@ public class PostPotionUseHookTargetMode
 	)
 	public static void Insert(PotionPopUp __instance, AbstractPotion potion)
 	{
+		BaseMod6.EVENT_BUS.post(new PostPotionUseEvent(potion));
 		BaseMod.publishPostPotionUse(potion);
 	}
 
