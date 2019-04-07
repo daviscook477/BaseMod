@@ -155,6 +155,7 @@ public class BaseMod {
 	private static ArrayList<RelicGetSubscriber> relicGetSubscribers;
 	@Deprecated
 	private static ArrayList<PostPowerApplySubscriber> postPowerApplySubscribers;
+	@Deprecated
 	private static ArrayList<OnPowersModifiedSubscriber> onPowersModifiedSubscribers;
 	private static ArrayList<PostDeathSubscriber> postDeathSubscribers;
 	private static ArrayList<OnStartBattleSubscriber> startBattleSubscribers;
@@ -2654,6 +2655,7 @@ public class BaseMod {
 	}
 
 	// publishOnPowersModified
+	@Deprecated
 	public static void publishOnPowersModified() {
 		logger.info("powers modified");
 
