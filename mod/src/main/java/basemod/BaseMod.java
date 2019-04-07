@@ -149,6 +149,7 @@ public class BaseMod {
 	private static ArrayList<SetUnlocksSubscriber> setUnlocksSubscribers;
 	private static ArrayList<PostPotionUseSubscriber> postPotionUseSubscribers;
 	private static ArrayList<PrePotionUseSubscriber> prePotionUseSubscribers;
+	@Deprecated
 	private static ArrayList<PotionGetSubscriber> potionGetSubscribers;
 	@Deprecated
 	private static ArrayList<RelicGetSubscriber> relicGetSubscribers;
@@ -2604,6 +2605,7 @@ public class BaseMod {
 	}
 
 	// publishPotionGet -
+	@Deprecated
 	public static void publishPotionGet(AbstractPotion p) {
 		logger.info("publish on potion get");
 
