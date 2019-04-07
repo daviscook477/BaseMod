@@ -1753,12 +1753,15 @@ public class BaseMod {
 	//
 
 	// add a color -
+	@Deprecated
 	public static void addColor(AbstractCard.CardColor color, Color everythingColor,
 								String attackBg, String skillBg, String powerBg, String energyOrb,
 								String attackBgPortrait, String skillBgPortrait, String powerBgPortrait, String energyOrbPortrait,
 								String cardEnergyOrb) {
 		addColor(color, everythingColor, everythingColor, everythingColor, everythingColor, everythingColor, everythingColor, everythingColor, attackBg, skillBg, powerBg, energyOrb, attackBgPortrait, skillBgPortrait, powerBgPortrait, energyOrbPortrait, cardEnergyOrb);
 	}
+
+	@Deprecated
 	public static void addColor(AbstractCard.CardColor color, com.badlogic.gdx.graphics.Color bgColor,
 								com.badlogic.gdx.graphics.Color backColor, com.badlogic.gdx.graphics.Color frameColor,
 								com.badlogic.gdx.graphics.Color frameOutlineColor, com.badlogic.gdx.graphics.Color descBoxColor,
@@ -1767,6 +1770,8 @@ public class BaseMod {
 								String attackBgPortrait, String skillBgPortrait, String powerBgPortrait, String energyOrbPortrait) {
 		addColor(color, bgColor, backColor, frameColor, frameOutlineColor, descBoxColor, trailVfxColor, glowColor, attackBg, skillBg, powerBg, energyOrb, attackBgPortrait, skillBgPortrait, powerBgPortrait, energyOrbPortrait, null);
 	}
+
+	@Deprecated
 	public static void addColor(AbstractCard.CardColor color, com.badlogic.gdx.graphics.Color bgColor,
 								com.badlogic.gdx.graphics.Color backColor, com.badlogic.gdx.graphics.Color frameColor,
 								com.badlogic.gdx.graphics.Color frameOutlineColor, com.badlogic.gdx.graphics.Color descBoxColor,
@@ -1774,6 +1779,16 @@ public class BaseMod {
 								String attackBg, String skillBg, String powerBg, String energyOrb,
 								String attackBgPortrait, String skillBgPortrait, String powerBgPortrait, String energyOrbPortrait,
 								String cardEnergyOrb) {
+		_internal_AddColor(color, bgColor, backColor, frameColor, frameOutlineColor, descBoxColor, trailVfxColor, glowColor, attackBg, skillBg, powerBg, energyOrb, attackBgPortrait, skillBgPortrait, powerBgPortrait, energyOrbPortrait, cardEnergyOrb);
+	}
+
+	public static void _internal_AddColor(AbstractCard.CardColor color, com.badlogic.gdx.graphics.Color bgColor,
+	                            com.badlogic.gdx.graphics.Color backColor, com.badlogic.gdx.graphics.Color frameColor,
+	                            com.badlogic.gdx.graphics.Color frameOutlineColor, com.badlogic.gdx.graphics.Color descBoxColor,
+	                            com.badlogic.gdx.graphics.Color trailVfxColor, com.badlogic.gdx.graphics.Color glowColor,
+	                            String attackBg, String skillBg, String powerBg, String energyOrb,
+	                            String attackBgPortrait, String skillBgPortrait, String powerBgPortrait, String energyOrbPortrait,
+	                            String cardEnergyOrb) {
 		colorBgColorMap.put(color, bgColor);
 		colorBackColorMap.put(color, backColor);
 		colorFrameColorMap.put(color, frameColor);
@@ -1799,7 +1814,12 @@ public class BaseMod {
 
 	// remove a custom color -
 	// removing existing colors not currently supported
+	@Deprecated
 	public static void removeColor(AbstractCard.CardColor color) {
+		_internal_RemoveColor(color);
+	}
+
+	public static void _internal_RemoveColor(AbstractCard.CardColor color) {
 		colorBgColorMap.remove(color);
 		colorBackColorMap.remove(color);
 		colorFrameColorMap.remove(color);
