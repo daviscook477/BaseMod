@@ -161,6 +161,7 @@ public class BaseMod {
 	@Deprecated
 	private static ArrayList<MaxHPChangeSubscriber> maxHPChangeSubscribers;
 	private static ArrayList<PreRoomRenderSubscriber> preRoomRenderSubscribers;
+	@Deprecated
 	private static ArrayList<OnPlayerLoseBlockSubscriber> onPlayerLoseBlockSubscribers;
 	private static ArrayList<OnPlayerDamagedSubscriber> onPlayerDamagedSubscribers;
 
@@ -2725,6 +2726,7 @@ public class BaseMod {
 	}
 
 	// publishOnPlayerLoseBlock
+	@Deprecated
 	public static int publishOnPlayerLoseBlock(int amount) {
 		logger.info("publish on Player Lose Block");
 
