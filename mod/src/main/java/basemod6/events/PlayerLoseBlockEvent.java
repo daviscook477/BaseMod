@@ -1,10 +1,10 @@
 package basemod6.events;
 
-public class OnPlayerLoseBlockEvent extends Event
+public class PlayerLoseBlockEvent extends Event
 {
     private int[] amount;
 
-	public OnPlayerLoseBlockEvent(int[] amount)
+	public PlayerLoseBlockEvent(int[] amount)
 	{
 		this.amount = amount;
 	}
