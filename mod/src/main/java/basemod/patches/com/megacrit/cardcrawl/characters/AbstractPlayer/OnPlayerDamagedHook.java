@@ -1,16 +1,12 @@
 package basemod.patches.com.megacrit.cardcrawl.characters.AbstractPlayer;
 
 import basemod.BaseMod;
-import basemod.patches.com.megacrit.cardcrawl.screens.custom.CustomModeScreen.PositionCharacterButtons;
+import basemod6.BaseMod6;
+import basemod6.events.PlayerDamagedEvent;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.cards.DamageInfo;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
-import com.megacrit.cardcrawl.core.AbstractCreature;
-import com.megacrit.cardcrawl.screens.custom.CustomModeCharacterButton;
-import javassist.CannotCompileException;
 import javassist.CtBehavior;
-import javassist.expr.ExprEditor;
-import javassist.expr.MethodCall;
 
 @SpirePatch(
         clz = AbstractPlayer.class,
@@ -23,6 +19,7 @@ public class OnPlayerDamagedHook {
             locator = OnPlayerDamagedHook.LocatorPre.class
     )
     public static void InsertPre(AbstractPlayer __instance, DamageInfo info, @ByRef int[] damageAmount) {
+        BaseMod6.EVENT_BUS.post(new PlayerDamagedEvent(damageAmount));
         int damage = BaseMod.publishOnPlayerDamaged(damageAmount[0], info);
         if (damage < 0) {
             damage = 0;

@@ -163,6 +163,7 @@ public class BaseMod {
 	private static ArrayList<PreRoomRenderSubscriber> preRoomRenderSubscribers;
 	@Deprecated
 	private static ArrayList<OnPlayerLoseBlockSubscriber> onPlayerLoseBlockSubscribers;
+	@Deprecated
 	private static ArrayList<OnPlayerDamagedSubscriber> onPlayerDamagedSubscribers;
 
 	@Deprecated
@@ -2738,6 +2739,7 @@ public class BaseMod {
 		return amount;
 	}
 
+	@Deprecated
 	public static int publishOnPlayerDamaged(int amount, DamageInfo info) {
 		logger.info("publish on Player Damaged");
 
