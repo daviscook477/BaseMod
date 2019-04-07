@@ -16,4 +16,9 @@ public class EditPotionsEvent extends Event
 	{
 		BaseMod._internal_AddPotion(playerClass, potionClass, liquidColor, hybridColor, spotsColor, potionID);
 	}
+
+	public void removePotion(String potionID)
+	{
+		BaseMod._internal_RemovePotion(potionID);
+	}
 }

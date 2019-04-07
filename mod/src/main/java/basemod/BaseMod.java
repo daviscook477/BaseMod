@@ -2057,7 +2057,12 @@ public class BaseMod {
 		return potionsToRemove;
 	}
 
+	@Deprecated
 	public static void removePotion(String potionID) {
+		_internal_RemovePotion(potionID);
+	}
+
+	public static void _internal_RemovePotion(String potionID) {
 		potionsToRemove.add(potionID);
 	}
 

@@ -24,5 +24,9 @@ public class PotionHelperInitialize
 				PotionHelper.potions.add(potionID);
 			}
 		}
+
+		for (String potionID : BaseMod.getPotionsToRemove()) {
+			PotionHelper.potions.remove(potionID);
+		}
 	}
 } 
