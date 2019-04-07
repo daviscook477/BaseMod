@@ -97,5 +97,7 @@ public class EventBus
 			}
 			clz = clz.getSuperclass();
 		} while (clz != null);
+
+		event.finish();
 	}
 }
