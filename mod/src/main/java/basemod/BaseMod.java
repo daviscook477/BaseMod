@@ -150,6 +150,7 @@ public class BaseMod {
 	private static ArrayList<PostPotionUseSubscriber> postPotionUseSubscribers;
 	private static ArrayList<PrePotionUseSubscriber> prePotionUseSubscribers;
 	private static ArrayList<PotionGetSubscriber> potionGetSubscribers;
+	@Deprecated
 	private static ArrayList<RelicGetSubscriber> relicGetSubscribers;
 	private static ArrayList<PostPowerApplySubscriber> postPowerApplySubscribers;
 	private static ArrayList<OnPowersModifiedSubscriber> onPowersModifiedSubscribers;
@@ -2613,6 +2614,7 @@ public class BaseMod {
 	}
 
 	// publishRelicGet -
+	@Deprecated
 	public static void publishRelicGet(AbstractRelic r) {
 		logger.info("publish on relic get");
 		for (RelicGetSubscriber sub : relicGetSubscribers) {
