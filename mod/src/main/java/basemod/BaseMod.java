@@ -110,6 +110,7 @@ public class BaseMod {
 	private static ArrayList<PostCampfireSubscriber> postCampfireSubscribers;
 	private static ArrayList<PostDrawSubscriber> postDrawSubscribers;
 	private static ArrayList<PostExhaustSubscriber> postExhaustSubscribers;
+	@Deprecated
 	private static ArrayList<OnCardUseSubscriber> onCardUseSubscribers;
 	private static ArrayList<PostDungeonInitializeSubscriber> postDungeonInitializeSubscribers;
 	private static ArrayList<PostEnergyRechargeSubscriber> postEnergyRechargeSubscribers;
@@ -2572,6 +2573,7 @@ public class BaseMod {
 	}
 
 	// publishOnCardUse -
+	@Deprecated
 	public static void publishOnCardUse(AbstractCard c) {
 		logger.info("publish on card use");
 
