@@ -153,6 +153,7 @@ public class BaseMod {
 	private static ArrayList<PotionGetSubscriber> potionGetSubscribers;
 	@Deprecated
 	private static ArrayList<RelicGetSubscriber> relicGetSubscribers;
+	@Deprecated
 	private static ArrayList<PostPowerApplySubscriber> postPowerApplySubscribers;
 	private static ArrayList<OnPowersModifiedSubscriber> onPowersModifiedSubscribers;
 	private static ArrayList<PostDeathSubscriber> postDeathSubscribers;
@@ -2629,6 +2630,7 @@ public class BaseMod {
 	}
 
 	// publishPostPowerApply
+	@Deprecated
 	public static void publishPostPowerApply(AbstractPower p, AbstractCreature target, AbstractCreature source) {
 		logger.info("publish on post power apply");
 
