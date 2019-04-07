@@ -1,6 +1,7 @@
 package basemod6.events;
 
 import basemod.BaseMod;
+import basemod.abstracts.DynamicVariable;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.helpers.CardLibrary;
 import javafx.util.Pair;
@@ -65,5 +66,10 @@ public class EditCardsEvent extends Event
 		toRemove.putIfAbsent(color, new ArrayList<>());
 		List<Pair<String, AbstractCard.CardColor>> cards = toRemove.get(color);
 		cards.add(new Pair<>(card, color));
+	}
+
+	public void addDynamicVariable(DynamicVariable dv)
+	{
+		BaseMod.cardDynamicVariableMap.put(dv.key(), dv);
 	}
 }

@@ -955,6 +955,7 @@ public class BaseMod {
 		}
 	}
 
+	@Deprecated
 	public static void addDynamicVariable(DynamicVariable dv) {
 		cardDynamicVariableMap.put(dv.key(), dv);
 	}
