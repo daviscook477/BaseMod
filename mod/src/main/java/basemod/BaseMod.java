@@ -121,6 +121,7 @@ public class BaseMod {
 	private static ArrayList<PostEnergyRechargeSubscriber> postEnergyRechargeSubscribers;
 	@Deprecated
 	private static ArrayList<PostInitializeSubscriber> postInitializeSubscribers;
+	@Deprecated
 	private static ArrayList<PreMonsterTurnSubscriber> preMonsterTurnSubscribers;
 	@Deprecated
 	private static ArrayList<RenderSubscriber> renderSubscribers;
@@ -2289,6 +2290,8 @@ public class BaseMod {
 	}
 
 	// publishPreMonsterTurn - false skips monster turn
+	@Deprecated
+	@SuppressWarnings("unused")
 	public static boolean publishPreMonsterTurn(AbstractMonster m) {
 		logger.info("publishPreMonsterTurn");
 
