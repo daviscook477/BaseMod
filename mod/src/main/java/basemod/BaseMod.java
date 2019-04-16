@@ -121,6 +121,7 @@ public class BaseMod {
 	@Deprecated
 	private static ArrayList<PostInitializeSubscriber> postInitializeSubscribers;
 	private static ArrayList<PreMonsterTurnSubscriber> preMonsterTurnSubscribers;
+	@Deprecated
 	private static ArrayList<RenderSubscriber> renderSubscribers;
 	private static ArrayList<PreRenderSubscriber> preRenderSubscribers;
 	private static ArrayList<PostRenderSubscriber> postRenderSubscribers;
@@ -2301,6 +2302,7 @@ public class BaseMod {
 	}
 
 	// publishRender -
+	@Deprecated
 	public static void publishRender(SpriteBatch sb) {
 		for (RenderSubscriber sub : renderSubscribers) {
 			sub.receiveRender(sb);
