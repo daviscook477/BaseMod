@@ -115,6 +115,7 @@ public class BaseMod {
 	private static ArrayList<PostExhaustSubscriber> postExhaustSubscribers;
 	@Deprecated
 	private static ArrayList<OnCardUseSubscriber> onCardUseSubscribers;
+	@Deprecated
 	private static ArrayList<PostDungeonInitializeSubscriber> postDungeonInitializeSubscribers;
 	private static ArrayList<PostEnergyRechargeSubscriber> postEnergyRechargeSubscribers;
 	@Deprecated
@@ -2249,6 +2250,7 @@ public class BaseMod {
 	}
 
 	// publishPostDungeonInitialize -
+	@Deprecated
 	public static void publishPostDungeonInitialize() {
 		logger.info("publishPostDungeonInitialize");
 
