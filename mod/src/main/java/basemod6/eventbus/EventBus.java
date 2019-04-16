@@ -1,6 +1,7 @@
 package basemod6.eventbus;
 
 import basemod6.events.Event;
+import basemod6.events.ResultEvent;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 
@@ -99,5 +100,12 @@ public class EventBus
 		} while (clz != null);
 
 		event.finish();
+	}
+
+	public <T> T post(ResultEvent<T> event)
+	{
+		post((Event) event);
+
+		return event.result();
 	}
 }
