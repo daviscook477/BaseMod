@@ -1,21 +1,27 @@
 package basemod6.events;
 
-public class MaxHPChangeEvent extends Event
+public class MaxHPChangeEvent extends ResultEvent<Integer>
 {
-	private int[] amount;
+	private int amount;
 
-	public MaxHPChangeEvent(int[] amount)
+	public MaxHPChangeEvent(int amount)
 	{
 		this.amount = amount;
 	}
 
+	@Override
+	public Integer result()
+	{
+		return amount;
+	}
+
 	public int getMaxHPChange()
 	{
-		return amount[0];
+		return amount;
 	}
 
 	public void setMaxHPChange(int amount)
 	{
-		this.amount[0] = amount;
+		this.amount = amount;
 	}
 }

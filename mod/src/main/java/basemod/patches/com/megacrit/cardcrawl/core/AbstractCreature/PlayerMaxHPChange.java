@@ -27,7 +27,7 @@ public class PlayerMaxHPChange
 				return SpireReturn.Continue();
 			}
 
-			BaseMod6.EVENT_BUS.post(new MaxHPChangeEvent(amount));
+			amount[0] = BaseMod6.EVENT_BUS.post(new MaxHPChangeEvent(amount[0]));
 			amount[0] = BaseMod.publishMaxHPChange(amount[0]);
 			if (amount[0] == 0) {
 				return SpireReturn.Return(null);
@@ -68,7 +68,7 @@ public class PlayerMaxHPChange
 			}
 
 
-			BaseMod6.EVENT_BUS.post(new MaxHPChangeEvent(amount));
+			amount[0] = BaseMod6.EVENT_BUS.post(new MaxHPChangeEvent(amount[0]));
 			amount[0] = -BaseMod.publishMaxHPChange(-amount[0]);
 			if (amount[0] == 0) {
 				return SpireReturn.Return(null);
