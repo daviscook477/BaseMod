@@ -109,6 +109,7 @@ public class BaseMod {
 	@Deprecated
 	private static ArrayList<StartActSubscriber> startActSubscribers;
 	private static ArrayList<PostCampfireSubscriber> postCampfireSubscribers;
+	@Deprecated
 	private static ArrayList<PostDrawSubscriber> postDrawSubscribers;
 	private static ArrayList<PostExhaustSubscriber> postExhaustSubscribers;
 	@Deprecated
@@ -2227,6 +2228,7 @@ public class BaseMod {
 	}
 
 	// publishPostDraw -
+	@Deprecated
 	public static void publishPostDraw(AbstractCard c) {
 		logger.info("publishPostDraw");
 		for (PostDrawSubscriber sub : postDrawSubscribers) {
