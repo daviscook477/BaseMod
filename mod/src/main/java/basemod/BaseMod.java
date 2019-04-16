@@ -108,6 +108,7 @@ public class BaseMod {
 	private static ArrayList<ISubscriber> toRemove;
 	@Deprecated
 	private static ArrayList<StartActSubscriber> startActSubscribers;
+	@Deprecated
 	private static ArrayList<PostCampfireSubscriber> postCampfireSubscribers;
 	@Deprecated
 	private static ArrayList<PostDrawSubscriber> postDrawSubscribers;
@@ -2215,6 +2216,8 @@ public class BaseMod {
 	}
 
 	// publishPostCampfire - false allows an additional option to be selected
+	@Deprecated
+	@SuppressWarnings("unused")
 	public static boolean publishPostCampfire() {
 		logger.info("publishPostCampfire");
 
