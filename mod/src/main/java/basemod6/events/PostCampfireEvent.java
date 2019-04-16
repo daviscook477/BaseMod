@@ -1,21 +1,27 @@
 package basemod6.events;
 
-public class PostCampfireEvent extends Event
+public class PostCampfireEvent extends ResultEvent<Boolean>
 {
-	private boolean[] selected;
+	private boolean selected;
 
-	public PostCampfireEvent(boolean[] selected)
+	public PostCampfireEvent(boolean selected)
 	{
 		this.selected = selected;
 	}
 
+	@Override
+	public Boolean result()
+	{
+		return selected;
+	}
+
 	public boolean getOptionSelected()
 	{
-		return selected[0];
+		return selected;
 	}
 
 	public void setOptionSelected(boolean selected)
 	{
-		this.selected[0] = selected;
+		this.selected = selected;
 	}
 }

@@ -31,9 +31,9 @@ public class PostCampfireHook
     @SuppressWarnings("unused")
     public static boolean Do()
     {
-        boolean[] ret = {true};
-        BaseMod6.EVENT_BUS.post(new PostCampfireEvent(ret));
-        ret[0] = BaseMod.publishPostCampfire();
-        return ret[0];
+        boolean ret = true;
+        ret = BaseMod6.EVENT_BUS.post(new PostCampfireEvent(ret));
+        ret = BaseMod.publishPostCampfire();
+        return ret;
     }
 }
