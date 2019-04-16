@@ -1,6 +1,8 @@
 package basemod.patches.com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 
 import basemod.BaseMod;
+import basemod6.BaseMod6;
+import basemod6.events.StartActEvent;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -28,6 +30,7 @@ public class ActChangeHooks {
 			if (levelId.equals(Exordium.ID) && AbstractDungeon.floorNum == 0) {
 				BaseMod.publishStartGame();
 			}
+			BaseMod6.EVENT_BUS.post(new StartActEvent());
 			BaseMod.publishStartAct();
 		}
 		

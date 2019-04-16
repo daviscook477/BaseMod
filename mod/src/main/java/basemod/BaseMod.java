@@ -106,6 +106,7 @@ public class BaseMod {
 	private static ArrayList<ModBadge> modBadges;
 
 	private static ArrayList<ISubscriber> toRemove;
+	@Deprecated
 	private static ArrayList<StartActSubscriber> startActSubscribers;
 	private static ArrayList<PostCampfireSubscriber> postCampfireSubscribers;
 	private static ArrayList<PostDrawSubscriber> postDrawSubscribers;
@@ -2200,6 +2201,7 @@ public class BaseMod {
 	//
 
 	// publishStartAct -
+	@Deprecated
 	public static void publishStartAct() {
 		logger.info("publishStartAct");
 		for (StartActSubscriber sub : startActSubscribers) {
