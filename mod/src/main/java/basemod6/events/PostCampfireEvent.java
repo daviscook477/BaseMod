@@ -4,6 +4,11 @@ public class PostCampfireEvent extends ResultEvent<Boolean>
 {
 	private boolean selected;
 
+	public PostCampfireEvent()
+	{
+		this(true);
+	}
+
 	public PostCampfireEvent(boolean selected)
 	{
 		this.selected = selected;
