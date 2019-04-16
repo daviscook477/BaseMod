@@ -21,7 +21,7 @@ public class ModifyPlayerLoseBlock
 	public static void Prefix(AbstractCreature __instance, @ByRef int[] amount, boolean noAnimation)
 	{
 		if (OnPlayerLoseBlockToggle.isEnabled) {
-			BaseMod6.EVENT_BUS.post(new PlayerLoseBlockEvent(amount));
+			amount[0] = BaseMod6.EVENT_BUS.post(new PlayerLoseBlockEvent(amount[0]));
 			amount[0] = BaseMod.publishOnPlayerLoseBlock(amount[0]);
 		}
 		if (amount[0] < 0) {
