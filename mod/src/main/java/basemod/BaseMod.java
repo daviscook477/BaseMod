@@ -129,6 +129,7 @@ public class BaseMod {
 	private static ArrayList<PreRenderSubscriber> preRenderSubscribers;
 	@Deprecated
 	private static ArrayList<PostRenderSubscriber> postRenderSubscribers;
+	@Deprecated
 	private static ArrayList<ModelRenderSubscriber> modelRenderSubscribers;
 	private static ArrayList<PreStartGameSubscriber> preStartGameSubscribers;
 	private static ArrayList<StartGameSubscriber> startGameSubscribers;

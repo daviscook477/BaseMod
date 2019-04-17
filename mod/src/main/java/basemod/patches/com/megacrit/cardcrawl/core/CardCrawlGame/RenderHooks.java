@@ -13,8 +13,6 @@ import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.helpers.DrawMaster;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Field;
 
