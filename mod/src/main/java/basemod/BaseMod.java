@@ -154,6 +154,7 @@ public class BaseMod {
 	private static ArrayList<PostCreateStartingRelicsSubscriber> postCreateStartingRelicsSubscribers;
 	@Deprecated
 	private static ArrayList<PostCreateShopRelicSubscriber> postCreateShopRelicSubscribers;
+	@Deprecated
 	private static ArrayList<PostCreateShopPotionSubscriber> postCreateShopPotionSubscribers;
 	@Deprecated
 	private static ArrayList<EditCardsSubscriber> editCardsSubscribers;
@@ -2522,6 +2523,7 @@ public class BaseMod {
 	}
 
 	// publishPostCreateShopPotion -
+	@Deprecated
 	public static void publishPostCreateShopPotions(ArrayList<StorePotion> potions, ShopScreen screenInstance) {
 		logger.info("postCreateShopPotions for: " + potions);
 
