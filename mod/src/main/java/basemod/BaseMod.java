@@ -2342,6 +2342,7 @@ public class BaseMod {
 	}
 
 	// publishAnimationRender -
+	@Deprecated
 	public static void publishAnimationRender(SpriteBatch sb) {
 		if (modelRenderSubscribers.size() > 0) {
 			// custom animations
