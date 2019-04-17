@@ -168,6 +168,7 @@ public class BaseMod {
 	private static ArrayList<AddAudioSubscriber> addAudioSubscribers;
 	@Deprecated
 	private static ArrayList<EditKeywordsSubscriber> editKeywordsSubscribers;
+	@Deprecated
 	private static ArrayList<PostBattleSubscriber> postBattleSubscribers;
 	private static ArrayList<SetUnlocksSubscriber> setUnlocksSubscribers;
 	@Deprecated
@@ -2600,6 +2601,7 @@ public class BaseMod {
 	}
 
 	// publishPostBattle -
+	@Deprecated
 	public static void publishPostBattle(AbstractRoom battleRoom) {
 		logger.info("publish post combat");
 
