@@ -188,6 +188,7 @@ public class BaseMod {
 	private static ArrayList<PostDeathSubscriber> postDeathSubscribers;
 	@Deprecated
 	private static ArrayList<OnStartBattleSubscriber> startBattleSubscribers;
+	@Deprecated
 	private static ArrayList<AddCustomModeModsSubscriber> addCustomModeModsSubscribers;
 	@Deprecated
 	private static ArrayList<MaxHPChangeSubscriber> maxHPChangeSubscribers;
@@ -2735,22 +2736,9 @@ public class BaseMod {
 		unsubscribeLaterHelper(PostDeathSubscriber.class);
 	}
 
+	@Deprecated
 	public static void publishAddCustomModeMods(List<CustomMod> modList) {
 		logger.info("publishAddCustomModeMods");
-
-		CustomMod charMod = new CustomMod("Modded Character Cards", "p", false);
-		for (AbstractPlayer character : getModdedCharacters()) {
-			CustomMod mod = new CustomMod(RedCards.ID, "g", true);
-			mod.ID = character.chosenClass.name() + charMod.name;
-			mod.name = character.getLocalizedCharacterName() + charMod.name;
-			mod.description = character.getLocalizedCharacterName() + charMod.description;
-			String label = FontHelper.colorString("[" + mod.name + "]", mod.color) + " " + mod.description;
-			ReflectionHacks.setPrivate(mod, CustomMod.class, "label", label);
-			float height = -FontHelper.getSmartHeight(FontHelper.charDescFont, label, 1050.0F * Settings.scale, 32.0F * Settings.scale) + 70.0F * Settings.scale;
-			ReflectionHacks.setPrivate(mod, CustomMod.class, "height", height);
-
-			insertCustomMod(modList, mod);
-		}
 
 		for (AddCustomModeModsSubscriber sub : addCustomModeModsSubscribers) {
 			List<CustomMod> tmpModList = new ArrayList<>();
@@ -2761,6 +2749,7 @@ public class BaseMod {
 		unsubscribeLaterHelper(AddCustomModeModsSubscriber.class);
 	}
 
+	@Deprecated
 	private static void insertCustomMod(List<CustomMod> modList, CustomMod mod)
 	{
 		int lastIndex = modList.size();
