@@ -1,8 +1,11 @@
 package basemod.patches.com.megacrit.cardcrawl.core.CardCrawlGame;
 
 import basemod.BaseMod;
+import basemod6.BaseMod6;
+import basemod6.events.PreUpdateEvent;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
 
@@ -10,12 +13,16 @@ import java.util.ArrayList;
 
 public class UpdateHooks {
 
-	@SpirePatch(cls="com.megacrit.cardcrawl.core.CardCrawlGame", method="update")
+	@SpirePatch(
+			clz=CardCrawlGame.class,
+			method="update"
+	)
 	public static class PreUpdateHook {
 	    @SpireInsertPatch(
 	    		locator=Locator.class
 		)
-	    public static void Insert(Object __obj_instance) {
+	    public static void Insert(CardCrawlGame __instance) {
+			BaseMod6.EVENT_BUS.post(new PreUpdateEvent());
 	        BaseMod.publishPreUpdate();
 	    }
 	    
