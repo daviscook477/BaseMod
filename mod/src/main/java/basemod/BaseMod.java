@@ -150,6 +150,7 @@ public class BaseMod {
 	private static ArrayList<PrePlayerUpdateSubscriber> prePlayerUpdateSubscribers;
 	@Deprecated
 	private static ArrayList<PostCreateStartingDeckSubscriber> postCreateStartingDeckSubscribers;
+	@Deprecated
 	private static ArrayList<PostCreateStartingRelicsSubscriber> postCreateStartingRelicsSubscribers;
 	private static ArrayList<PostCreateShopRelicSubscriber> postCreateShopRelicSubscribers;
 	private static ArrayList<PostCreateShopPotionSubscriber> postCreateShopPotionSubscribers;
@@ -2483,6 +2484,7 @@ public class BaseMod {
 	}
 
 	// publishPostCreateStartingRelics -
+	@Deprecated
 	public static void publishPostCreateStartingRelics(PlayerClass chosenClass, ArrayList<String> relics) {
 		logger.info("postCreateStartingRelics for: " + chosenClass);
 
