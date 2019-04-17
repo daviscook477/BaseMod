@@ -125,6 +125,7 @@ public class BaseMod {
 	private static ArrayList<PreMonsterTurnSubscriber> preMonsterTurnSubscribers;
 	@Deprecated
 	private static ArrayList<RenderSubscriber> renderSubscribers;
+	@Deprecated
 	private static ArrayList<PreRenderSubscriber> preRenderSubscribers;
 	private static ArrayList<PostRenderSubscriber> postRenderSubscribers;
 	private static ArrayList<ModelRenderSubscriber> modelRenderSubscribers;
@@ -2331,6 +2332,7 @@ public class BaseMod {
 	}
 
 	// publishPreRender -
+	@Deprecated
 	public static void publishPreRender(OrthographicCamera camera) {
 		for (PreRenderSubscriber sub : preRenderSubscribers) {
 			sub.receiveCameraRender(camera);
