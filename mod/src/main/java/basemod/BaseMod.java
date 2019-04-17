@@ -191,6 +191,7 @@ public class BaseMod {
 	private static ArrayList<AddCustomModeModsSubscriber> addCustomModeModsSubscribers;
 	@Deprecated
 	private static ArrayList<MaxHPChangeSubscriber> maxHPChangeSubscribers;
+	@Deprecated
 	private static ArrayList<PreRoomRenderSubscriber> preRoomRenderSubscribers;
 	@Deprecated
 	private static ArrayList<OnPlayerLoseBlockSubscriber> onPlayerLoseBlockSubscribers;
@@ -2783,6 +2784,7 @@ public class BaseMod {
 		return amount;
 	}
 
+	@Deprecated
 	public static void publishPreRoomRender(SpriteBatch sb) {
 		for(PreRoomRenderSubscriber sub : preRoomRenderSubscribers) {
 			sub.receivePreRoomRender(sb);
