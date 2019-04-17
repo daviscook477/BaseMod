@@ -148,6 +148,7 @@ public class BaseMod {
 	private static ArrayList<PostPlayerUpdateSubscriber> postPlayerUpdateSubscribers;
 	@Deprecated
 	private static ArrayList<PrePlayerUpdateSubscriber> prePlayerUpdateSubscribers;
+	@Deprecated
 	private static ArrayList<PostCreateStartingDeckSubscriber> postCreateStartingDeckSubscribers;
 	private static ArrayList<PostCreateStartingRelicsSubscriber> postCreateStartingRelicsSubscribers;
 	private static ArrayList<PostCreateShopRelicSubscriber> postCreateShopRelicSubscribers;
@@ -2462,6 +2463,7 @@ public class BaseMod {
 	}
 
 	// publishPostCreateStartingDeck -
+	@Deprecated
 	public static void publishPostCreateStartingDeck(PlayerClass chosenClass, CardGroup cards) {
 		logger.info("postCreateStartingDeck for: " + chosenClass);
 
