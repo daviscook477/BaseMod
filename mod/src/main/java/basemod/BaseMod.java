@@ -105,6 +105,7 @@ public class BaseMod {
 
 	private static ArrayList<ModBadge> modBadges;
 
+	@Deprecated
 	private static ArrayList<ISubscriber> toRemove;
 	@Deprecated
 	private static ArrayList<StartActSubscriber> startActSubscribers;
@@ -481,6 +482,7 @@ public class BaseMod {
 	}
 
 	// initializeSubscriptions -
+	@Deprecated
 	private static void initializeSubscriptions() {
 		toRemove = new ArrayList<>();
 		startActSubscribers = new ArrayList<>();
@@ -2810,6 +2812,7 @@ public class BaseMod {
 	//
 
 	// unsubscribes all elements of toRemove that are of type removalClass
+	@Deprecated
 	private static void unsubscribeLaterHelper(Class<? extends ISubscriber> removalClass) {
 		for (ISubscriber sub : toRemove) {
 			if (removalClass.isInstance(sub)) {
@@ -2818,12 +2821,14 @@ public class BaseMod {
 		}
 	}
 
+	@Deprecated
 	private static <T> void subscribeIfInstance(ArrayList<T> list, ISubscriber sub, Class<T> clazz) {
 		if (clazz.isInstance(sub)) {
 			list.add(clazz.cast(sub));
 		}
 	}
 
+	@Deprecated
 	private static <T> void unsubscribeIfInstance(ArrayList<T> list, ISubscriber sub, Class<T> clazz) {
 		if (clazz.isInstance(sub)) {
 			list.remove(clazz.cast(sub));
@@ -2832,6 +2837,7 @@ public class BaseMod {
 
 	// subscribe -
 	// will subscribe to all lists this sub implements
+	@Deprecated
 	public static void subscribe(ISubscriber sub) {
 		subscribeIfInstance(startActSubscribers, sub, StartActSubscriber.class);
 		subscribeIfInstance(postCampfireSubscribers, sub, PostCampfireSubscriber.class);
@@ -2883,6 +2889,7 @@ public class BaseMod {
 
 	// subscribe -
 	// only subscribers to a specific list
+	@Deprecated
 	public static void subscribe(ISubscriber sub, Class<? extends ISubscriber> additionClass) {
 		if (additionClass.equals(StartActSubscriber.class)) {
 			startActSubscribers.add((StartActSubscriber) sub);
@@ -2979,6 +2986,7 @@ public class BaseMod {
 
 	// unsubscribe -
 	// will unsubscribe from all lists this sub implements
+	@Deprecated
 	public static void unsubscribe(ISubscriber sub) {
 		unsubscribeIfInstance(startActSubscribers, sub, StartActSubscriber.class);
 		unsubscribeIfInstance(postCampfireSubscribers, sub, PostCampfireSubscriber.class);
@@ -3029,6 +3037,7 @@ public class BaseMod {
 
 	// unsubscribe -
 	// only unsubscribe from a specific list
+	@Deprecated
 	public static void unsubscribe(ISubscriber sub, Class<? extends ISubscriber> removalClass) {
 		if (removalClass.equals(StartActSubscriber.class)) {
 			startActSubscribers.remove(sub);
@@ -3126,6 +3135,7 @@ public class BaseMod {
 	}
 
 	// unsubscribeLater -
+	@Deprecated
 	public static void unsubscribeLater(ISubscriber sub) {
 		toRemove.add(sub);
 	}
