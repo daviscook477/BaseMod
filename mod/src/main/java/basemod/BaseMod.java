@@ -134,6 +134,7 @@ public class BaseMod {
 	private static ArrayList<ModelRenderSubscriber> modelRenderSubscribers;
 	@Deprecated
 	private static ArrayList<PreStartGameSubscriber> preStartGameSubscribers;
+	@Deprecated
 	private static ArrayList<StartGameSubscriber> startGameSubscribers;
 	private static ArrayList<PreUpdateSubscriber> preUpdateSubscribers;
 	private static ArrayList<PostUpdateSubscriber> postUpdateSubscribers;
@@ -2387,6 +2388,7 @@ public class BaseMod {
 		unsubscribeLaterHelper(PreStartGameSubscriber.class);
 	}
 
+	@Deprecated
 	public static void publishStartGame() {
 		logger.info("publishStartGame");
 
