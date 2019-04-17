@@ -186,6 +186,7 @@ public class BaseMod {
 	private static ArrayList<OnPowersModifiedSubscriber> onPowersModifiedSubscribers;
 	@Deprecated
 	private static ArrayList<PostDeathSubscriber> postDeathSubscribers;
+	@Deprecated
 	private static ArrayList<OnStartBattleSubscriber> startBattleSubscribers;
 	private static ArrayList<AddCustomModeModsSubscriber> addCustomModeModsSubscribers;
 	@Deprecated
@@ -2613,6 +2614,7 @@ public class BaseMod {
 		unsubscribeLaterHelper(PostBattleSubscriber.class);
 	}
 
+	@Deprecated
 	public static void publishStartBattle(AbstractRoom room){
 		logger.info("publish start battle");
 
