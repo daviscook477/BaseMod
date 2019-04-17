@@ -1,16 +1,22 @@
 package basemod.patches.com.megacrit.cardcrawl.characters.AbstractPlayer;
 
 import basemod.BaseMod;
+import basemod6.BaseMod6;
+import basemod6.events.PostPlayerUpdateEvent;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 
-@SpirePatch(cls = "com.megacrit.cardcrawl.characters.AbstractPlayer", method = "update")
+@SpirePatch(
+        clz=AbstractPlayer.class,
+        method="update"
+)
 public class PlayerUpdateHooks {
     public static void Prefix(AbstractPlayer __instance) {
         BaseMod.publishPrePlayerUpdate();
     }
 
     public static void Postfix(AbstractPlayer __instance) {
+        BaseMod6.EVENT_BUS.post(new PostPlayerUpdateEvent(__instance));
         BaseMod.publishPostPlayerUpdate();
     }
 }
