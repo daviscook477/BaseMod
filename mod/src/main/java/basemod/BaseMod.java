@@ -152,6 +152,7 @@ public class BaseMod {
 	private static ArrayList<PostCreateStartingDeckSubscriber> postCreateStartingDeckSubscribers;
 	@Deprecated
 	private static ArrayList<PostCreateStartingRelicsSubscriber> postCreateStartingRelicsSubscribers;
+	@Deprecated
 	private static ArrayList<PostCreateShopRelicSubscriber> postCreateShopRelicSubscribers;
 	private static ArrayList<PostCreateShopPotionSubscriber> postCreateShopPotionSubscribers;
 	@Deprecated
@@ -2510,6 +2511,7 @@ public class BaseMod {
 	}
 
 	// publishPostCreateShopRelic -
+	@Deprecated
 	public static void publishPostCreateShopRelics(ArrayList<StoreRelic> relics, ShopScreen screenInstance) {
 		logger.info("postCreateShopRelics for: " + relics);
 

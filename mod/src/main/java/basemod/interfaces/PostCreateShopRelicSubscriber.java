@@ -5,6 +5,7 @@ import com.megacrit.cardcrawl.shop.StoreRelic;
 
 import java.util.ArrayList;
 
+@Deprecated
 public interface PostCreateShopRelicSubscriber extends ISubscriber {
 	void receiveCreateShopRelics(ArrayList<StoreRelic> relics, ShopScreen screenInstance);
 }
