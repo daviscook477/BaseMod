@@ -184,6 +184,7 @@ public class BaseMod {
 	private static ArrayList<PostPowerApplySubscriber> postPowerApplySubscribers;
 	@Deprecated
 	private static ArrayList<OnPowersModifiedSubscriber> onPowersModifiedSubscribers;
+	@Deprecated
 	private static ArrayList<PostDeathSubscriber> postDeathSubscribers;
 	private static ArrayList<OnStartBattleSubscriber> startBattleSubscribers;
 	private static ArrayList<AddCustomModeModsSubscriber> addCustomModeModsSubscribers;
@@ -2721,6 +2722,7 @@ public class BaseMod {
 	}
 
 	// publishPostDeath - Is triggered on death and victory
+	@Deprecated
 	public static void publishPostDeath() {
 		logger.info("publishPostDeath");
 

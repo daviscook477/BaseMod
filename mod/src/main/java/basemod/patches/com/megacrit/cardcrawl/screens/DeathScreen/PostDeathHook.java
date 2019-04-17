@@ -1,6 +1,8 @@
 package basemod.patches.com.megacrit.cardcrawl.screens.DeathScreen;
 
 import basemod.BaseMod;
+import basemod6.BaseMod6;
+import basemod6.events.PostDeathEvent;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.cutscenes.Cutscene;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -25,6 +27,7 @@ public class PostDeathHook
             return;
         }
 
+        BaseMod6.EVENT_BUS.post(new PostDeathEvent());
         BaseMod.publishPostDeath();
     }
 
