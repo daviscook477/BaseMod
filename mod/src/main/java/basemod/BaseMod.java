@@ -1129,16 +1129,16 @@ public class BaseMod {
 	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static void removeRelicFromCustomPool(AbstractRelic relic, AbstractCard.CardColor color) {
-		_internal_RemoveRelicFromCustomPool(relic, color);
+		_internal_RemoveRelicFromCustomPool(relic, color, BaseMod::removeRelicFromTierList);
 	}
 
-	public static void _internal_RemoveRelicFromCustomPool(AbstractRelic relic, AbstractCard.CardColor color) {
+	public static void _internal_RemoveRelicFromCustomPool(AbstractRelic relic, AbstractCard.CardColor color, Consumer<AbstractRelic> removeRelicFromTierList) {
 		if (relic == null) return;
 		if (customRelicPools.containsKey(color)) {
 			if (customRelicPools.get(color).containsKey(relic.relicId)) {
 				customRelicPools.get(color).remove(relic.relicId);
 				--RelicLibrary.totalRelicCount;
-				removeRelicFromTierList(relic);
+				removeRelicFromTierList.accept(relic);
 			}
 		}
 		if (customRelicLists.containsKey(color)) {

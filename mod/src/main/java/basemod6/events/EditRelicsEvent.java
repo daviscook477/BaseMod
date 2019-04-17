@@ -99,7 +99,7 @@ public class EditRelicsEvent extends Event
 					}
 					break;
 				default:
-					BaseMod._internal_RemoveRelicFromCustomPool(relic, color);
+					BaseMod._internal_RemoveRelicFromCustomPool(relic, color, this::removeRelicFromTierList);
 					break;
 			}
 		}
