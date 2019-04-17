@@ -142,6 +142,7 @@ public class BaseMod {
 	private static ArrayList<PostUpdateSubscriber> postUpdateSubscribers;
 	@Deprecated
 	private static ArrayList<PostDungeonUpdateSubscriber> postDungeonUpdateSubscribers;
+	@Deprecated
 	private static ArrayList<PreDungeonUpdateSubscriber> preDungeonUpdateSubscribers;
 	private static ArrayList<PostPlayerUpdateSubscriber> postPlayerUpdateSubscribers;
 	private static ArrayList<PrePlayerUpdateSubscriber> prePlayerUpdateSubscribers;
@@ -2432,6 +2433,7 @@ public class BaseMod {
 	}
 
 	// publishPreDungeonUpdate -
+	@Deprecated
 	public static void publishPreDungeonUpdate() {
 		for(PreDungeonUpdateSubscriber sub : preDungeonUpdateSubscribers) {
 			sub.receivePreDungeonUpdate();
