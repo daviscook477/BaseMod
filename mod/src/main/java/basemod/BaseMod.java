@@ -170,6 +170,7 @@ public class BaseMod {
 	private static ArrayList<EditKeywordsSubscriber> editKeywordsSubscribers;
 	@Deprecated
 	private static ArrayList<PostBattleSubscriber> postBattleSubscribers;
+	@Deprecated
 	private static ArrayList<SetUnlocksSubscriber> setUnlocksSubscribers;
 	@Deprecated
 	private static ArrayList<PostPotionUseSubscriber> postPotionUseSubscribers;
@@ -2621,6 +2622,7 @@ public class BaseMod {
 	}
 
 	// publishPostRefresh -
+	@Deprecated
 	public static void publishPostRefresh() {
 		logger.info("publish post refresh - refreshing unlocks");
 
