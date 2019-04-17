@@ -132,6 +132,7 @@ public class BaseMod {
 	private static ArrayList<PostRenderSubscriber> postRenderSubscribers;
 	@Deprecated
 	private static ArrayList<ModelRenderSubscriber> modelRenderSubscribers;
+	@Deprecated
 	private static ArrayList<PreStartGameSubscriber> preStartGameSubscribers;
 	private static ArrayList<StartGameSubscriber> startGameSubscribers;
 	private static ArrayList<PreUpdateSubscriber> preUpdateSubscribers;
@@ -2374,6 +2375,7 @@ public class BaseMod {
 	}
 
 	// publishPreStartGame -
+	@Deprecated
 	public static void publishPreStartGame() {
 		logger.info("publishPreStartGame");
 
