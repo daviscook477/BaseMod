@@ -1,6 +1,8 @@
 package basemod.patches.com.megacrit.cardcrawl.core.EnergyManager;
 
 import basemod.BaseMod;
+import basemod6.BaseMod6;
+import basemod6.events.PostEnergyRechargeEvent;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.audio.SoundMaster;
@@ -18,6 +20,7 @@ public class PostEnergyRechargeHook
 	)
     public static void Insert(EnergyManager __instance)
 	{
+		BaseMod6.EVENT_BUS.post(new PostEnergyRechargeEvent());
         BaseMod.publishPostEnergyRecharge();
     }
 

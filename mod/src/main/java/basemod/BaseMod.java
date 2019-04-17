@@ -118,6 +118,7 @@ public class BaseMod {
 	private static ArrayList<OnCardUseSubscriber> onCardUseSubscribers;
 	@Deprecated
 	private static ArrayList<PostDungeonInitializeSubscriber> postDungeonInitializeSubscribers;
+	@Deprecated
 	private static ArrayList<PostEnergyRechargeSubscriber> postEnergyRechargeSubscribers;
 	@Deprecated
 	private static ArrayList<PostInitializeSubscriber> postInitializeSubscribers;
@@ -2269,6 +2270,7 @@ public class BaseMod {
 	}
 
 	// publishPostEnergyRecharge -
+	@Deprecated
 	public static void publishPostEnergyRecharge() {
 		logger.info("publishPostEnergyRecharge");
 		for (PostEnergyRechargeSubscriber sub : postEnergyRechargeSubscribers) {
