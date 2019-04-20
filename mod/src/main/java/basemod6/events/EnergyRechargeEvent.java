@@ -1,10 +1,10 @@
 package basemod6.events;
 
-public class PostEnergyRechargeEvent extends Event
+public class EnergyRechargeEvent extends Event
 {
 	private int energyGain;
 
-	public PostEnergyRechargeEvent(int energyGain)
+	public EnergyRechargeEvent(int energyGain)
 	{
 		this.energyGain = energyGain;
 	}
