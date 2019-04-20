@@ -20,7 +20,7 @@ public class PostEnergyRechargeHook
 	)
     public static void Insert(EnergyManager __instance)
 	{
-		BaseMod6.EVENT_BUS.post(new PostEnergyRechargeEvent());
+		BaseMod6.EVENT_BUS.post(new PostEnergyRechargeEvent(__instance.energy));
         BaseMod.publishPostEnergyRecharge();
     }
 
