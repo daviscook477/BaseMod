@@ -29,4 +29,9 @@ public class CreateStartingDeckEvent extends Event
 	{
 		startingDeck.addToTop(card);
 	}
+
+	public boolean removeCard(String id)
+	{
+		return startingDeck.removeCard(id);
+	}
 }
