@@ -5,12 +5,12 @@ import com.megacrit.cardcrawl.shop.StoreRelic;
 
 import java.util.ArrayList;
 
-public class PostCreateShopRelicEvent extends Event
+public class CreateShopRelicEvent extends Event
 {
 	private ShopScreen shopScreen;
 	private ArrayList<StoreRelic> relics;
 
-	public PostCreateShopRelicEvent(ShopScreen shopScreen, ArrayList<StoreRelic> relics)
+	public CreateShopRelicEvent(ShopScreen shopScreen, ArrayList<StoreRelic> relics)
 	{
 		this.shopScreen = shopScreen;
 		this.relics = relics;
