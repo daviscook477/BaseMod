@@ -2,7 +2,7 @@ package basemod.patches.com.megacrit.cardcrawl.characters.AbstractPlayer;
 
 import basemod.BaseMod;
 import basemod6.BaseMod6;
-import basemod6.events.PostCreateStartingDeckEvent;
+import basemod6.events.CreateStartingDeckEvent;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 
@@ -14,7 +14,7 @@ public class PostInitializeStarterDeckHookSwitch
 {
     public static void Postfix(AbstractPlayer __instance)
 	{
-		BaseMod6.EVENT_BUS.post(new PostCreateStartingDeckEvent(__instance.chosenClass, __instance.masterDeck));
+		BaseMod6.EVENT_BUS.post(new CreateStartingDeckEvent(__instance.chosenClass, __instance.masterDeck));
 		BaseMod.publishPostCreateStartingDeck(__instance.chosenClass, __instance.masterDeck);
     }
 }

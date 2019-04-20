@@ -4,12 +4,12 @@ import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.CardGroup;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 
-public class PostCreateStartingDeckEvent extends Event
+public class CreateStartingDeckEvent extends Event
 {
 	private AbstractPlayer.PlayerClass playerClass;
 	private CardGroup startingDeck;
 
-	public PostCreateStartingDeckEvent(AbstractPlayer.PlayerClass playerClass, CardGroup startingDeck)
+	public CreateStartingDeckEvent(AbstractPlayer.PlayerClass playerClass, CardGroup startingDeck)
 	{
 		this.playerClass = playerClass;
 		this.startingDeck = startingDeck;
