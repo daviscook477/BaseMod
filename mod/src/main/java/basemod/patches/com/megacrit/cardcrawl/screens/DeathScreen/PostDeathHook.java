@@ -13,33 +13,11 @@ import com.megacrit.cardcrawl.screens.VictoryScreen;
         clz=DeathScreen.class,
         method=SpirePatch.CONSTRUCTOR
 )
-@SpirePatch(
-        clz=VictoryScreen.class,
-        method=SpirePatch.CONSTRUCTOR
-)
 public class PostDeathHook
 {
-    private static boolean doHook = true;
-
-    public static void Postfix(Object __obj_instance, Object __monster_group)
+    public static void Postfix(DeathScreen __instance, Object __monster_group)
     {
-        if (__obj_instance instanceof VictoryScreen && !doHook) {
-            return;
-        }
-
         BaseMod6.EVENT_BUS.post(new PostDeathEvent());
         BaseMod.publishPostDeath();
-    }
-
-    @SpirePatch(
-            clz=Cutscene.class,
-            method="openVictoryScreen"
-    )
-    public static class StopMultiVictory
-    {
-        public static void Prefix(Cutscene __instance)
-        {
-            doHook = (AbstractDungeon.victoryScreen == null);
-        }
     }
 }
