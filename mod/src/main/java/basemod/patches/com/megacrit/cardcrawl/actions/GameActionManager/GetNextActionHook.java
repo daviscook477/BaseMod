@@ -2,11 +2,10 @@ package basemod.patches.com.megacrit.cardcrawl.actions.GameActionManager;
 
 import basemod.BaseMod;
 import basemod6.BaseMod6;
-import basemod6.events.OnCardUseEvent;
+import basemod6.events.CardUseEvent;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
 import com.megacrit.cardcrawl.actions.GameActionManager;
-import com.megacrit.cardcrawl.cards.CardQueueItem;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
 
@@ -23,7 +22,7 @@ public class GetNextActionHook
 	)
 	public static void Insert(GameActionManager __instance)
 	{
-		BaseMod6.EVENT_BUS.post(new OnCardUseEvent(__instance.cardQueue.get(0).card));
+		BaseMod6.EVENT_BUS.post(new CardUseEvent(__instance.cardQueue.get(0).card));
 		BaseMod.publishOnCardUse(__instance.cardQueue.get(0).card);
 	}
 	
