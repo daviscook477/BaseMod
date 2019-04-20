@@ -5,12 +5,12 @@ import com.megacrit.cardcrawl.shop.StorePotion;
 
 import java.util.ArrayList;
 
-public class PostCreateShopPotionEvent extends Event
+public class CreateShopPotionEvent extends Event
 {
 	private ShopScreen shopScreen;
 	private ArrayList<StorePotion> potions;
 
-	public PostCreateShopPotionEvent(ShopScreen shopScreen, ArrayList<StorePotion> potions)
+	public CreateShopPotionEvent(ShopScreen shopScreen, ArrayList<StorePotion> potions)
 	{
 		this.shopScreen = shopScreen;
 		this.potions = potions;
