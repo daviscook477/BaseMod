@@ -2,7 +2,7 @@ package basemod.patches.com.megacrit.cardcrawl.cards.CardGroup;
 
 import basemod.BaseMod;
 import basemod6.BaseMod6;
-import basemod6.events.PostExhaustEvent;
+import basemod6.events.CardExhaustEvent;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.CardGroup;
@@ -19,7 +19,7 @@ public class MoveToExhaustPileHook
 	)
 	public static void Insert(CardGroup __instance, AbstractCard c)
 	{
-		BaseMod6.EVENT_BUS.post(new PostExhaustEvent(c));
+		BaseMod6.EVENT_BUS.post(new CardExhaustEvent(c));
 		BaseMod.publishPostExhaust(c);
 	}
 

@@ -2,11 +2,11 @@ package basemod6.events;
 
 import com.megacrit.cardcrawl.cards.AbstractCard;
 
-public class PostExhaustEvent extends Event
+public class CardExhaustEvent extends Event
 {
 	private AbstractCard card;
 
-	public PostExhaustEvent(AbstractCard card)
+	public CardExhaustEvent(AbstractCard card)
 	{
 		this.card = card;
 	}
