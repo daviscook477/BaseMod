@@ -4,12 +4,12 @@ import com.megacrit.cardcrawl.characters.AbstractPlayer;
 
 import java.util.ArrayList;
 
-public class PostCreateStartingRelicsEvent extends ResultEvent<ArrayList<String>>
+public class CreateStartingRelicsEvent extends ResultEvent<ArrayList<String>>
 {
 	private AbstractPlayer.PlayerClass playerClass;
 	private ArrayList<String> relicIDs;
 
-	public PostCreateStartingRelicsEvent(AbstractPlayer.PlayerClass playerClass, ArrayList<String> relicIDs)
+	public CreateStartingRelicsEvent(AbstractPlayer.PlayerClass playerClass, ArrayList<String> relicIDs)
 	{
 		this.playerClass = playerClass;
 		this.relicIDs = relicIDs;

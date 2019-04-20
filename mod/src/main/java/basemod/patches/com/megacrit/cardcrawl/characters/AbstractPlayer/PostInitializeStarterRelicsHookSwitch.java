@@ -2,7 +2,7 @@ package basemod.patches.com.megacrit.cardcrawl.characters.AbstractPlayer;
 
 import basemod.BaseMod;
 import basemod6.BaseMod6;
-import basemod6.events.PostCreateStartingRelicsEvent;
+import basemod6.events.CreateStartingRelicsEvent;
 import com.evacipated.cardcrawl.modthespire.lib.ByRef;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
@@ -25,7 +25,7 @@ public class PostInitializeStarterRelicsHookSwitch
 			localvars={"relics"}
 	)
     public static void Insert(AbstractPlayer __instance, PlayerClass chosenClass, @ByRef ArrayList<String>[] relics) {
-		relics[0] = BaseMod6.EVENT_BUS.post(new PostCreateStartingRelicsEvent(chosenClass, relics[0]));
+		relics[0] = BaseMod6.EVENT_BUS.post(new CreateStartingRelicsEvent(chosenClass, relics[0]));
     	BaseMod.publishPostCreateStartingRelics(chosenClass, relics[0]);
     }
 }
