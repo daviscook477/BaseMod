@@ -5,7 +5,7 @@
     <parent>
         <artifactId>BaseMod-root</artifactId>
         <groupId>basemod</groupId>
-        <version>5.13.0</version>
+        <version>5.13.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -17,14 +17,14 @@
             <artifactId>slaythespire</artifactId>
             <version>${SlayTheSpire.version}</version>
             <scope>system</scope>
-            <systemPath>${basedir}/../../lib/desktop-1.0.jar</systemPath>
+            <systemPath>C:/My Stuff/Games/Steam/steamapps/common/SlayTheSpire/desktop-1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.evacipated.cardcrawl</groupId>
             <artifactId>ModTheSpire</artifactId>
             <version>${ModTheSpire.version}</version>
             <scope>system</scope>
-            <systemPath>${basedir}/../../lib/ModTheSpire.jar</systemPath>
+            <systemPath>C:/My Stuff/Games/Steam/steamapps/workshop/content/646570/1605060445/ModTheSpire.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.github.trixt0r</groupId>
@@ -64,8 +64,8 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <copy file="target/${artifactId}.jar" tofile="../../_ModTheSpire/mods/${artifactId}.jar"/>
-                                <copy file="target/${artifactId}.jar" tofile="../../lib/${artifactId}.jar"/>
+                                <copy file="target/${artifactId}.jar" tofile="C:\My Stuff\Games\Steam\steamapps\common\SlayTheSpire\mods\${artifactId}.jar"/>
+                             <!--   <copy file="target/${artifactId}.jar" tofile="../../lib/${artifactId}.jar"/>-->
                             </target>
                         </configuration>
                         <goals>
