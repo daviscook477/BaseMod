@@ -177,51 +177,51 @@ public class RenderFixSwitches {
 	@SpirePatch(cls = "com.megacrit.cardcrawl.cards.AbstractCard", method = "renderCardBg")
 	public static class RenderBgSwitch {
 		public static SpireReturn<?> Prefix(AbstractCard __instance, SpriteBatch sb, float xPos, float yPos) {
-			if(!(__instance instanceof CustomCard) 
-					|| __instance.color==AbstractCard.CardColor.RED 
-					|| __instance.color==AbstractCard.CardColor.GREEN
-					|| __instance.color==AbstractCard.CardColor.BLUE 
-					|| __instance.color==AbstractCard.CardColor.COLORLESS
-					|| __instance.color==AbstractCard.CardColor.CURSE) return SpireReturn.Continue();
-			CardColor color = __instance.color;
-			CustomCard card = (CustomCard) __instance;
-			Texture texture;
-			
-			switch(card.type) {
-			case POWER:
-				if (BaseMod.getPowerBgTexture(color) == null) {
-					BaseMod.savePowerBgTexture(color, ImageMaster.loadImage(BaseMod.getPowerBg(color)));
-				}
-				texture = BaseMod.getPowerBgTexture(color);
-				break;
-			case ATTACK:
-				if (BaseMod.getAttackBgTexture(color) == null) {
-					BaseMod.saveAttackBgTexture(color, ImageMaster.loadImage(BaseMod.getAttackBg(color)));
-				}
-				texture = BaseMod.getAttackBgTexture(color);
-				break;
-			case SKILL:
-				if (BaseMod.getSkillBgTexture(color) == null) {
-					BaseMod.saveSkillBgTexture(color, ImageMaster.loadImage(BaseMod.getSkillBg(color)));
-				}
-				texture = BaseMod.getSkillBgTexture(color);
-				break;
-			default:
-				texture = ImageMaster.CARD_SKILL_BG_BLACK;
-				break;
-			}
-			
-			if(!(card.textureBackgroundSmallImg == null) && !card.textureBackgroundSmallImg.isEmpty()) {
-				texture = card.getBackgroundSmallTexture();
-			}
-			
-			if(texture == null) {
-				BaseMod.logger.info(color.toString() + " texture is null wtf");
+			if (!(__instance instanceof CustomCard)) {
 				return SpireReturn.Continue();
+			} else if ((((CustomCard) __instance).textureBackgroundSmallImg == null)
+					|| ((CustomCard) __instance).textureBackgroundSmallImg.isEmpty()) {
+				return SpireReturn.Continue();
+			} else {
+				CardColor color = __instance.color;
+				CustomCard card = (CustomCard) __instance;
+				Texture texture;
+				
+				switch (card.type) {
+					case POWER:
+						if (BaseMod.getPowerBgTexture(color) == null) {
+							BaseMod.savePowerBgTexture(color, ImageMaster.loadImage(BaseMod.getPowerBg(color)));
+						}
+						texture = BaseMod.getPowerBgTexture(color);
+						break;
+					case ATTACK:
+						if (BaseMod.getAttackBgTexture(color) == null) {
+							BaseMod.saveAttackBgTexture(color, ImageMaster.loadImage(BaseMod.getAttackBg(color)));
+						}
+						texture = BaseMod.getAttackBgTexture(color);
+						break;
+					case SKILL:
+						if (BaseMod.getSkillBgTexture(color) == null) {
+							BaseMod.saveSkillBgTexture(color, ImageMaster.loadImage(BaseMod.getSkillBg(color)));
+						}
+						texture = BaseMod.getSkillBgTexture(color);
+						break;
+					default:
+						texture = ImageMaster.CARD_SKILL_BG_BLACK;
+						break;
+				}
+				
+				if (!(card.textureBackgroundSmallImg == null) && !card.textureBackgroundSmallImg.isEmpty()) {
+					texture = card.getBackgroundSmallTexture();
+				}
+				
+				if (texture == null) {
+					BaseMod.logger.info(color.toString() + " texture is null wtf");
+					return SpireReturn.Continue();
+				}
+				
+				renderHelper(card, sb, Color.WHITE, texture, xPos, yPos);
 			}
-			
-			renderHelper(card, sb, Color.WHITE, texture, xPos, yPos);
-			
 			return SpireReturn.Return(null);
 		}
 	}
