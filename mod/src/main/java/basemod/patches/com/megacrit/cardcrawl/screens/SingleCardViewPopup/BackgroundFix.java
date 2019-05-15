@@ -37,10 +37,13 @@ public class BackgroundFix
 				cardField.setAccessible(true);
 				AbstractCard card = (AbstractCard) cardField.get(popup);
 				AbstractCard.CardColor color = card.color;
+				if (!(card instanceof CustomCard)) {
+				} else if ((((CustomCard) card).textureBackgroundLargeImg == null)
+						|| ((CustomCard) card).textureBackgroundLargeImg.isEmpty()) {
+				} else {
 				switch (card.type) {
 				case ATTACK:
-					if (color != AbstractCard.CardColor.RED && color != AbstractCard.CardColor.GREEN && color != AbstractCard.CardColor.BLUE
-						&& color != AbstractCard.CardColor.COLORLESS && color != AbstractCard.CardColor.CURSE) {
+					if (true) {
 						Texture bgTexture = null;
 						if (card instanceof CustomCard) {
 							bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
@@ -56,8 +59,7 @@ public class BackgroundFix
 					}
 					break;
 				case POWER:
-					if (color != AbstractCard.CardColor.RED && color != AbstractCard.CardColor.GREEN && color != AbstractCard.CardColor.BLUE
-							&& color != AbstractCard.CardColor.COLORLESS && color != AbstractCard.CardColor.CURSE) {
+					if (true) {
 						Texture bgTexture = null;
 						if (card instanceof CustomCard) {
 							bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
@@ -69,27 +71,26 @@ public class BackgroundFix
 								BaseMod.savePowerBgPortraitTexture(color, bgTexture);
 							}
 						}
-						sb.draw(bgTexture, 
-								Settings.WIDTH / 2.0F - 512.0F, 
-								Settings.HEIGHT / 2.0F - 512.0F, 
+						sb.draw(bgTexture,
+								Settings.WIDTH / 2.0F - 512.0F,
+								Settings.HEIGHT / 2.0F - 512.0F,
 								512.0F,
-								512.0F, 
-								1024.0F, 
-								1024.0F, 
+								512.0F,
+								1024.0F,
+								1024.0F,
 								Settings.scale,
-								Settings.scale, 
-								0.0F, 
-								0, 
-								0, 
-								1024, 
-								1024, 
-								false, 
+								Settings.scale,
+								0.0F,
+								0,
+								0,
+								1024,
+								1024,
+								false,
 								false);
 					}
 					break;
 				default:
-					if (color != AbstractCard.CardColor.RED && color != AbstractCard.CardColor.GREEN && color != AbstractCard.CardColor.BLUE
-							&& color != AbstractCard.CardColor.COLORLESS && color != AbstractCard.CardColor.CURSE) {
+					if (true) {
 						Texture bgTexture = null;
 						if (card instanceof CustomCard) {
 							bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
@@ -104,7 +105,7 @@ public class BackgroundFix
 						sb.draw(bgTexture, Settings.WIDTH / 2.0F - 512.0F, Settings.HEIGHT / 2.0F - 512.0F, 512.0F, 512.0F, 1024.0F, 1024.0F, Settings.scale, Settings.scale, 0.0F, 0, 0, 1024, 1024, false, false);
 					}
 					break;
-				}
+				}}
 			} catch (NoSuchFieldException | SecurityException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
