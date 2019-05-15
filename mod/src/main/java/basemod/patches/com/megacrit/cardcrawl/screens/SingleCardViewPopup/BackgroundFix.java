@@ -4,20 +4,17 @@ import basemod.BaseMod;
 import basemod.abstracts.CustomCard;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.evacipated.cardcrawl.modthespire.lib.*;
-import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
+import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
+import com.evacipated.cardcrawl.modthespire.lib.SpireReturn;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 import javassist.CannotCompileException;
-import javassist.CtBehavior;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
-import org.omg.CORBA.UNKNOWN;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 
 public class BackgroundFix
 {
@@ -27,7 +24,7 @@ public class BackgroundFix
 	)
 	public static class BackgroundTexture
 	{
-		public static void Prefix(Object __obj_instance, Object sbObject)
+		public static  SpireReturn<?> Prefix(Object __obj_instance, Object sbObject)
 		{
 			try {
 				SingleCardViewPopup popup = (SingleCardViewPopup) __obj_instance;
@@ -37,78 +34,88 @@ public class BackgroundFix
 				cardField.setAccessible(true);
 				AbstractCard card = (AbstractCard) cardField.get(popup);
 				AbstractCard.CardColor color = card.color;
+				
+				
 				if (!(card instanceof CustomCard)) {
+					return SpireReturn.Continue();
 				} else if ((((CustomCard) card).textureBackgroundLargeImg == null)
 						|| ((CustomCard) card).textureBackgroundLargeImg.isEmpty()) {
-				} else {
-				switch (card.type) {
-				case ATTACK:
-					if (true) {
-						Texture bgTexture = null;
-						if (card instanceof CustomCard) {
-							bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
-						}
-						if (bgTexture == null) {
-							bgTexture = BaseMod.getAttackBgPortraitTexture(color);
-							if (bgTexture == null) {
-								bgTexture = ImageMaster.loadImage(BaseMod.getAttackBgPortrait(color));
-								BaseMod.saveAttackBgPortraitTexture(color, bgTexture);
-							}
-						}
-						sb.draw(bgTexture, Settings.WIDTH / 2.0F - 512.0F, Settings.HEIGHT / 2.0F - 512.0F, 512.0F, 512.0F, 1024.0F, 1024.0F, Settings.scale, Settings.scale, 0.0F, 0, 0, 1024, 1024, false, false);
+					if (color == AbstractCard.CardColor.RED
+							|| color == AbstractCard.CardColor.GREEN
+							|| color == AbstractCard.CardColor.BLUE
+							|| color == AbstractCard.CardColor.COLORLESS
+							|| color == AbstractCard.CardColor.CURSE) {
+						return SpireReturn.Continue();
 					}
-					break;
-				case POWER:
-					if (true) {
-						Texture bgTexture = null;
-						if (card instanceof CustomCard) {
-							bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
-						}
-						if (bgTexture == null) {
-							bgTexture = BaseMod.getPowerBgPortraitTexture(color);
-							if (bgTexture == null) {
-								bgTexture = ImageMaster.loadImage(BaseMod.getPowerBgPortrait(color));
-								BaseMod.savePowerBgPortraitTexture(color, bgTexture);
+				}
+				
+					switch (card.type) {
+						case ATTACK: {
+							Texture bgTexture = null;
+							if (card instanceof CustomCard) {
+								bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
 							}
-						}
-						sb.draw(bgTexture,
-								Settings.WIDTH / 2.0F - 512.0F,
-								Settings.HEIGHT / 2.0F - 512.0F,
-								512.0F,
-								512.0F,
-								1024.0F,
-								1024.0F,
-								Settings.scale,
-								Settings.scale,
-								0.0F,
-								0,
-								0,
-								1024,
-								1024,
-								false,
-								false);
-					}
-					break;
-				default:
-					if (true) {
-						Texture bgTexture = null;
-						if (card instanceof CustomCard) {
-							bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
-						}
-						if (bgTexture == null) {
-							bgTexture = BaseMod.getSkillBgPortraitTexture(color);
 							if (bgTexture == null) {
-								bgTexture = ImageMaster.loadImage(BaseMod.getSkillBgPortrait(color));
-								BaseMod.saveSkillBgPortraitTexture(color, bgTexture);
+								bgTexture = BaseMod.getAttackBgPortraitTexture(color);
+								if (bgTexture == null) {
+									bgTexture = ImageMaster.loadImage(BaseMod.getAttackBgPortrait(color));
+									BaseMod.saveAttackBgPortraitTexture(color, bgTexture);
+								}
 							}
+							sb.draw(bgTexture, Settings.WIDTH / 2.0F - 512.0F, Settings.HEIGHT / 2.0F - 512.0F, 512.0F, 512.0F, 1024.0F, 1024.0F, Settings.scale, Settings.scale, 0.0F, 0, 0, 1024, 1024, false, false);
 						}
-						sb.draw(bgTexture, Settings.WIDTH / 2.0F - 512.0F, Settings.HEIGHT / 2.0F - 512.0F, 512.0F, 512.0F, 1024.0F, 1024.0F, Settings.scale, Settings.scale, 0.0F, 0, 0, 1024, 1024, false, false);
+						break;
+						case POWER: {
+							Texture bgTexture = null;
+							if (card instanceof CustomCard) {
+								bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
+							}
+							if (bgTexture == null) {
+								bgTexture = BaseMod.getPowerBgPortraitTexture(color);
+								if (bgTexture == null) {
+									bgTexture = ImageMaster.loadImage(BaseMod.getPowerBgPortrait(color));
+									BaseMod.savePowerBgPortraitTexture(color, bgTexture);
+								}
+							}
+							sb.draw(bgTexture,
+									Settings.WIDTH / 2.0F - 512.0F,
+									Settings.HEIGHT / 2.0F - 512.0F,
+									512.0F,
+									512.0F,
+									1024.0F,
+									1024.0F,
+									Settings.scale,
+									Settings.scale,
+									0.0F,
+									0,
+									0,
+									1024,
+									1024,
+									false,
+									false);
+						}
+						break;
+						default: {
+							Texture bgTexture = null;
+							if (card instanceof CustomCard) {
+								bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
+							}
+							if (bgTexture == null) {
+								bgTexture = BaseMod.getSkillBgPortraitTexture(color);
+								if (bgTexture == null) {
+									bgTexture = ImageMaster.loadImage(BaseMod.getSkillBgPortrait(color));
+									BaseMod.saveSkillBgPortraitTexture(color, bgTexture);
+								}
+							}
+							sb.draw(bgTexture, Settings.WIDTH / 2.0F - 512.0F, Settings.HEIGHT / 2.0F - 512.0F, 512.0F, 512.0F, 1024.0F, 1024.0F, Settings.scale, Settings.scale, 0.0F, 0, 0, 1024, 1024, false, false);
+						}
+						break;
 					}
-					break;
-				}}
+				
 			} catch (NoSuchFieldException | SecurityException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
+			return SpireReturn.Return(null);
 		}
 	}
 	
