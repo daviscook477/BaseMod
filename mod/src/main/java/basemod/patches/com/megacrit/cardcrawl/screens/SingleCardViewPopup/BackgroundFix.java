@@ -35,7 +35,6 @@ public class BackgroundFix
 				AbstractCard card = (AbstractCard) cardField.get(popup);
 				AbstractCard.CardColor color = card.color;
 				
-				
 				if (!(card instanceof CustomCard)) {
 					return SpireReturn.Continue();
 				} else if ((((CustomCard) card).textureBackgroundLargeImg == null)
@@ -48,13 +47,9 @@ public class BackgroundFix
 						return SpireReturn.Continue();
 					}
 				}
-				
-					switch (card.type) {
+				switch (card.type) {
 						case ATTACK: {
-							Texture bgTexture = null;
-							if (card instanceof CustomCard) {
-								bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
-							}
+							Texture bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
 							if (bgTexture == null) {
 								bgTexture = BaseMod.getAttackBgPortraitTexture(color);
 								if (bgTexture == null) {
@@ -66,10 +61,7 @@ public class BackgroundFix
 						}
 						break;
 						case POWER: {
-							Texture bgTexture = null;
-							if (card instanceof CustomCard) {
-								bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
-							}
+							Texture bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
 							if (bgTexture == null) {
 								bgTexture = BaseMod.getPowerBgPortraitTexture(color);
 								if (bgTexture == null) {
@@ -96,10 +88,7 @@ public class BackgroundFix
 						}
 						break;
 						default: {
-							Texture bgTexture = null;
-							if (card instanceof CustomCard) {
-								bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
-							}
+							Texture bgTexture = ((CustomCard) card).getBackgroundLargeTexture();
 							if (bgTexture == null) {
 								bgTexture = BaseMod.getSkillBgPortraitTexture(color);
 								if (bgTexture == null) {
@@ -111,7 +100,6 @@ public class BackgroundFix
 						}
 						break;
 					}
-				
 			} catch (NoSuchFieldException | SecurityException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
@@ -153,7 +141,6 @@ public class BackgroundFix
             if (card instanceof CustomCard) {
                 texture = ((CustomCard) card).getOrbLargeTexture();
             }
-
 				if (texture == null) {
 					texture = BaseMod.getEnergyOrbPortraitTexture(card.color);
 					if (texture == null) {
@@ -165,8 +152,7 @@ public class BackgroundFix
 				if (texture == null) {
 					texture = ImageMaster.CARD_GRAY_ORB_L;
 				}
-			
-
+				
 			sb.draw(texture, x, y, originX, originY, width, height, scaleX, scaleY, rotation, srcX, srcY, srcWidth, srcHeight, flipX, flipY);
 		}
 	}
