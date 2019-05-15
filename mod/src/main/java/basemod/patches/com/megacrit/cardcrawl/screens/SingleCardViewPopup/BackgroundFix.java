@@ -150,11 +150,9 @@ public class BackgroundFix
 										 int srcWidth, int srcHeight,
 										 boolean flipX, boolean flipY)
 		{
-			if (card.color != AbstractCard.CardColor.RED && card.color != AbstractCard.CardColor.GREEN && card.color != AbstractCard.CardColor.BLUE
-				&& card.color != AbstractCard.CardColor.COLORLESS && card.color != AbstractCard.CardColor.CURSE) {
-				if (card instanceof CustomCard) {
-					texture = ((CustomCard) card).getOrbLargeTexture();
-				}
+            if (card instanceof CustomCard) {
+                texture = ((CustomCard) card).getOrbLargeTexture();
+            }
 
 				if (texture == null) {
 					texture = BaseMod.getEnergyOrbPortraitTexture(card.color);
@@ -167,7 +165,7 @@ public class BackgroundFix
 				if (texture == null) {
 					texture = ImageMaster.CARD_GRAY_ORB_L;
 				}
-			}
+			
 
 			sb.draw(texture, x, y, originX, originY, width, height, scaleX, scaleY, rotation, srcX, srcY, srcWidth, srcHeight, flipX, flipY);
 		}
