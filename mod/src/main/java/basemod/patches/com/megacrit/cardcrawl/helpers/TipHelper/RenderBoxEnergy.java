@@ -1,33 +1,38 @@
 package basemod.patches.com.megacrit.cardcrawl.helpers.TipHelper;
 
-import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
+import basemod.BaseMod;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.evacipated.cardcrawl.modthespire.lib.*;
+import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.helpers.TipHelper;
 import javassist.CannotCompileException;
+import javassist.CtBehavior;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 
 @SpirePatch(
-        cls="com.megacrit.cardcrawl.helpers.TipHelper",
+        clz=TipHelper.class,
         method="renderBox"
 )
 public class RenderBoxEnergy
 {
-    public static ExprEditor Instrument()
+    @SpireInsertPatch(
+            locator=Locator.class,
+            localvars={"card", "currentOrb"}
+    )
+	public static void Insert(SpriteBatch sb, String word, float x, float y, AbstractCard card, @ByRef TextureAtlas.AtlasRegion[] currentOrb)
     {
-        return new ExprEditor() {
-            @Override
-            public void edit(MethodCall m) throws CannotCompileException
-            {
-                if (m.getClassName().equals("com.megacrit.cardcrawl.helpers.FontHelper") && m.getMethodName().equals("renderFontLeftTopAligned")) {
-                    m.replace("if (word.equals(\"[E]\")) {" +
-                            "renderTipEnergy(sb, basemod.BaseMod.getCardSmallEnergy(card), x + TEXT_OFFSET_X, y + ORB_OFFSET_Y);" +
-                            "$3 = capitalize(TEXT[0]);" +
-                            "$4 = x + TEXT_OFFSET_X * 2.5f;" +
-                            "$_ = $proceed($$);" +
-                            "} else {" +
-                            "$_ = $proceed($$);" +
-                            "}");
-                }
-            }
-        };
+        currentOrb[0] = BaseMod.getCardSmallEnergy(card);
+    }
+
+    private static class Locator extends SpireInsertLocator
+    {
+        @Override
+        public int[] Locate(CtBehavior ctBehavior) throws Exception
+        {
+            Matcher matcher = new Matcher.MethodCallMatcher(String.class, "equals");
+            return LineFinder.findInOrder(ctBehavior, matcher);
+        }
     }
 }

@@ -44,6 +44,11 @@ public class FakeKeywords
         for (String s : keywords) {
             if (GameDictionary.keywords.containsKey(s)) {
                 float textHeight = -FontHelper.getSmartHeight(
+                        FontHelper.tipHeaderFont, 
+                        TipHelper.capitalize(s), 
+                        BODY_TEXT_WIDTH, 
+                        TIP_DESC_LINE_SPACING) -
+                    FontHelper.getSmartHeight(
                         FontHelper.tipBodyFont,
                         GameDictionary.keywords.get(s),
                         BODY_TEXT_WIDTH,
@@ -59,10 +64,16 @@ public class FakeKeywords
             if (tooltips != null) {
                 for (TooltipInfo tooltip : tooltips) {
                     float textHeight = -FontHelper.getSmartHeight(
-                            FontHelper.tipBodyFont,
-                            tooltip.description,
-                            BODY_TEXT_WIDTH,
-                            TIP_DESC_LINE_SPACING) - 7.0f * Settings.scale;
+                            FontHelper.tipHeaderFont, 
+                            TipHelper.capitalize(tooltip.title), 
+                            BODY_TEXT_WIDTH, 
+                            TIP_DESC_LINE_SPACING) - 
+	                    FontHelper.getSmartHeight(
+	                        FontHelper.tipBodyFont,
+	                        tooltip.description,
+	                        BODY_TEXT_WIDTH,
+	                        TIP_DESC_LINE_SPACING) - 7.0f * Settings.scale;
+                     textHeight -= 
                     sumTooltipHeight -= textHeight + BOX_EDGE_H * 3.15f;
                 }
             }
@@ -97,7 +108,16 @@ public class FakeKeywords
                     for (TooltipInfo tooltip : tooltips) {
                         Field textHeight = TipHelper.class.getDeclaredField("textHeight");
                         textHeight.setAccessible(true);
-                        float h = -FontHelper.getSmartHeight(FontHelper.tipBodyFont, tooltip.description, BODY_TEXT_WIDTH, TIP_DESC_LINE_SPACING) - 7.0f * Settings.scale;
+                        float h = -FontHelper.getSmartHeight(
+                                FontHelper.tipHeaderFont, 
+                                TipHelper.capitalize(tooltip.title), 
+                                BODY_TEXT_WIDTH, 
+                                TIP_DESC_LINE_SPACING) - 
+                            FontHelper.getSmartHeight(
+                                FontHelper.tipBodyFont,
+                                tooltip.description,
+                                BODY_TEXT_WIDTH,
+                                TIP_DESC_LINE_SPACING) - 7.0f * Settings.scale;;
                         textHeight.set(null, h);
 
                         Method renderTipBox = TipHelper.class.getDeclaredMethod("renderTipBox", float.class, float.class, SpriteBatch.class, String.class, String.class);

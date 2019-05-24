@@ -19,6 +19,7 @@ import com.megacrit.cardcrawl.actions.common.*;
 import com.megacrit.cardcrawl.blights.AbstractBlight;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.DamageInfo;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.events.AbstractImageEvent;
@@ -27,6 +28,7 @@ import com.megacrit.cardcrawl.map.MapEdge;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
+import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.rooms.MonsterRoom;
 import com.megacrit.cardcrawl.ui.panels.EnergyPanel;
 import com.megacrit.cardcrawl.unlock.UnlockTracker;
@@ -945,6 +947,8 @@ implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSub
 			node.addEdge(edge);
 		}
 
+		AbstractDungeon.player.releaseCard();
+		AbstractDungeon.overlayMenu.hideCombatPanels();
 		AbstractDungeon.previousScreen = null;
 		AbstractDungeon.dynamicBanner.hide();
 		AbstractDungeon.dungeonMapScreen.closeInstantly();

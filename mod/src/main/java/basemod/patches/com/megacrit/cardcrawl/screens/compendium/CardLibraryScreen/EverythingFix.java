@@ -1,6 +1,7 @@
 package basemod.patches.com.megacrit.cardcrawl.screens.compendium.CardLibraryScreen;
 
 import basemod.patches.com.megacrit.cardcrawl.screens.mainMenu.ColorTabBar.ColorTabBarFix;
+import com.badlogic.gdx.math.MathUtils;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
 import com.megacrit.cardcrawl.cards.AbstractCard;
@@ -107,6 +108,25 @@ public class EverythingFix
         {
             if (newSelection == ColorTabBarFix.Enums.MOD) {
                 visibleCards[0] = Fields.cardGroupMap.get(ColorTabBarFix.Fields.getModTab().color);
+            }
+        }
+    }
+
+    @SpirePatch(
+            clz=CardLibraryScreen.class,
+            method="open"
+    )
+    public static class Open
+    {
+        public static void Postfix(CardLibraryScreen __instance)
+        {
+            AbstractCard.CardColor[] colors = AbstractCard.CardColor.values();
+            for (int icolor = AbstractCard.CardColor.CURSE.ordinal() + 1; icolor < colors.length; ++icolor) {
+                CardGroup group = Fields.cardGroupMap.get(colors[icolor]);
+                for (AbstractCard c : group.group) {
+                    c.drawScale = MathUtils.random(0.2F, 0.4F);
+                    c.targetDrawScale = 0.75F;
+                }
             }
         }
     }

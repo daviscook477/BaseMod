@@ -4,16 +4,26 @@ import basemod.BaseMod;
 import basemod.ReflectionHacks;
 import basemod.helpers.BaseModCardTags;
 import basemod.helpers.TooltipInfo;
+import basemod.patches.com.megacrit.cardcrawl.screens.SingleCardViewPopup.TitleFontSize;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
+import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.localization.LocalizedStrings;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class CustomCard extends AbstractCard {
 	
@@ -22,20 +32,7 @@ public abstract class CustomCard extends AbstractCard {
 	public static final String PORTRAIT_ENDING = "_p";
 	
 	public static Texture getPortraitImage(CustomCard card) {
-		if (card.textureImg == null) {
-			return null;
-		}
-		int endingIndex = card.textureImg.lastIndexOf(".");
-		String newPath = card.textureImg.substring(0, endingIndex) + 
-				PORTRAIT_ENDING + card.textureImg.substring(endingIndex); 
-		System.out.println("Finding texture: " + newPath);
-		Texture portraitTexture;
-		try {
-			portraitTexture = ImageMaster.loadImage(newPath);
-		} catch (Exception e) {
-			portraitTexture = null;
-		}
-		return portraitTexture;
+		return card.getPortraitImage();
 	}
 	
 	private static void loadTextureFromString(String textureString) {
@@ -71,6 +68,8 @@ public abstract class CustomCard extends AbstractCard {
 	public String textureBannerSmallImg = null;
 	public String textureBannerLargeImg = null;
 
+	private static Map<Class<? extends CustomCard>, BitmapFont> titleFontMap = new HashMap<>();
+
 	public CustomCard(String id, String name, String img, int cost, String rawDescription, CardType type, CardColor color, CardRarity rarity, CardTarget target) {
 		super(id, name, "status/beta", "status/beta", cost, rawDescription, type, color, rarity, target);
 		
@@ -78,6 +77,10 @@ public abstract class CustomCard extends AbstractCard {
 		if (img != null) {
 			loadCardImage(img);
 		}
+	}
+
+	public CustomCard(String id, String name, RegionName img, int cost, String rawDescription, CardType type, CardColor color, CardRarity rarity, CardTarget target) {
+		super(id, name, "status/beta", img.name, cost, rawDescription, type, color, rarity, target);
 	}
 	
 	// 
@@ -236,5 +239,97 @@ public abstract class CustomCard extends AbstractCard {
 	@Override
 	public void unlock() {
 		this.isLocked = false;
+	}
+
+	public float getTitleFontSize() {
+		return -1;
+	}
+
+	private BitmapFont getTitleFont() {
+		if (getTitleFontSize() < 0) {
+			return null;
+		}
+
+		BitmapFont font = titleFontMap.get(getClass());
+		if (font == null) {
+			font = generateTitleFont(getTitleFontSize());
+			titleFontMap.put(getClass(), font);
+		}
+		return font;
+	}
+
+	@SpireOverride
+	protected void renderTitle(SpriteBatch sb) {
+		BitmapFont titleFont = getTitleFont();
+		if (titleFont == null) {
+			SpireSuper.call(sb);
+			return;
+		}
+
+		BitmapFont savedFont_N = FontHelper.cardTitleFont_small_N;
+		BitmapFont savedFont_L = FontHelper.cardTitleFont_small_L;
+		FontHelper.cardTitleFont_small_N = titleFont;
+		FontHelper.cardTitleFont_small_L = titleFont;
+		SpireSuper.call(sb);
+		FontHelper.cardTitleFont_small_N = savedFont_N;
+		FontHelper.cardTitleFont_small_L = savedFont_L;
+	}
+
+	private static BitmapFont generateTitleFont(float size) {
+		FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
+		param.minFilter = Texture.TextureFilter.Linear;
+		param.magFilter = Texture.TextureFilter.Linear;
+		param.hinting = FreeTypeFontGenerator.Hinting.Slight;
+		param.spaceX = 0;
+		param.kerning = true;
+		param.borderColor = new Color(0.35f, 0.35f, 0.35f, 1);
+		param.borderWidth = 2.25f * Settings.scale;
+		param.gamma = 0.9f;
+		param.borderGamma = 0.9f;
+		param.shadowColor = new Color(0, 0, 0, 0.25f);
+		param.shadowOffsetX = Math.round(3 * Settings.scale);
+		param.shadowOffsetY = Math.round(3 * Settings.scale);
+		param.borderStraight = false;
+
+		param.characters = "";
+		param.incremental = true;
+		param.size = Math.round(size * Settings.scale);
+
+		FreeTypeFontGenerator g = new FreeTypeFontGenerator(TitleFontSize.fontFile);
+		g.scaleForPixelHeight(param.size);
+
+		BitmapFont font = g.generateFont(param);
+		font.setUseIntegerPositions(false);
+		font.getData().markupEnabled = true;
+		if (LocalizedStrings.break_chars != null) {
+			font.getData().breakChars = LocalizedStrings.break_chars.toCharArray();
+		}
+
+		return font;
+	}
+
+	protected Texture getPortraitImage() {
+		if (textureImg == null) {
+			return null;
+		}
+		int endingIndex = textureImg.lastIndexOf(".");
+		String newPath = textureImg.substring(0, endingIndex) +
+				PORTRAIT_ENDING + textureImg.substring(endingIndex);
+		System.out.println("Finding texture: " + newPath);
+		Texture portraitTexture;
+		try {
+			portraitTexture = ImageMaster.loadImage(newPath);
+		} catch (Exception e) {
+			portraitTexture = null;
+		}
+		return portraitTexture;
+	}
+
+	public static class RegionName {
+		public final String name;
+
+		public RegionName(String name) {
+			this.name = name;
+		}
 	}
 }
