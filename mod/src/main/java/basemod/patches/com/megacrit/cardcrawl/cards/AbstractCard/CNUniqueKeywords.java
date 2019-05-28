@@ -28,7 +28,7 @@ public class CNUniqueKeywords {
 
     public static class Locator extends SpireInsertLocator {
         public int[] Locate(CtBehavior ctMethodToPatch) throws CannotCompileException, PatchingException {
-            Matcher finalMatcher = new Matcher.NewExprMatcher(GlyphLayout.class);
+            Matcher finalMatcher = new Matcher.MethodCallMatcher(GlyphLayout.class, "setText");
 
             return LineFinder.findInOrder(ctMethodToPatch, finalMatcher);
         }

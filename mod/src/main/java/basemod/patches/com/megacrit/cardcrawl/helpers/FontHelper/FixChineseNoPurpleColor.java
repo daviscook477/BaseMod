@@ -18,7 +18,7 @@ public class FixChineseNoPurpleColor
 			locator=Locator.class,
 			localvars={"word"}
 	)
-	public static void Insert(SpriteBatch sb, BitmapFont font, String msg, float x, float y, Color c, float widthMax, @ByRef String[] word)
+	public static void Insert(SpriteBatch sb, BitmapFont font, String msg, float x, float y, Color c, float widthMax, float lineSpacing, @ByRef String[] word)
 	{
 		if (word[0].charAt(1) == 'p') {
 			word[0] = "[#" + Settings.PURPLE_COLOR.toString() + "]" + word[0].substring(2) + "[]";

@@ -117,12 +117,11 @@ public class ScrollingTooltips
 
 		@SpireInsertPatch(
 				rloc=6,
-				localvars={"shift", "y"}
+				localvars={ "y"}
 		)
-		public static void Insert(float x, float yParam, SpriteBatch sb, ArrayList<PowerTip> powerTips, @ByRef boolean[] shift, @ByRef float[] y)
+		public static void Insert(float x, float yParam, SpriteBatch sb, ArrayList<PowerTip> powerTips, @ByRef float[] y)
 		{
 			if (IsScrolling.isScrolling.get() > 0) {
-				shift[0] = true;
 				y[0] += Fields.scrollPosition;
 			}
 		}
@@ -210,8 +209,9 @@ public class ScrollingTooltips
 	{
 		// Normalize the positions of keyword tooltips on all cards
 		// For some reason they move slightly depending on the number of tooltips
-		y += powerTips.size() * 20 * Settings.scale;
-		y -= 20 * Settings.scale;
+		// UPDATE: Not necessary anymore
+//		y += powerTips.size() * 20 * Settings.scale;
+//		y -= 20 * Settings.scale;
 
 		float tipsHeight = powerTipsHeight(powerTips);
 		if (tipsHeight > scrollingSize) {

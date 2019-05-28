@@ -1,5 +1,6 @@
 package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
+import basemod.ReflectionHacks;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -82,7 +83,7 @@ public class ShrinkLongDescription
 			float height = 0;
 			GlyphLayout gl = new GlyphLayout();
 			for (int i=0; i<description.size(); ++i) {
-				gl.setText(font, description.get(i).text);
+				gl.setText(font, (String) ReflectionHacks.getPrivate(description.get(i), DescriptionLine.class, "text"));
 				height += gl.height;
 			}
 			return height;

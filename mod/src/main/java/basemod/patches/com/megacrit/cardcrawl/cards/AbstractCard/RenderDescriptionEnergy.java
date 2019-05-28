@@ -1,6 +1,7 @@
 package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
 import basemod.BaseMod;
+import basemod.ReflectionHacks;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -118,21 +119,23 @@ public class RenderDescriptionEnergy
     {
         @SpireInsertPatch(
                 locator=Locator.class,
-                localvars={"word", "currentWidth", "currentLine", "numLines", "CARD_ENERGY_IMG_WIDTH", "CN_DESC_BOX_WIDTH"}
+                localvars={"word", "currentWidth", "numLines", "CARD_ENERGY_IMG_WIDTH", "CN_DESC_BOX_WIDTH"}
         )
         public static void Insert(AbstractCard __instance, @ByRef String[] word, @ByRef float[] currentWidth,
-                                  @ByRef StringBuilder[] currentLine, @ByRef int[] numLines,
+                                  @ByRef int[] numLines,
                                   float CARD_ENERGY_IMG_WIDTH, float CN_DESC_BOX_WIDTH)
         {
+            StringBuilder sbuilderRFHacks = (StringBuilder) ReflectionHacks.getPrivateStatic(AbstractCard.class, "sbuilder");
+
             if (word[0].equals("[E]")) {
                 if (currentWidth[0] + CARD_ENERGY_IMG_WIDTH > CN_DESC_BOX_WIDTH) {
                     ++numLines[0];
-                    __instance.description.add(new DescriptionLine(currentLine[0].toString(), currentWidth[0]));
-                    currentLine[0] = new StringBuilder();
+                    __instance.description.add(new DescriptionLine(sbuilderRFHacks.toString(), currentWidth[0]));
+                    sbuilderRFHacks = new StringBuilder();
                     currentWidth[0] = CARD_ENERGY_IMG_WIDTH;
-                    currentLine[0].append(" ").append(word[0]).append(" ");
+                    sbuilderRFHacks.append(" ").append(word[0]).append(" ");
                 } else {
-                    currentLine[0].append(" ").append(word[0]).append(" ");
+                    sbuilderRFHacks.append(" ").append(word[0]).append(" ");
                     currentWidth[0] += CARD_ENERGY_IMG_WIDTH;
                 }
                 word[0] = "";

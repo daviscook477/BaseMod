@@ -20,12 +20,12 @@ public class PlayerPowerTips
     private static String modName = null;
 
     @SpireInsertPatch(
-        rloc=2,
+        rloc=3,
         localvars={"p"}
     )
-    public static void Insert(AbstractCreature __instance, SpriteBatch sb, AbstractPower power)
+    public static void Insert(AbstractCreature __instance, SpriteBatch sb, AbstractPower p)
     {
-        modName = WhatMod.findModName(power.getClass());
+        modName = WhatMod.findModName(p.getClass());
     }
 
     public static PowerTip alterTip(PowerTip tip)

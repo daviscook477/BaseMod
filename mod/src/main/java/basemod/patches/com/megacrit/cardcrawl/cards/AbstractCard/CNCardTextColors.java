@@ -1,5 +1,6 @@
 package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
+import basemod.ReflectionHacks;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
@@ -19,9 +20,11 @@ import java.util.ArrayList;
 public class CNCardTextColors {
     @SpireInsertPatch(
             locator = Locator.class,
-            localvars = {"word", "currentWidth", "numLines", "currentLine", "CN_DESC_BOX_WIDTH"}
+            localvars = {"word", "currentWidth", "numLines", "CN_DESC_BOX_WIDTH"}
     )
-    public static void Insert(AbstractCard __instance, @ByRef String[] word, @ByRef float[] currentWidth, @ByRef int[] numLines, @ByRef StringBuilder[] currentLine, float CN_DESC_BOX_WIDTH) {
+    public static void Insert(AbstractCard __instance, @ByRef String[] word, @ByRef float[] currentWidth, @ByRef int[] numLines, float CN_DESC_BOX_WIDTH) {
+        StringBuilder sbuilderRFHacks = (StringBuilder) ReflectionHacks.getPrivateStatic(AbstractCard.class, "sbuilder");
+
         if (word[0].startsWith("[#") && word[0].endsWith("[]")) {
             String wordTrim = word[0].substring(9, word[0].length() - 2);
             String buffer = "一";
@@ -30,13 +33,13 @@ public class CNCardTextColors {
             float limitPlusBuffer = CN_DESC_BOX_WIDTH + bufferWidth;
             if (currentWidth[0] + wordWidth > limitPlusBuffer) {
                 ++numLines[0];
-                __instance.description.add(new DescriptionLine(currentLine[0].toString(), currentWidth[0]));
-                currentLine[0] = new StringBuilder();
+                __instance.description.add(new DescriptionLine(sbuilderRFHacks.toString(), currentWidth[0]));
+                sbuilderRFHacks = new StringBuilder();
                 currentWidth[0] = wordWidth;
-                currentLine[0].append(word[0]);
+                sbuilderRFHacks.append(word[0]);
             } else {
                 currentWidth[0] += wordWidth;
-                currentLine[0].append(word[0]);
+                sbuilderRFHacks.append(word[0]);
             }
             word[0] = "";
         }
