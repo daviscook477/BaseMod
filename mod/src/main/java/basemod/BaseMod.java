@@ -1,5 +1,7 @@
 package basemod;
 
+import basemod.customacts.CustomDungeon;
+import basemod.customacts.savefields.Breadcrumbs;
 import basemod.devcommands.ConsoleCommand;
 import basemod.abstracts.*;
 import basemod.helpers.RelicType;
@@ -371,6 +373,8 @@ public class BaseMod {
 		config = makeConfig();
 		setProperties();
 		console = new DevConsole();
+
+		Breadcrumbs.initialize();
 	}
 
 	// setupAnimationGfx -
@@ -1338,6 +1342,49 @@ public class BaseMod {
 		}
 	}
 
+
+	//Add the encounter and add it to a dungeon in one methodcall.
+	public static void addMonster(String encounterID, GetMonster monster, String dungeonID, EnemyData.MonsterType type) {
+		addMonster(encounterID, () -> new MonsterGroup(monster.get()), dungeonID, type, 1F);
+	}
+	public static void addMonster(String encounterID, GetMonster monster, String dungeonID, EnemyData.MonsterType type, float weight) {
+		addMonster(encounterID, () -> new MonsterGroup(monster.get()), dungeonID, type, weight);
+	}
+	public static void addMonster(String encounterID, String name, GetMonster monster, String dungeonID, EnemyData.MonsterType type) {
+		addMonster(encounterID, name, () -> new MonsterGroup(monster.get()), dungeonID, type, 1F);
+	}
+	public static void addMonster(String encounterID, String name, GetMonster monster, String dungeonID, EnemyData.MonsterType type, float weight) {
+		addMonster(encounterID, name, () -> new MonsterGroup(monster.get()), dungeonID, type, weight);
+	}
+	public static void addMonster(String encounterID, GetMonsterGroup group, String dungeonID, EnemyData.MonsterType type) {
+		addMonster(encounterID, autoCalculateMonsterName(group), group, dungeonID, type, 1F);
+	}
+	public static void addMonster(String encounterID, GetMonsterGroup group, String dungeonID, EnemyData.MonsterType type, float weight) {
+		addMonster(encounterID, autoCalculateMonsterName(group), group, dungeonID, type, weight);
+	}
+	public static void addMonster(String encounterID, String name, GetMonsterGroup group, String dungeonID, EnemyData.MonsterType type) {
+		addMonster(encounterID, name, group, dungeonID, type, 1F);
+	}
+	public static void addMonster(String encounterID, String name, GetMonsterGroup group, String dungeonID, EnemyData.MonsterType type, float weight) {
+		addMonster(encounterID, name, group);
+		switch(type) {
+			case WEAK:
+				addMonsterEncounter(dungeonID, new MonsterInfo(encounterID, weight));
+				break;
+			case STRONG:
+				addStrongMonsterEncounter(dungeonID, new MonsterInfo(encounterID, weight));
+				break;
+			case ELITE:
+				addEliteEncounter(dungeonID, new MonsterInfo(encounterID, weight));
+				break;
+
+			default:
+				logger.error("Invalid Enemytype for encounter \"" + encounterID + "\"");
+				break;
+		}
+	}
+
+
 	public static MonsterGroup getMonster(String encounterID) {
 		GetMonsterGroup getter = customMonsters.get(encounterID);
 		if (getter == null) {
@@ -1422,6 +1469,21 @@ public class BaseMod {
 		}
 	}
 
+	//Add the encounter and add it to a dungeon in one methodcall.
+	public static void addBoss(String dungeon, String bossID, GetMonster monster, String mapIcon, String mapIconOutline) {
+		addBoss(dungeon, bossID, () -> new MonsterGroup(monster.get()), mapIcon, mapIconOutline);
+	}
+	public static void addBoss(String dungeon, String bossID, GetMonster monster, String name, String mapIcon, String mapIconOutline) {
+		addBoss(dungeon, bossID, () -> new MonsterGroup(monster.get()), name, mapIcon, mapIconOutline);
+	}
+	public static void addBoss(String dungeon, String bossID, GetMonsterGroup group, String mapIcon, String mapIconOutline) {
+		addBoss(dungeon, bossID, group, autoCalculateMonsterName(group), mapIcon, mapIconOutline);
+	}
+	public static void addBoss(String dungeon, String bossID, GetMonsterGroup group, String name, String mapIcon, String mapIconOutline) {
+		BaseMod.addMonster(bossID, name, group);
+		addBoss(dungeon, bossID, mapIcon, mapIconOutline);
+	}
+
 	public static void addBoss(String dungeon, String bossID, String mapIcon, String mapIconOutline) {
 		if (!customBosses.containsKey(dungeon)) {
 			customBosses.put(dungeon, new ArrayList<>());
@@ -1452,6 +1514,25 @@ public class BaseMod {
 			}
 		}
 		return null;
+	}
+
+	//
+	// Acts
+	//
+
+	public static void addAct(int actnumber, CustomDungeon cd) {
+		cd.addAct(actnumber);
+	}
+	public static void addAct(String actID, CustomDungeon cd) {
+		cd.addAct(actID);
+	}
+	public static void addAct(String actID, CustomDungeon cd, boolean finalAct) {
+		cd.finalAct = finalAct;
+		cd.addAct(actID);
+	}
+	public static void addAct(int actnumber, CustomDungeon cd, boolean finalAct) {
+		cd.finalAct = finalAct;
+		cd.addAct(actnumber);
 	}
 
 	//

@@ -1,6 +1,7 @@
 package basemod.patches.com.megacrit.cardcrawl.monsters.MonsterInfo;
 
 import basemod.BaseMod;
+import basemod.customacts.CustomDungeon;
 import com.evacipated.cardcrawl.modthespire.lib.ByRef;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -18,20 +19,22 @@ public class AddCustomMonsters
 
 	public static void Prefix(@ByRef ArrayList<MonsterInfo>[] monsters)
 	{
-		++calls;
+		if(!CustomDungeon.dungeons.containsKey(AbstractDungeon.id)) {
+			++calls;
 
-		switch (calls) {
-			case 1: // Normal monsters
-				monsters[0].addAll(BaseMod.getMonsterEncounters(AbstractDungeon.id));
-				break;
-			case 2: // Strong monsters
-				monsters[0].addAll(BaseMod.getStrongMonsterEncounters(AbstractDungeon.id));
-				break;
-			case 3: // Elites
-				monsters[0].addAll(BaseMod.getEliteEncounters(AbstractDungeon.id));
-			default:
-				calls = 0;
-				break;
+			switch (calls) {
+				case 1: // Normal monsters
+					monsters[0].addAll(BaseMod.getMonsterEncounters(AbstractDungeon.id));
+					break;
+				case 2: // Strong monsters
+					monsters[0].addAll(BaseMod.getStrongMonsterEncounters(AbstractDungeon.id));
+					break;
+				case 3: // Elites
+					monsters[0].addAll(BaseMod.getEliteEncounters(AbstractDungeon.id));
+				default:
+					calls = 0;
+					break;
+			}
 		}
 	}
 }

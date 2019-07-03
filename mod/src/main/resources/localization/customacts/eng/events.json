@@ -1,0 +1,12 @@
+{
+  "basemod:ForkInTheRoad": {
+    "NAME": "Fork in the Road",
+    "DESCRIPTIONS": [
+      "You ascend further. NL There is a junction in the path ahead. NL You consider your options."
+    ],
+    "OPTIONS": [
+      "[Go Somewhere] Choose randomly.",
+      "Approach the Heart"
+    ]
+  }
+}
