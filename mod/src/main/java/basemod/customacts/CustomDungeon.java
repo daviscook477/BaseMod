@@ -242,20 +242,19 @@ public abstract class CustomDungeon extends AbstractDungeon {
 
     @Override
     protected void generateWeakEnemies(int count) {
-        this.handleEnemyList(BaseMod.getMonsterEncounters(this.id), count, false, false);
+        this.handleEnemyList(count, false, false);
     }
     @Override
     protected void generateStrongEnemies(int count) {
-        this.handleEnemyList(BaseMod.getStrongMonsterEncounters(this.id), count, true, false);
+        this.handleEnemyList(count, true, false);
     }
     @Override
     protected void generateElites(int count) {
-        this.handleEnemyList(BaseMod.getEliteEncounters(this.id), count, false, true);
+        this.handleEnemyList(count, false, true);
     }
 
-    private void handleEnemyList(List<MonsterInfo> registered, int count, boolean strong, boolean elites) {
+    private void handleEnemyList(int count, boolean strong, boolean elites) {
         ArrayList<MonsterInfo> monsters = new ArrayList<>();
-        monsters.addAll(registered);
         MonsterInfo.normalizeWeights(monsters);
         if(strong) {
             populateFirstStrongEnemy(monsters, generateExclusions());

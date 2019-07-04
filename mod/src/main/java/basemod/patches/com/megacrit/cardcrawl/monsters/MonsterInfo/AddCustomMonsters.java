@@ -19,22 +19,20 @@ public class AddCustomMonsters
 
 	public static void Prefix(@ByRef ArrayList<MonsterInfo>[] monsters)
 	{
-		if(!CustomDungeon.dungeons.containsKey(AbstractDungeon.id)) {
-			++calls;
+		++calls;
 
-			switch (calls) {
-				case 1: // Normal monsters
-					monsters[0].addAll(BaseMod.getMonsterEncounters(AbstractDungeon.id));
-					break;
-				case 2: // Strong monsters
-					monsters[0].addAll(BaseMod.getStrongMonsterEncounters(AbstractDungeon.id));
-					break;
-				case 3: // Elites
-					monsters[0].addAll(BaseMod.getEliteEncounters(AbstractDungeon.id));
-				default:
-					calls = 0;
-					break;
-			}
+		switch (calls) {
+			case 1: // Normal monsters
+				monsters[0].addAll(BaseMod.getMonsterEncounters(AbstractDungeon.id));
+				break;
+			case 2: // Strong monsters
+				monsters[0].addAll(BaseMod.getStrongMonsterEncounters(AbstractDungeon.id));
+				break;
+			case 3: // Elites
+				monsters[0].addAll(BaseMod.getEliteEncounters(AbstractDungeon.id));
+			default:
+				calls = 0;
+				break;
 		}
 	}
 }
