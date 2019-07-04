@@ -10,6 +10,7 @@ import com.megacrit.cardcrawl.events.AbstractImageEvent;
 import com.megacrit.cardcrawl.events.GenericEventDialog;
 import com.megacrit.cardcrawl.localization.EventStrings;
 import com.megacrit.cardcrawl.neow.NeowRoom;
+import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.ui.buttons.ProceedButton;
 
 import java.util.ArrayList;
@@ -124,6 +125,8 @@ public class ForkEvent extends AbstractImageEvent {
         }
         GenericEventDialog.hide();
 
+        CardCrawlGame.mode = CardCrawlGame.GameMode.GAMEPLAY;
+        AbstractDungeon.getCurrRoom().phase = AbstractRoom.RoomPhase.COMPLETE;
         AbstractDungeon.fadeOut();
         AbstractDungeon.isDungeonBeaten = true;
     }
