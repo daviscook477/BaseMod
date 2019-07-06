@@ -1,9 +1,8 @@
 package basemod;
 
+import basemod.abstracts.*;
 import basemod.customacts.CustomDungeon;
 import basemod.customacts.savefields.Breadcrumbs;
-import basemod.devcommands.ConsoleCommand;
-import basemod.abstracts.*;
 import basemod.helpers.RelicType;
 import basemod.helpers.dynamicvariables.BlockVariable;
 import basemod.helpers.dynamicvariables.DamageVariable;
@@ -1521,10 +1520,10 @@ public class BaseMod {
 	//
 
 	public static void addAct(int actnumber, CustomDungeon cd) {
-		cd.addAct(actnumber);
+		addAct(actnumber, cd, false);
 	}
 	public static void addAct(String actID, CustomDungeon cd) {
-		cd.addAct(actID);
+		addAct(actID, cd, false);
 	}
 	public static void addAct(String actID, CustomDungeon cd, boolean finalAct) {
 		cd.finalAct = finalAct;

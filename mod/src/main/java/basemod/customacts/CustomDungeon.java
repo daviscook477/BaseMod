@@ -20,7 +20,6 @@ import com.megacrit.cardcrawl.scenes.AbstractScene;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public abstract class CustomDungeon extends AbstractDungeon {
@@ -341,7 +340,7 @@ public abstract class CustomDungeon extends AbstractDungeon {
                 actnumbers.get(actReplacement).add(cd.id);
             }
             dungeons.put(cd.id, cd);
-            ActCommand.addAct(cd.ID, actReplacement);
+            ActCommand.addAct(cd.id, actReplacement);
             BaseMod.logger.error("Act \"" + cd.id + "\" registered as act " + actReplacement);
         } else {
             BaseMod.logger.error("Act \"" + cd.id + "\" already present.");
