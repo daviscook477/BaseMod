@@ -152,6 +152,10 @@ public abstract class CustomDungeon extends AbstractDungeon {
         miscRng = new com.megacrit.cardcrawl.random.Random(Settings.seed + saveFile.floor_num);
         firstRoomChosen = true;
 
+        if(AbstractDungeon.lastCombatMetricKey == null) {
+            AbstractDungeon.lastCombatMetricKey = "";
+        }
+
         populatePathTaken(saveFile);
     }
     private void setupMisc(CustomDungeon cd, int actNum) {
@@ -166,7 +170,7 @@ public abstract class CustomDungeon extends AbstractDungeon {
         AbstractDungeon.eventBackgroundImg = ImageMaster.loadImage(cd.eventImg);
         initializeLevelSpecificChances();
         mapRng = new com.megacrit.cardcrawl.random.Random(Settings.seed + actNum * 100);
-        generateMap();
+        generateSpecialMap();
 
         if(cd.mainmusic != null) {
             CardCrawlGame.music.changeBGM(cd.id);
@@ -186,6 +190,10 @@ public abstract class CustomDungeon extends AbstractDungeon {
                     break;
             }
         }
+    }
+
+    protected void generateSpecialMap() {
+        generateMap();
     }
 
     //Use of Reflection allows for instantiation, only requiring the 3 simple, mandatory constructors.
