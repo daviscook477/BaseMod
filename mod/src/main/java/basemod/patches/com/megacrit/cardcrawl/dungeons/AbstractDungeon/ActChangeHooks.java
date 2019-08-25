@@ -1,6 +1,7 @@
 package basemod.patches.com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 
 import basemod.BaseMod;
+import basemod.customacts.CustomDungeon;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -25,10 +26,12 @@ public class ActChangeHooks {
 		
 		public static void Postfix(AbstractDungeon __instance,
 								   String name, String levelId, AbstractPlayer p, ArrayList<String> newSpecialOneTimeEventList) {
-			if (levelId.equals(Exordium.ID) && AbstractDungeon.floorNum == 0) {
-				BaseMod.publishStartGame();
+			if(!(__instance instanceof CustomDungeon && p == null)) {
+				if (levelId.equals(Exordium.ID) && AbstractDungeon.floorNum == 0) {
+					BaseMod.publishStartGame();
+				}
+				BaseMod.publishStartAct();
 			}
-			BaseMod.publishStartAct();
 		}
 		
 	}
