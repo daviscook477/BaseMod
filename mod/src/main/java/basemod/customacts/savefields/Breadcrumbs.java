@@ -2,7 +2,6 @@ package basemod.customacts.savefields;
 
 import basemod.BaseMod;
 import basemod.abstracts.CustomSavable;
-import basemod.customacts.event.ForkEvent;
 import basemod.interfaces.EditStringsSubscriber;
 import basemod.interfaces.PostInitializeSubscriber;
 import basemod.interfaces.StartActSubscriber;
@@ -31,7 +30,6 @@ public class Breadcrumbs implements CustomSavable<Map<Integer, String>>,
 
     @Override
     public void receivePostInitialize() {
-        BaseMod.addEvent(ForkEvent.ID, ForkEvent.class);
         BaseMod.addSaveField("ActLikeIt:breadCrumbs", bc);
 
         ElitesSlain.initialize(); //Doing this means I don't have to subscribe ElitesSlain to BaseMod.
