@@ -1,8 +1,11 @@
 package basemod.customacts;
 
 import basemod.BaseMod;
+import basemod.ReflectionHacks;
 import basemod.devcommands.act.ActCommand;
 import com.badlogic.gdx.graphics.Color;
+import com.megacrit.cardcrawl.audio.MainMusic;
+import com.megacrit.cardcrawl.audio.MusicMaster;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
@@ -172,6 +175,10 @@ public abstract class CustomDungeon extends AbstractDungeon {
         mapRng = new com.megacrit.cardcrawl.random.Random(Settings.seed + actNum * 100);
         generateSpecialMap();
 
+        ArrayList<MainMusic> tracks = (ArrayList) ReflectionHacks.getPrivate(CardCrawlGame.music, MusicMaster.class, "mainTrack");
+        for(final MainMusic t : tracks) {
+            t.kill();
+        }
         if(cd.mainmusic != null) {
             CardCrawlGame.music.changeBGM(cd.id);
         } else {
