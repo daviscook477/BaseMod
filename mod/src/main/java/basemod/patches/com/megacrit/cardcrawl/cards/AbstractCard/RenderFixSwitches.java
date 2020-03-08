@@ -35,84 +35,24 @@ public class RenderFixSwitches
 	)
 	public static class RenderBannerSwitch
 	{
-		public static SpireReturn<?> Prefix(AbstractCard __instance, SpriteBatch sb, float drawX, float drawY, Color ___renderColor)
+		public static final Logger logger = LogManager.getLogger(BaseMod.class.getName());
+		
+		public static SpireReturn<?> Prefix(AbstractCard __instance, SpriteBatch sb, float drawX, float drawY)
 		{
-			//If it is not a custom card it cant possibly have the method getBannerSmallRegion, so use normal rendering
+			//if it is not a custom card it cant possibly have the method getBannerSmallTexture force the normal rendering
 			if (!(__instance instanceof CustomCard)) {
 				return SpireReturn.Continue();
 			}
-
+			
 			CustomCard card = (CustomCard) __instance;
-			TextureAtlas.AtlasRegion region = card.getBannerSmallRegion();
-			if (region == null) {
+			Texture texture = card.getBannerSmallTexture();
+			if (texture == null) {
 				return SpireReturn.Continue();
 			}
-
-			renderHelper(card, sb, ___renderColor, region, drawX, drawY);
-
+			
+			renderHelper(card, sb, Color.WHITE, new TextureAtlas.AtlasRegion(texture, 0, 0, texture.getWidth(), texture.getHeight()), drawX, drawY);
+			
 			return SpireReturn.Return(null);
-		}
-	}
-
-	@SpirePatch(
-			clz=AbstractCard.class,
-			method="renderPortraitFrame"
-	)
-	public static class RenderPortraitFrameSwitch
-	{
-		public static SpireReturn<?> Prefix(AbstractCard __instance, SpriteBatch sb, float x, float y, Color ___renderColor)
-		{
-			//If it's not a CustomCard, no custom rendering
-			if (!(__instance instanceof CustomCard)) {
-				return SpireReturn.Continue();
-			}
-
-			CustomCard card = (CustomCard) __instance;
-
-			if (card.frameSmallRegion != null) //Does it have a custom frame?
-			{
-				renderHelper(card, sb, ___renderColor, card.frameSmallRegion, x, y);
-
-				if (card.frameMiddleRegion != null) //Does it have dynamic frame parts?
-				{
-					float tWidth = 0;
-					float tOffset = 0;
-
-					switch (card.type)
-					{
-						case ATTACK:
-							tWidth = AbstractCard.typeWidthAttack;
-							tOffset = AbstractCard.typeOffsetAttack;
-							break;
-						case SKILL:
-							tWidth = AbstractCard.typeWidthSkill;
-							tOffset = AbstractCard.typeOffsetSkill;
-							break;
-						case POWER:
-							tWidth = AbstractCard.typeWidthPower;
-							tOffset = AbstractCard.typeOffsetPower;
-							break;
-						case STATUS:
-							tWidth = AbstractCard.typeWidthStatus;
-							tOffset = AbstractCard.typeOffsetStatus;
-							break;
-						case CURSE:
-							tWidth = AbstractCard.typeWidthCurse;
-							tOffset = AbstractCard.typeOffsetCurse;
-							break;
-					}
-
-					if (tWidth > 1.1f)
-					{
-						dynamicFrameRenderHelper(sb, ImageMaster.CARD_COMMON_FRAME_MID, x, y, 0.0F, __instance.drawScale, __instance.angle, tWidth);
-						dynamicFrameRenderHelper(sb, ImageMaster.CARD_COMMON_FRAME_LEFT, x, y, -tOffset, __instance.drawScale, __instance.angle, 1.0F);
-						dynamicFrameRenderHelper(sb, ImageMaster.CARD_COMMON_FRAME_RIGHT, x, y, tOffset, __instance.drawScale, __instance.angle, 1.0F);
-					}
-				}
-				return SpireReturn.Return(null);
-			}
-
-			return SpireReturn.Continue();
 		}
 	}
 	
@@ -209,8 +149,7 @@ public class RenderFixSwitches
 			}
 		}
 	}
-
-	//As far as I can tell, this method isn't actually used anymore, but the old version would attempt to render a null texture if it ever was called, so I decided to clean it up anyways.
+	
 	@SpirePatch(
 			clz=AbstractCard.class,
 			method="renderOuterGlow"
@@ -220,14 +159,37 @@ public class RenderFixSwitches
 		public static final Logger logger = LogManager.getLogger(BaseMod.class.getName());
 		
 		@SpireInsertPatch(rloc = 9)
-		public static void Insert(AbstractCard __instance, SpriteBatch sb, float ___current_x, float ___current_y, Color ___tintColor)
+		public static void Insert(Object __obj_instance, Object sbObj)
 		{
-			if (!BaseMod.isBaseGameCardColor(__instance.color)) {
-				Color glowColor = BaseMod.getGlowColor(__instance.color);
+			AbstractCard card = (AbstractCard) __obj_instance;
+			CardColor color = card.color;
+			SpriteBatch sb = (SpriteBatch) sbObj;
+			if (!BaseMod.isBaseGameCardColor(color)) {
+				Color glowColor = BaseMod.getGlowColor(color);
 				if (glowColor == null) {
 					glowColor = Color.WHITE;
 				}
-				renderHelper(__instance, sb, glowColor, __instance.getCardBgAtlas(), ___current_x - 256.0f, ___current_y - 256.0f, 1.0F + ___tintColor.a / 5.0f);
+				try {
+					// use reflection hacks to invoke renderHelper (with float scale)
+					Field current_x;
+					current_x = AbstractCard.class.getDeclaredField("current_x");
+					current_x.setAccessible(true);
+					Field current_y;
+					current_y = AbstractCard.class.getDeclaredField("current_y");
+					current_y.setAccessible(true);
+					Field tintColor;
+					tintColor = AbstractCard.class.getDeclaredField("tintColor");
+					tintColor.setAccessible(true);
+					Method renderHelperMethod = AbstractCard.class.getDeclaredMethod("renderHelper", SpriteBatch.class,
+							Color.class, Texture.class, float.class, float.class, float.class);
+					renderHelperMethod.setAccessible(true);
+					renderHelperMethod.invoke(card, sb, glowColor, card.getCardBg(),
+							((Float)current_x.get(card)) - 256.0f, ((Float)current_y.get(card)) - 256.0f, 1.0F + ((Color)tintColor.get(card)).a / 5.0f);
+				} catch (Exception e) {
+					logger.error("could not render outer glow for card " + card.getClass().toString() + " with color " + color.toString());
+					logger.error("with exception: " + e.getMessage());
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -238,7 +200,7 @@ public class RenderFixSwitches
 	)
 	public static class RenderBgSwitch
 	{
-		public static SpireReturn<?> Prefix(AbstractCard __instance, SpriteBatch sb, float xPos, float yPos, Color ___renderColor)
+		public static SpireReturn<?> Prefix(AbstractCard __instance, SpriteBatch sb, float xPos, float yPos)
 		{
 			if (!(__instance instanceof CustomCard)
 					|| BaseMod.isBaseGameCardColor(__instance.color)
@@ -249,36 +211,33 @@ public class RenderFixSwitches
 			CustomCard card = (CustomCard) __instance;
 			Texture texture = null;
 			TextureAtlas.AtlasRegion region = null;
-
-
+			
+			switch (card.type) {
+			case POWER:
+				if (BaseMod.getPowerBgTexture(color) == null) {
+					BaseMod.savePowerBgTexture(color, ImageMaster.loadImage(BaseMod.getPowerBg(color)));
+				}
+				texture = BaseMod.getPowerBgTexture(color);
+				break;
+			case ATTACK:
+				if (BaseMod.getAttackBgTexture(color) == null) {
+					BaseMod.saveAttackBgTexture(color, ImageMaster.loadImage(BaseMod.getAttackBg(color)));
+				}
+				texture = BaseMod.getAttackBgTexture(color);
+				break;
+			case SKILL:
+				if (BaseMod.getSkillBgTexture(color) == null) {
+					BaseMod.saveSkillBgTexture(color, ImageMaster.loadImage(BaseMod.getSkillBg(color)));
+				}
+				texture = BaseMod.getSkillBgTexture(color);
+				break;
+			default:
+				region = ImageMaster.CARD_SKILL_BG_BLACK;
+				break;
+			}
+			
 			if (card.textureBackgroundSmallImg != null && !card.textureBackgroundSmallImg.isEmpty()) {
 				texture = card.getBackgroundSmallTexture();
-			}
-			else
-			{
-				switch (card.type) {
-					case POWER:
-						if (BaseMod.getPowerBgTexture(color) == null) {
-							BaseMod.savePowerBgTexture(color, ImageMaster.loadImage(BaseMod.getPowerBg(color)));
-						}
-						texture = BaseMod.getPowerBgTexture(color);
-						break;
-					case ATTACK:
-						if (BaseMod.getAttackBgTexture(color) == null) {
-							BaseMod.saveAttackBgTexture(color, ImageMaster.loadImage(BaseMod.getAttackBg(color)));
-						}
-						texture = BaseMod.getAttackBgTexture(color);
-						break;
-					case SKILL:
-						if (BaseMod.getSkillBgTexture(color) == null) {
-							BaseMod.saveSkillBgTexture(color, ImageMaster.loadImage(BaseMod.getSkillBg(color)));
-						}
-						texture = BaseMod.getSkillBgTexture(color);
-						break;
-					default:
-						region = ImageMaster.CARD_SKILL_BG_BLACK;
-						break;
-				}
 			}
 
 			if (texture != null) {
@@ -290,50 +249,51 @@ public class RenderFixSwitches
 				return SpireReturn.Continue();
 			}
 			
-			renderHelper(card, sb, ___renderColor, region, xPos, yPos);
+			renderHelper(card, sb, Color.WHITE, region, xPos, yPos);
 			
 			return SpireReturn.Return(null);
 		}
 	}
-
-
-	//renderHelper usability
-	private static Method renderHelperMethod;
-	private static Method renderHelperMethodWithScale;
-
-	static
-	{
-		try
-		{
-			renderHelperMethod = AbstractCard.class.getDeclaredMethod("renderHelper", SpriteBatch.class, Color.class, TextureAtlas.AtlasRegion.class, float.class, float.class);
-			renderHelperMethod.setAccessible(true);
-			renderHelperMethodWithScale = AbstractCard.class.getDeclaredMethod("renderHelper", SpriteBatch.class, Color.class, TextureAtlas.AtlasRegion.class, float.class, float.class, float.class);
-			renderHelperMethodWithScale.setAccessible(true);
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		}
-	}
-
+	
 	private static void renderHelper(AbstractCard card, SpriteBatch sb, Color color, TextureAtlas.AtlasRegion region, float xPos, float yPos)
 	{
 		try {
 			// use reflection hacks to invoke renderHelper (without float scale)
-			renderHelperMethod.invoke(card, sb, color, region, xPos, yPos);
-		} catch (IllegalAccessException | IllegalArgumentException | SecurityException | InvocationTargetException e) {
+			Method renderHelperMethod;
+			Field renderColorField; 
+			
+			
+			renderHelperMethod = SuperclassFinder.getSuperClassMethod(card.getClass(), "renderHelper", SpriteBatch.class, Color.class, TextureAtlas.AtlasRegion.class, float.class, float.class);
+			renderHelperMethod.setAccessible(true);
+			renderColorField = SuperclassFinder.getSuperclassField(card.getClass(), "renderColor");
+			renderColorField.setAccessible(true);
+			
+				
+			Color renderColor = (Color) renderColorField.get(card);
+			renderHelperMethod.invoke(card, sb, renderColor, region, xPos, yPos);
+		} catch (IllegalAccessException | IllegalArgumentException | NoSuchFieldException | NoSuchMethodException | InvocationTargetException | SecurityException e) {
 			e.printStackTrace();
 		}
 	}
-	private static void renderHelper(AbstractCard card, SpriteBatch sb, Color color, TextureAtlas.AtlasRegion region, float xPos, float yPos, float scale)
+	
+	private static void renderHelper(AbstractCard card, SpriteBatch sb, Color color, Texture texture, float xPos, float yPos, float scale)
 	{
 		try {
 			// use reflection hacks to invoke renderHelper (without float scale)
-			renderHelperMethodWithScale.invoke(card, sb, color, region, xPos, yPos, scale);
-		} catch (IllegalAccessException | IllegalArgumentException | SecurityException | InvocationTargetException e) {
+			Method renderHelperMethod;
+			Field renderColorField; 
+			
+			
+			renderHelperMethod = SuperclassFinder.getSuperClassMethod(card.getClass(), "renderHelper", SpriteBatch.class, Color.class, Texture.class, float.class, float.class, float.class);
+			renderHelperMethod.setAccessible(true);
+			renderColorField = SuperclassFinder.getSuperclassField(card.getClass(), "renderColor");
+			renderColorField.setAccessible(true);
+			
+				
+			Color renderColor = (Color) renderColorField.get(card);
+			renderHelperMethod.invoke(card, sb, renderColor, texture, xPos, yPos);
+		} catch (IllegalAccessException | IllegalArgumentException | NoSuchFieldException | NoSuchMethodException | InvocationTargetException | SecurityException e) {
 			e.printStackTrace();
 		}
-	}
-
-	private static void dynamicFrameRenderHelper(SpriteBatch sb, TextureAtlas.AtlasRegion img, float x, float y, float xOffset, float drawScale, float angle, float xScale) {
-		sb.draw(img, x + img.offsetX - (float)img.originalWidth / 2.0F + xOffset * drawScale, y + img.offsetY - (float)img.originalHeight / 2.0F, (float)img.originalWidth / 2.0F - img.offsetX, (float)img.originalHeight / 2.0F - img.offsetY, (float)img.packedWidth, (float)img.packedHeight, drawScale * Settings.scale * xScale, drawScale * Settings.scale, angle);
 	}
 }

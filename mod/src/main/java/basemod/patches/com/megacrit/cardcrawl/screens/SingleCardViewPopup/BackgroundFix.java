@@ -152,4 +152,36 @@ public class BackgroundFix
 			return new TextureAtlas.AtlasRegion(texture, 0, 0, texture.getWidth(), texture.getHeight());
 		}
 	}
+	
+	@SpirePatch(
+			clz=SingleCardViewPopup.class,
+			method="renderCardBanner"
+	)
+	public static class BannerTexture
+	{
+		@SpireInsertPatch(
+				locator=Locator.class,
+				localvars={"card", "tmpImg"}
+		)
+		public static void Insert(SingleCardViewPopup __instance, SpriteBatch sb, AbstractCard card, @ByRef TextureAtlas.AtlasRegion[] tmpImg)
+		{
+			if (card instanceof CustomCard) {
+				Texture bannerTexture = ((CustomCard)card).getBannerLargeTexture();
+				if (bannerTexture != null) {
+					tmpImg[0] = new TextureAtlas.AtlasRegion(bannerTexture, 0, 0, bannerTexture.getWidth(), bannerTexture.getHeight());
+				}
+			}
+		}
+
+		private static class Locator extends SpireInsertLocator
+		{
+			@Override
+			public int[] Locate(CtBehavior ctBehavior) throws Exception
+			{
+				Matcher matcher = new Matcher.MethodCallMatcher(SingleCardViewPopup.class, "renderHelper");
+				int[] found = LineFinder.findInOrder(ctBehavior, matcher);
+				return new int[]{found[0]-1};
+			}
+		}
+	}
 }

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class CustomCard extends AbstractCard {
+	
 	public static HashMap<String, Texture> imgMap;
 	
 	public static final String PORTRAIT_ENDING = "_p";
@@ -66,21 +67,6 @@ public abstract class CustomCard extends AbstractCard {
 	public String textureBackgroundLargeImg = null;
 	public String textureBannerSmallImg = null;
 	public String textureBannerLargeImg = null;
-
-	public AtlasRegion bannerSmallRegion = null;
-	public AtlasRegion bannerLargeRegion = null;
-
-	public AtlasRegion frameSmallRegion = null;
-	public AtlasRegion frameLargeRegion = null;
-
-	//dynamic frame parts
-	public AtlasRegion frameMiddleRegion = null;
-	public AtlasRegion frameLeftRegion = null;
-	public AtlasRegion frameRightRegion = null;
-
-	public AtlasRegion frameMiddleLargeRegion = null;
-	public AtlasRegion frameLeftLargeRegion = null;
-	public AtlasRegion frameRightLargeRegion = null;
 
 	private static Map<Class<? extends CustomCard>, BitmapFont> titleFontMap = new HashMap<>();
 
@@ -143,6 +129,7 @@ public abstract class CustomCard extends AbstractCard {
 		
 		return getTextureFromString(textureBackgroundSmallImg);
 	}
+	
 	public Texture getBackgroundLargeTexture() {
 		if (textureBackgroundLargeImg == null) {
 			switch (this.type) {
@@ -157,6 +144,7 @@ public abstract class CustomCard extends AbstractCard {
 		
 		return getTextureFromString(textureBackgroundLargeImg);
 	}
+	
 	public void setBackgroundTexture(String backgroundSmallImg, String backgroundLargeImg) {
 		this.textureBackgroundSmallImg = backgroundSmallImg;
 		this.textureBackgroundLargeImg = backgroundLargeImg;
@@ -168,181 +156,29 @@ public abstract class CustomCard extends AbstractCard {
 	//
 	// per card banner functionality
 	//
+	
 	public Texture getBannerSmallTexture() {
-		if (textureBannerSmallImg == null) {
+		if(textureBannerSmallImg == null) {
 			return null;
 		}
 		
 		return getTextureFromString(textureBannerSmallImg);
 	}
+	
 	public Texture getBannerLargeTexture() {
-		if (textureBannerLargeImg == null) {
+		if(textureBannerLargeImg == null) {
 			return null;
 		}
 		
 		return getTextureFromString(textureBannerLargeImg);
 	}
-
-	//Region versions, to make it easier to use basegame regions defined in ImageMaster
-	public AtlasRegion getBannerSmallRegion() {
-		if (bannerSmallRegion == null && textureBannerSmallImg != null)
-		{
-			Texture t = getBannerSmallTexture();
-			bannerSmallRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-		}
-		return bannerSmallRegion;
-	}
-	public AtlasRegion getBannerLargeRegion() {
-		if (bannerLargeRegion == null && textureBannerLargeImg != null)
-		{
-			Texture t = getBannerLargeTexture();
-			bannerLargeRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-		}
-		return bannerLargeRegion;
-	}
-
+	
 	public void setBannerTexture(String bannerSmallImg, String bannerLargeImg) {
 		this.textureBannerSmallImg = bannerSmallImg;
 		this.textureBannerLargeImg = bannerLargeImg;
 		
 		loadTextureFromString(bannerSmallImg);
 		loadTextureFromString(bannerLargeImg);
-
-		Texture t = getBannerSmallTexture();
-		this.bannerSmallRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-		t = getBannerLargeTexture();
-		this.bannerLargeRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-	}
-	public void setPortraitTextures(String cardFrameSmall, String cardFrameLarge)
-	{
-		loadTextureFromString(cardFrameSmall);
-		loadTextureFromString(cardFrameLarge);
-
-		Texture t = getTextureFromString(cardFrameSmall);
-		this.frameSmallRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-		t = getTextureFromString(cardFrameLarge);
-		this.frameLargeRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-	}
-	public void setPortraitTextures(String cardFrameSmall, String cardFrameLarge, String dynamicLeftFrame, String dynamicMiddleFrame, String dynamicRightFrame, String dynamicLeftFrameLarge, String dynamicMiddleFrameLarge, String dynamicRightFrameLarge)
-	{
-		loadTextureFromString(cardFrameSmall);
-		loadTextureFromString(cardFrameLarge);
-		loadTextureFromString(dynamicLeftFrame);
-		loadTextureFromString(dynamicMiddleFrame);
-		loadTextureFromString(dynamicRightFrame);
-		loadTextureFromString(dynamicLeftFrameLarge);
-		loadTextureFromString(dynamicMiddleFrameLarge);
-		loadTextureFromString(dynamicRightFrameLarge);
-
-		Texture t = getTextureFromString(cardFrameSmall);
-		this.frameSmallRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-		t = getTextureFromString(cardFrameLarge);
-		this.frameLargeRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-		t = getTextureFromString(dynamicLeftFrame);
-		this.frameLeftRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-		t = getTextureFromString(dynamicMiddleFrame);
-		this.frameMiddleRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-		t = getTextureFromString(dynamicRightFrame);
-		this.frameRightRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-		t = getTextureFromString(dynamicLeftFrameLarge);
-		this.frameLeftLargeRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-		t = getTextureFromString(dynamicMiddleFrameLarge);
-		this.frameMiddleLargeRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-		t = getTextureFromString(dynamicRightFrameLarge);
-		this.frameRightLargeRegion = new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-	}
-
-	public void setDisplayRarity(CardRarity rarity)
-	{
-		switch (rarity)
-		{
-			case BASIC:
-			case CURSE:
-			case SPECIAL:
-			case COMMON:
-				this.bannerSmallRegion = ImageMaster.CARD_BANNER_COMMON;
-				this.bannerLargeRegion = ImageMaster.CARD_BANNER_COMMON_L;
-
-				switch (type)
-				{
-					case ATTACK:
-						this.frameSmallRegion = ImageMaster.CARD_FRAME_ATTACK_COMMON;
-						this.frameLargeRegion = ImageMaster.CARD_FRAME_ATTACK_COMMON_L;
-						break;
-					case POWER:
-						this.frameSmallRegion = ImageMaster.CARD_FRAME_POWER_COMMON;
-						this.frameLargeRegion = ImageMaster.CARD_FRAME_POWER_COMMON_L;
-						break;
-					default:
-						this.frameSmallRegion = ImageMaster.CARD_FRAME_SKILL_COMMON;
-						this.frameLargeRegion = ImageMaster.CARD_FRAME_SKILL_COMMON_L;
-						break;
-				}
-				this.frameMiddleRegion = ImageMaster.CARD_COMMON_FRAME_MID;
-				this.frameLeftRegion = ImageMaster.CARD_COMMON_FRAME_LEFT;
-				this.frameRightRegion = ImageMaster.CARD_COMMON_FRAME_RIGHT;
-
-				this.frameMiddleLargeRegion = ImageMaster.CARD_COMMON_FRAME_MID_L;
-				this.frameLeftLargeRegion = ImageMaster.CARD_COMMON_FRAME_LEFT_L;
-				this.frameRightLargeRegion = ImageMaster.CARD_COMMON_FRAME_RIGHT_L;
-				break;
-			case UNCOMMON:
-				this.bannerSmallRegion = ImageMaster.CARD_BANNER_UNCOMMON;
-				this.bannerLargeRegion = ImageMaster.CARD_BANNER_UNCOMMON_L;
-
-				switch (type)
-				{
-					case ATTACK:
-						this.frameSmallRegion = ImageMaster.CARD_FRAME_ATTACK_UNCOMMON;
-						this.frameLargeRegion = ImageMaster.CARD_FRAME_ATTACK_UNCOMMON_L;
-						break;
-					case POWER:
-						this.frameSmallRegion = ImageMaster.CARD_FRAME_POWER_UNCOMMON;
-						this.frameLargeRegion = ImageMaster.CARD_FRAME_POWER_UNCOMMON_L;
-						break;
-					default:
-						this.frameSmallRegion = ImageMaster.CARD_FRAME_SKILL_UNCOMMON;
-						this.frameLargeRegion = ImageMaster.CARD_FRAME_SKILL_UNCOMMON_L;
-						break;
-				}
-				this.frameMiddleRegion = ImageMaster.CARD_UNCOMMON_FRAME_MID;
-				this.frameLeftRegion = ImageMaster.CARD_UNCOMMON_FRAME_LEFT;
-				this.frameRightRegion = ImageMaster.CARD_UNCOMMON_FRAME_RIGHT;
-
-				this.frameMiddleLargeRegion = ImageMaster.CARD_UNCOMMON_FRAME_MID_L;
-				this.frameLeftLargeRegion = ImageMaster.CARD_UNCOMMON_FRAME_LEFT_L;
-				this.frameRightLargeRegion = ImageMaster.CARD_UNCOMMON_FRAME_RIGHT_L;
-				break;
-			case RARE:
-				this.bannerSmallRegion = ImageMaster.CARD_BANNER_RARE;
-				this.bannerLargeRegion = ImageMaster.CARD_BANNER_RARE_L;
-
-				switch (type)
-				{
-					case ATTACK:
-						this.frameSmallRegion = ImageMaster.CARD_FRAME_ATTACK_RARE;
-						this.frameLargeRegion = ImageMaster.CARD_FRAME_ATTACK_RARE_L;
-						break;
-					case POWER:
-						this.frameSmallRegion = ImageMaster.CARD_FRAME_POWER_RARE;
-						this.frameLargeRegion = ImageMaster.CARD_FRAME_POWER_RARE_L;
-						break;
-					default:
-						this.frameSmallRegion = ImageMaster.CARD_FRAME_SKILL_RARE;
-						this.frameLargeRegion = ImageMaster.CARD_FRAME_SKILL_RARE_L;
-						break;
-				}
-				this.frameMiddleRegion = ImageMaster.CARD_RARE_FRAME_MID;
-				this.frameLeftRegion = ImageMaster.CARD_RARE_FRAME_LEFT;
-				this.frameRightRegion = ImageMaster.CARD_RARE_FRAME_RIGHT;
-
-				this.frameMiddleLargeRegion = ImageMaster.CARD_RARE_FRAME_MID_L;
-				this.frameLeftLargeRegion = ImageMaster.CARD_RARE_FRAME_LEFT_L;
-				this.frameRightLargeRegion = ImageMaster.CARD_RARE_FRAME_RIGHT_L;
-				break;
-			default:
-				System.out.println("Attempted to set display rarity to an unknown rarity: " + rarity.name());
-		}
 	}
 	
 	/**
