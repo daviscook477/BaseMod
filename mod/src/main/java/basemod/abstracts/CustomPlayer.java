@@ -5,6 +5,7 @@ import basemod.animations.AbstractAnimation;
 import basemod.animations.G3DJAnimation;
 import basemod.animations.SpineAnimation;
 import basemod.interfaces.ModelRenderSubscriber;
+import basemod.patches.com.megacrit.cardcrawl.unlock.UnlockTracker.CountModdedUnlockCards;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -210,8 +211,7 @@ public abstract class CustomPlayer extends AbstractPlayer implements ModelRender
 	@Override
 	public int getUnlockedCardCount()
 	{
-		// TODO
-		return 0;
+		return CountModdedUnlockCards.getUnlockedCardCount(chosenClass);
 	}
 
 	@Override

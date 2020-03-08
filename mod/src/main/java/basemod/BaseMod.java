@@ -1,6 +1,5 @@
 package basemod;
 
-import basemod.devcommands.ConsoleCommand;
 import basemod.abstracts.*;
 import basemod.helpers.RelicType;
 import basemod.helpers.dynamicvariables.BlockVariable;
@@ -9,6 +8,7 @@ import basemod.helpers.dynamicvariables.MagicNumberVariable;
 import basemod.interfaces.*;
 import basemod.patches.com.megacrit.cardcrawl.helpers.TopPanel.TopPanelHelper;
 import basemod.patches.com.megacrit.cardcrawl.screens.select.GridCardSelectScreen.GridCardSelectScreenFields;
+import basemod.patches.com.megacrit.cardcrawl.unlock.UnlockTracker.CountModdedUnlockCards;
 import basemod.patches.whatmod.WhatMod;
 import basemod.screens.ModalChoiceScreen;
 import com.badlogic.gdx.Gdx;
@@ -66,6 +66,7 @@ import com.megacrit.cardcrawl.screens.custom.CustomModeCharacterButton;
 import com.megacrit.cardcrawl.shop.ShopScreen;
 import com.megacrit.cardcrawl.shop.StorePotion;
 import com.megacrit.cardcrawl.shop.StoreRelic;
+import com.megacrit.cardcrawl.unlock.AbstractUnlock;
 import com.megacrit.cardcrawl.unlock.UnlockTracker;
 import javafx.util.Pair;
 import javassist.ClassPool;
@@ -234,6 +235,8 @@ public class BaseMod {
 	private static HashMap<AbstractCard.CardColor, TextureAtlas.AtlasRegion> colorCardEnergyOrbAtlasRegionMap;
 
 	private static HashMap<AbstractPlayer.PlayerClass, HashMap<Integer, CustomUnlockBundle>> unlockBundles;
+	private static HashMap<AbstractPlayer.PlayerClass, ArrayList<String>> unlockCards;
+	private static HashMap<AbstractPlayer.PlayerClass, Integer> maxUnlockLevel;
 
 	private static HashMap<String, CustomSavableRaw> customSaveFields = new HashMap<>();
 
@@ -542,6 +545,8 @@ public class BaseMod {
 	// initializeUnlocks
 	private static void initializeUnlocks() {
 		unlockBundles = new HashMap<>();
+		unlockCards = new HashMap<>();
+		maxUnlockLevel = new HashMap<>();
 	}
 
 	private static void initializePotionMap() {
@@ -1581,6 +1586,25 @@ public class BaseMod {
 			HashMap<Integer, CustomUnlockBundle> bundles = unlockBundles.get(c);
 			bundles.put(unlockLevel, bundle);
 		}
+
+		if (bundle.unlockType == AbstractUnlock.UnlockType.CARD)
+		{
+			if (!unlockCards.containsKey(c))
+				unlockCards.put(c, new ArrayList<>());
+
+			for (String s : bundle.getUnlockIDs())
+			{
+				if (!unlockCards.get(c).contains(s))
+					unlockCards.get(c).add(s);
+			}
+		}
+
+		if (maxUnlockLevel.containsKey(c)) {
+			maxUnlockLevel.put(c, Math.max(maxUnlockLevel.get(c), unlockLevel));
+		}
+		else {
+			maxUnlockLevel.put(c, unlockLevel);
+		}
 	}
 
 	// remove old unlock bundle
@@ -1597,6 +1621,26 @@ public class BaseMod {
 			return null;
 		}
 		return levelMap.get(unlockLevel);
+	}
+
+	// get list of unlocks (cards)
+	public static ArrayList<String> getUnlockCards(AbstractPlayer.PlayerClass c)
+	{
+		return unlockCards.get(c);
+	}
+
+	// get the number of unlock levels for class
+	public static int getMaxUnlockLevel(AbstractPlayer p)
+	{
+		return getMaxUnlockLevel(p.chosenClass);
+	}
+
+	public static int getMaxUnlockLevel(AbstractPlayer.PlayerClass c)
+	{
+		if (maxUnlockLevel.containsKey(c)) {
+			return maxUnlockLevel.get(c);
+		}
+		return 0;
 	}
 
 	//
@@ -2486,6 +2530,10 @@ public class BaseMod {
 		for (SetUnlocksSubscriber sub : setUnlocksSubscribers) {
 			sub.receiveSetUnlocks();
 		}
+
+		CountModdedUnlockCards.enabled = true;
+		CountModdedUnlockCards.countModdedUnlocks(); //call it manually, as the count occurs during refresh normally.
+
 		unsubscribeLaterHelper(SetUnlocksSubscriber.class);
 	}
 

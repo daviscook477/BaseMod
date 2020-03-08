@@ -9,12 +9,12 @@ public class CustomUnlockBundle {
 	private ArrayList<String> unlocks;
 	private ArrayList<CustomUnlock> actualUnlocks;
 	private boolean initialized = false;
-	private AbstractUnlock.UnlockType unlockType;
+	public AbstractUnlock.UnlockType unlockType;
 
 	public CustomUnlockBundle(String unlock1, String unlock2, String unlock3) {
 		this(AbstractUnlock.UnlockType.CARD, unlock1, unlock2, unlock3);
 	}
-	
+
 	public CustomUnlockBundle(AbstractUnlock.UnlockType type, String unlock1, String unlock2, String unlock3) {
 		unlockType = type;
 		unlocks = new ArrayList<>();
@@ -33,12 +33,17 @@ public class CustomUnlockBundle {
 			UnlockTracker.addRelic(unlock3);
 		}
 	}
+
+	public ArrayList<String> getUnlockIDs()
+	{
+		return unlocks;
+	}
 	
 	public ArrayList<CustomUnlock> getUnlocks() {
 		if (!initialized) {
-			actualUnlocks.add(new CustomUnlock(unlockType, unlocks.remove(0)));
-			actualUnlocks.add(new CustomUnlock(unlockType, unlocks.remove(0)));
-			actualUnlocks.add(new CustomUnlock(unlockType, unlocks.remove(0)));
+			actualUnlocks.add(new CustomUnlock(unlockType, unlocks.get(0)));
+			actualUnlocks.add(new CustomUnlock(unlockType, unlocks.get(1)));
+			actualUnlocks.add(new CustomUnlock(unlockType, unlocks.get(2)));
 			initialized = true;
 		}
 
