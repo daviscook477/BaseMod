@@ -29,7 +29,6 @@ public class SelectCardsInHandAction
     * false for exact number
     * @param canPickZero - whether player can skip selection by picking zero cards.
     * @param cardFilter - filter that will be applied to cards in hand.
-    * @param cardFilter - Filters the cards in the group.
     * Example: if you want to display only skills, it would be c -> c.type == CardType.SKILL
     * If you don't need the filter, set it as c -> true
     * @param callback - What to do with cards selected.

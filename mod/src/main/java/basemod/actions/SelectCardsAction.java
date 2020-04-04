@@ -49,10 +49,9 @@ public class SelectCardsAction
         this.duration = this.startDuration = Settings.ACTION_DUR_XFAST;
         text = textForSelect;
         this.anyNumber = anyNumber;
-        this.predicate = cardFilter;
         this.callback = callback;
         this.selectGroup = new CardGroup(CardGroup.CardGroupType.UNSPECIFIED);
-        this.selectGroup.group.addAll(group);
+        this.selectGroup.group.addAll(group.stream().filter(cardFilter).collect(Collectors.toList()));
     }
 
     public SelectCardsAction(ArrayList<AbstractCard> group, String textForSelect, boolean anyNumber, Predicate<AbstractCard> cardFilter, Consumer<List<AbstractCard>> callback)
@@ -80,23 +79,21 @@ public class SelectCardsAction
     {
         if (this.duration == this.startDuration)
         {
-            if ((selectGroup.size() == 0) || selectGroup.group.stream().noneMatch(predicate) || callback == null)
+            if ((selectGroup.size() == 0) || callback == null)
             {
                 isDone = true;
                 return;
             }
 
-            if (selectGroup.group.stream().filter(predicate).count() <= amount && !anyNumber)
+            if (selectGroup.size() <= amount && !anyNumber)
             {
-                callback.accept(selectGroup.group.stream().filter(predicate).collect(Collectors.toList()));
+                callback.accept(selectGroup.group);
                 isDone = true;
                 return;
             }
 
-            selectGroup.group.removeIf(predicate.negate());
             AbstractDungeon.gridSelectScreen.open(selectGroup, amount, anyNumber, text);
             tickDuration();
-            return;
         }
 
         if (AbstractDungeon.gridSelectScreen.selectedCards.size() != 0)
