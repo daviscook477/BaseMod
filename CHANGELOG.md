@@ -688,3 +688,4 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 
 #### dev ####
 * Color tiny cards in Run History for modded cards (kiooeht)
+* For non-modded characters, don't give any extra orb slots on channel (wchargin)
