@@ -14,8 +14,7 @@ import com.megacrit.cardcrawl.unlock.UnlockTracker;
 import java.util.ArrayList;
 
 @SpirePatch(
-		clz=GameOverScreen.class,
-		method="calculateUnlockProgress"
+		clz=GameOverScreen.class;
 )
 public class ForceUnlock {
 	public static void Postfix(GameOverScreen __instance) {
