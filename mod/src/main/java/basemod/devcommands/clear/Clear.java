@@ -52,9 +52,7 @@ public class Clear extends ConsoleCommand {
 
     // clear command list
     private static void clearCmds() {
-        while (DevConsole.priorCommands.size() > 0) {
-            DevConsole.priorCommands.remove(0);
-        }
+        DevConsole.priorCommands.clear();
     }
 
     private static void cmdClearHelp() {

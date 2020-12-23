@@ -13,18 +13,27 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.ui.panels.EnergyPanel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class DevConsole
 implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSubscriber, PostUpdateSubscriber {
 	public static final Logger logger = LogManager.getLogger(DevConsole.class.getName());
+
+	private static final int HISTORY_SIZE = 10;
 
 	public static final float CONSOLE_X = 200.0f;
 	public static final float CONSOLE_Y = 200.0f;
@@ -53,7 +62,7 @@ implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSub
 
 	public static int priorKey = Keys.UP;
 	public static int nextKey = Keys.DOWN;
-	public static ArrayList<String> priorCommands;
+	public static PriorCommandsList priorCommands;
 	public static ArrayList<String> log;
 	public static ArrayList<Boolean> prompted;
 	public static int commandPos;
@@ -61,10 +70,10 @@ implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSub
 	public DevConsole() {
 		BaseMod.subscribe(this);
 
-		priorCommands = new ArrayList<>();
+		priorCommands = new PriorCommandsList();
 		commandPos = -1;
-		log = new ArrayList<>();
-		prompted = new ArrayList<>();
+		log = new ArrayList<>(priorCommands);
+		prompted = new ArrayList<>(Collections.nCopies(log.size(), true));
 
 		AutoComplete.init();
 
@@ -237,6 +246,52 @@ implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSub
 			if (AutoComplete.enabled) {
 				AutoComplete.suggest(false);
 			}
+		}
+	}
+
+	public static class PriorCommandsList extends ArrayList<String>
+	{
+		private static final String HISTORY_LOCATION = SpireConfig.makeFilePath(BaseModInit.MODNAME, "console-history", "txt");
+
+		public PriorCommandsList()
+		{
+			try {
+				List<String> list = Files.readAllLines(Paths.get(HISTORY_LOCATION), StandardCharsets.UTF_8);
+				addAll(list);
+			} catch (IOException e) {
+				logger.error("Failed to load dev console history: " + e);
+			}
+		}
+
+		private void saveHistory()
+		{
+			try {
+				Files.write(Paths.get(HISTORY_LOCATION), this.subList(0, Math.min(HISTORY_SIZE, size())), StandardCharsets.UTF_8);
+			} catch (IOException e) {
+				logger.error("Failed to save dev console history: " + e);
+			}
+		}
+
+		@Override
+		public boolean add(String s)
+		{
+			boolean ret = super.add(s);
+			saveHistory();
+			return ret;
+		}
+
+		@Override
+		public void add(int index, String element)
+		{
+			super.add(index, element);
+			saveHistory();
+		}
+
+		@Override
+		public void clear()
+		{
+			super.clear();
+			saveHistory();
 		}
 	}
 }

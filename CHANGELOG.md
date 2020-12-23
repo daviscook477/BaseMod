@@ -661,4 +661,94 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 * Fix SafeDamageAllEnemies crash (Alchyr)
 * Fix duplicate options when using event command (Alchyr)
 
+#### v5.20.0 ####
+* Fix scrolling tooltips in single-card view omitting some tips when many exist (dbjorge)
+* Custom card frames (Alchyr)
+* Show correct unlock stats on character select screen (Alchyr)
+* Save dev console history across game restarts (kiooeht)
+
+#### v5.20.1 ####
+* Fix crash if mods add unlocks badly (kiooeht)
+
+#### v5.21.0 ####
+* Fix hi-res relic art not being used on mod relics that have it (kiooeht)
+* Custom save fields for potions (kiooeht)
+* CardModifier (JohnnyDevo)
+
+#### v5.21.1 ####
+* Fix CustomRelic using small relic art as large relic art (kiooeht)
+* Remove broken onDiscarded CardModifier hook (JohnnyDevo)
+* Fix crash on very long card text caused by CardMod (JohnnyDevo)
+
+#### v5.22.0 ####
+* Add ModLabeledButton (LordAddy)
+* Make CardModifiers save and load on master deck (JohnnyDevo)
+* Refactor CardModifier alternate cost system (JohnnyDevo)
+* Much more options for how events spawn (Alchyr)
+
+#### v5.23.0 ####
+* Color tiny cards in Run History for modded cards (kiooeht)
+* Fix Expunger description reverting to X (kiooeht)
+* Add not-package filter for AutoAdd (BlankTheEvil)
+* Fix "Hide unnecessary unlock bar" to work on Heart kill (Celicath)
+* Change event utils default behavior to override if no type specified (Alchyr)
+* OnCreateDescriptionSubscriber (JohnnyDevo)
+* XCostModifier interface for changing X cost effect (JohnnyDevo)
+* CardModifier (JohnnyDevo)
+  * Make X costs work with alternate costs
+  * Add annotation for non-savable CardModifiers
+  * Fix save/load duplicating cardmods
+  * Fix non-splittable post-energy resources
+  * Fix hasModifier crash on modifiers without identifiers
+* Remove JavaFX dependency (kiooeht)
+
+#### v5.23.1 ####
+* Fix crash when opening the card compendium (kiooeht)
+
+#### v5.23.2 ####
+* Re-add getColor(float) to stop crash because GOG version of StS is out of date (kiooeht)
+
+#### v5.23.3 ####
+* Allow modded character card modifiers to be localized (kiooeht)
+* ZHS translation of modded character card modifiers (Rita-B)
+* Fix Discovery basegame bugs (kiooeht)
+  * Fix Discovery spamming the log and possibly lagging the game when played
+  * Fix returnTrulyRandomCardInCombat marking (almost) every card as seen
+* Make CardModifierManager.modifiers() public (kiooeht)
+* Fix Potion Lab scroll bounds (kiooeht)
+
+#### v5.24.0 ####
+* Sensory Stone event text for custom characters (kiooeht)
+* Fix upgrade count 0 in hand and deck commands not working (Celicath)
+* Fix ZHS, ZHT, and JPN not displaying color in tooltips (Celicath)
+
+#### v5.25.0 ####
+* Card descriptors (kiooeht)
+
+#### v5.26.0 ####
+* Fix Vigor gain from Attacks (kiooeht)
+* ReflectionHacks improvements (kiooeht)
+  * Change get methods to generic return types
+  * Cache Fields for faster access
+  * Javadoc comments
+  * Update setPrivateInherited to search all superclasses
+  * Add getPrivateInherited
+  * Add privateMethod
+  * Add privateStaticMethod
+* Fix modded character selection background animation (kiooeht)
+* Fix alternate card cost logic to better fit all situtations (JohnnyDevo)
+
+#### v5.27.0 ####
+* Support for Slay the Spire 11-27-2020 BETA (kiooeht)
+
+#### v5.28.0 ####
+* Add get/set X/Y methods to mod config ui elements (erasels)
+* Add ModMinMaxSlider (kiooeht/erasels)
+
+#### v5.28.1 ####
+* Fix DiscoveryAction for more than 2 copies (kiooeht)
+* Refactor CloneablePower code (Raz)
+* Add CloneablePower to base game powers introduced with v2.0 (Raz)
+* Fix crash with act command (Raz)
+
 #### dev ####

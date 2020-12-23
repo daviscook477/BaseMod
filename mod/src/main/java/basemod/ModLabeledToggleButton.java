@@ -3,7 +3,9 @@ package basemod;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.megacrit.cardcrawl.core.Settings;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 public class ModLabeledToggleButton implements IUIElement {
@@ -47,4 +49,31 @@ public class ModLabeledToggleButton implements IUIElement {
 		return ModPanel.DEFAULT_UPDATE;
 	}
 
+	@Override
+	public void set(float xPos, float yPos) {
+		toggle.set(xPos, yPos);
+		text.set(xPos + TEXT_X_OFFSET, yPos + TEXT_Y_OFFSET);
+	}
+
+	@Override
+	public void setX(float xPos) {
+		toggle.setX(xPos);
+		text.setX(xPos + TEXT_X_OFFSET);
+	}
+
+	@Override
+	public void setY(float yPos) {
+		toggle.setY(yPos);
+		text.setY(yPos + TEXT_Y_OFFSET);
+	}
+
+	@Override
+	public float getX() {
+		return toggle.getX();
+	}
+
+	@Override
+	public float getY() {
+		return toggle.getY();
+	}
 }

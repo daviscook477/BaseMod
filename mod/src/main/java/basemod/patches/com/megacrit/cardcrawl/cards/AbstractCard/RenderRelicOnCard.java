@@ -1,19 +1,19 @@
 package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
 import basemod.BaseMod;
+import basemod.Pair;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
-import javafx.util.Pair;
 
 import java.lang.reflect.Field;
 import java.util.function.Predicate;
 
 @SpirePatch(
-		cls="com.megacrit.cardcrawl.cards.AbstractCard",
+		clz=AbstractCard.class,
 		method="renderCard"
 )
 public class RenderRelicOnCard

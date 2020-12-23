@@ -58,4 +58,30 @@ public class ModLabel implements IUIElement{
 	public int updateOrder() {
 		return ModPanel.PRIORITY_UPDATE;
 	}
+
+    @Override
+    public void set(float xPos, float yPos) {
+        x = xPos*Settings.scale;
+        y = yPos*Settings.scale;
+    }
+
+    @Override
+    public void setX(float xPos) {
+        x = xPos*Settings.scale;
+    }
+
+    @Override
+    public void setY(float yPos) {
+        y = yPos*Settings.scale;
+    }
+
+    @Override
+    public float getX() {
+        return x/Settings.scale;
+    }
+
+    @Override
+    public float getY() {
+        return y/Settings.scale;
+    }
 }

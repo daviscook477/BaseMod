@@ -74,6 +74,14 @@ public class AutoAdd
 		return filter(new PackageFilter(packageClass));
 	}
 
+	public AutoAdd notPackageFilter(String packageName) {
+		return filter(new NotPackageFilter(packageName));
+	}
+
+	public AutoAdd notPackageFilter(Class<?> packageClass) {
+		return filter(new NotPackageFilter(packageClass));
+	}
+
 	public <T> Collection<CtClass> findClasses(Class<T> type)
 	{
 		try {
@@ -193,6 +201,21 @@ public class AutoAdd
 		public boolean accept(ClassInfo classInfo, ClassFinder classFinder)
 		{
 			return classInfo.getClassName().startsWith(packageName);
+		}
+	}
+
+	public static class NotPackageFilter extends PackageFilter {
+		public NotPackageFilter(String pkgName) {
+			super(pkgName);
+		}
+
+		public NotPackageFilter(Class<?> cls) {
+			super(cls);
+		}
+
+		@Override
+		public boolean accept(ClassInfo classInfo, ClassFinder classFinder) {
+			return !super.accept(classInfo, classFinder);
 		}
 	}
 }

@@ -5,6 +5,10 @@ import basemod.CustomEventRoom;
 import basemod.devcommands.ConsoleCommand;
 import basemod.DevConsole;
 import basemod.ReflectionHacks;
+import basemod.eventUtil.EventUtils;
+import com.megacrit.cardcrawl.actions.AbstractGameAction;
+import com.megacrit.cardcrawl.actions.common.DamageAllEnemiesAction;
+import com.megacrit.cardcrawl.cards.DamageInfo;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.events.AbstractImageEvent;
 import com.megacrit.cardcrawl.events.RoomEventDialog;
@@ -13,6 +17,7 @@ import com.megacrit.cardcrawl.localization.EventStrings;
 import com.megacrit.cardcrawl.localization.LocalizedStrings;
 import com.megacrit.cardcrawl.map.MapEdge;
 import com.megacrit.cardcrawl.map.MapRoomNode;
+import com.megacrit.cardcrawl.rooms.EventRoom;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +36,40 @@ public class Event extends ConsoleCommand {
     public void execute(String[] tokens, int depth) {
         if (AbstractDungeon.currMapNode == null) {
             DevConsole.log("cannot execute event when there is no map");
+            return;
+        }
+
+        if (tokens.length == 2 && tokens[1].toLowerCase().equals("random")) {
+            RoomEventDialog.optionList.clear();
+
+            MapRoomNode cur = AbstractDungeon.currMapNode;
+            MapRoomNode node = new MapRoomNode(cur.x, cur.y);
+            node.room = new EventRoom();
+
+            ArrayList<MapEdge> curEdges = cur.getEdges();
+            for (MapEdge edge : curEdges) {
+                node.addEdge(edge);
+            }
+
+            AbstractDungeon.player.releaseCard();
+            AbstractDungeon.overlayMenu.hideCombatPanels();
+            AbstractDungeon.previousScreen = null;
+            AbstractDungeon.dynamicBanner.hide();
+            AbstractDungeon.dungeonMapScreen.closeInstantly();
+            AbstractDungeon.closeCurrentScreen();
+            AbstractDungeon.topPanel.unhoverHitboxes();
+            AbstractDungeon.fadeIn();
+            AbstractDungeon.effectList.clear();
+            AbstractDungeon.topLevelEffects.clear();
+            AbstractDungeon.topLevelEffectsQueue.clear();
+            AbstractDungeon.effectsQueue.clear();
+            AbstractDungeon.dungeonMapScreen.dismissable = true;
+            AbstractDungeon.nextRoom = node;
+            AbstractDungeon.setCurrMapNode(node);
+            AbstractDungeon.getCurrRoom().onPlayerEntry();
+            AbstractDungeon.scene.nextRoom(node.room);
+            AbstractDungeon.rs = node.room.event instanceof AbstractImageEvent ? AbstractDungeon.RenderScene.EVENT : AbstractDungeon.RenderScene.NORMAL;
+
             return;
         }
 
@@ -82,15 +121,9 @@ public class Event extends ConsoleCommand {
     }
 
     public ArrayList<String> extraOptions(String[] tokens, int depth) {
-        ArrayList<String> result = new ArrayList<>();
+        ArrayList<String> result = new ArrayList<>(EventUtils.eventIDs);
 
-        Map<String, EventStrings> events = (Map<String, EventStrings>) (ReflectionHacks
-                .getPrivateStatic(LocalizedStrings.class, "events"));
-        if (events != null) {
-            for (String key : events.keySet()) {
-                result.add(key.replace(' ', '_'));
-            }
-        }
+        result.add("random");
 
         return result;
     }

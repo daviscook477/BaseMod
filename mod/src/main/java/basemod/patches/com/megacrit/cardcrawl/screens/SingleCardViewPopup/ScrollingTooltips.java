@@ -22,6 +22,7 @@ import com.megacrit.cardcrawl.screens.mainMenu.ScrollBarListener;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
 import javassist.expr.ExprEditor;
+import javassist.expr.FieldAccess;
 import javassist.expr.MethodCall;
 
 import java.lang.reflect.Field;
@@ -99,6 +100,20 @@ public class ScrollingTooltips
 
 				y[0] += Fields.scrollPosition;
 			}
+		}
+
+		// This prevents TipHelper's normal "offset" behavior by faking the screen height being too big to ever bother offsetting
+		public static ExprEditor Instrument()
+		{
+			return new ExprEditor() {
+				@Override
+				public void edit(FieldAccess f) throws CannotCompileException
+				{
+					if (f.getClassName().equals(Settings.class.getName()) && f.getFieldName().equals("HEIGHT")) {
+						f.replace("{ $_ = " + ScrollingTooltips.class.getName() + ".isScrolling() ? 1000000 : $proceed(); }");
+					}
+				}
+			};
 		}
 
 		public static void Postfix(float x, float y, SpriteBatch sb, ArrayList<PowerTip> powerTips)
@@ -216,6 +231,10 @@ public class ScrollingTooltips
 	public static class IsScrolling
 	{
 		public static StaticSpireField<Float> isScrolling = new StaticSpireField<>(() -> -1f);
+	}
+
+	public static boolean isScrolling() {
+		return IsScrolling.isScrolling.get() > 0;
 	}
 
 	@SpirePatch(

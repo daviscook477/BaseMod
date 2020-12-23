@@ -90,7 +90,7 @@ public class CustomCharacterSelectScreen extends CharacterSelectScreen {
         float offsetX = Settings.WIDTH / 2.0F - (optionsPerIndex / 2f) * 220.0F * Settings.scale + 0.5F * 220.0F * Settings.scale;
 
         for(int i = 0; i < count; ++i) {
-            this.options.get(i).move(
+            this.options.get(i).hb.move(
                     offsetX + (float)i * 220.0F * Settings.scale,
                     (Settings.isFourByThree ? 254.0F : 190.0F) * Settings.scale
             );

@@ -28,14 +28,12 @@ public abstract class CustomRelic extends AbstractRelic
 	public void setTexture(Texture t)
 	{
 		img = t;
-		largeImg = t;
 		outlineImg = t;
 	}
 
 	public void setTextureOutline(Texture t, Texture o)
 	{
 		img = t;
-		largeImg = t;
 		outlineImg = o;
 	}
 

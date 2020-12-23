@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class ModPanel {
     
@@ -138,5 +139,13 @@ public class ModPanel {
             CardCrawlGame.cancelButton.hideInstantly();
             isUp = false;
         }
+    }
+
+    public ArrayList<IUIElement> getUIElements() {
+        ArrayList<IUIElement> retVal = new ArrayList<>();
+        retVal.addAll(uiElementsRender);
+        retVal.addAll(uiElementsUpdate);
+
+        return retVal.stream().distinct().collect(Collectors.toCollection(ArrayList::new));
     }
 }

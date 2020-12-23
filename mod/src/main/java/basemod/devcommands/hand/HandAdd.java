@@ -25,7 +25,7 @@ public class HandAdd extends ConsoleCommand {
         if (c != null) {
             // card count
             int count = 1;
-            if (tokens.length > countIndex + 1 && ConvertHelper.tryParseInt(tokens[countIndex + 1], 0) != 0) {
+            if (tokens.length > countIndex + 1 && ConvertHelper.tryParseInt(tokens[countIndex + 1]) != null) {
                 count = ConvertHelper.tryParseInt(tokens[countIndex + 1], 0);
             }
 

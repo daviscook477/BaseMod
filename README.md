@@ -15,7 +15,7 @@ BaseMod provides a number of hooks and a console.
 
 ## Building ##
 1. (If you haven't already) `mvn install` ModTheSpire Altenatively, modify pom.xml to point to a local copy of the JAR.
-2. Copy `desktop-1.0.jar` from your Slay the Spire folder into `../_lib` relative to the repo.
+2. Copy `desktop-1.0.jar` from your Slay the Spire folder into `../lib` relative to the repo.
 3. Run `mvn package`
 
 ## Installation ##

@@ -1,5 +1,6 @@
 package basemod;
 
+import basemod.helpers.UIElementModificationHelper;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.megacrit.cardcrawl.core.Settings;
@@ -20,6 +21,7 @@ public class ModSlider implements IUIElement {
     private Hitbox bgHb;
     private float sliderX;
     private float handleX;
+    private float x;
     private float y;
     private boolean sliderGrabbed = false;
     private String label;
@@ -42,6 +44,7 @@ public class ModSlider implements IUIElement {
         } else {
             posX *= Settings.scale;
         }
+        x = posX;
         sliderX = posX - 11.0f * Settings.scale;
         handleX = posX + SLIDE_W;
         y = posY * Settings.scale;
@@ -133,4 +136,35 @@ public class ModSlider implements IUIElement {
 	public int updateOrder() {
 		return ModPanel.DEFAULT_UPDATE;
 	}
+
+    @Override
+    public void set(float xPos, float yPos) {
+        xPos *= Settings.scale;
+        handleX = handleX + (xPos - x);
+        x = xPos;
+        sliderX = x - 11.0f * Settings.scale;
+        y = yPos * Settings.scale;
+
+        bgHb.move(sliderX + SLIDE_W / 2.0f, y);
+    }
+
+    @Override
+    public void setX(float xPos) {
+        set(xPos, y/Settings.scale);
+    }
+
+    @Override
+    public void setY(float yPos) {
+        set(x/Settings.scale, yPos);
+    }
+
+    @Override
+    public float getX() {
+        return x/Settings.scale;
+    }
+
+    @Override
+    public float getY() {
+        return y/Settings.scale;
+    }
 }

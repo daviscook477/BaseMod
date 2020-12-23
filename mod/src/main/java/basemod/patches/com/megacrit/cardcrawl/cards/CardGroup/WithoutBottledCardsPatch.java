@@ -1,16 +1,16 @@
 package basemod.patches.com.megacrit.cardcrawl.cards.CardGroup;
 
 import basemod.BaseMod;
+import basemod.Pair;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.CardGroup;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
-import javafx.util.Pair;
 
 import java.util.function.Predicate;
 
 @SpirePatch(
-		cls="com.megacrit.cardcrawl.cards.CardGroup",
+		clz=CardGroup.class,
 		method="getGroupWithoutBottledCards"
 )
 public class WithoutBottledCardsPatch

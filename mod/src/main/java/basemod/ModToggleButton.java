@@ -1,5 +1,6 @@
 package basemod;
 
+import basemod.helpers.UIElementModificationHelper;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -13,7 +14,7 @@ import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import java.util.function.Consumer;
 
 public class ModToggleButton implements IUIElement {
-	private static final float TOGGLE_Y_DELTA = 8.0f;
+	private static final float TOGGLE_Y_DELTA = 0f;
 	private static final float TOGGLE_X_EXTEND = 12.0f;
 	private static final float HB_WIDTH_EXTENDED = 200.0f;
 	
@@ -23,6 +24,7 @@ public class ModToggleButton implements IUIElement {
 	private float y;
 	private float w;
 	private float h;
+	private boolean extendedHitbox;
 	
 	public boolean enabled;
 	public ModPanel parent;
@@ -36,6 +38,7 @@ public class ModToggleButton implements IUIElement {
 		y = yPos * Settings.scale;
 		w = ImageMaster.OPTION_TOGGLE.getWidth();
 		h = ImageMaster.OPTION_TOGGLE.getHeight();
+		this.extendedHitbox = extendedHitbox;
 		if (extendedHitbox) {
 			hb = new Hitbox(x - TOGGLE_X_EXTEND * Settings.scale,
 					y - TOGGLE_Y_DELTA * Settings.scale,
@@ -95,6 +98,10 @@ public class ModToggleButton implements IUIElement {
 		this.enabled = !enabled;
 		toggle.accept(this);
 	}
+
+	public void toggle() {
+		onToggle();
+	}
 	
 	@Override
 	public int renderLayer() {
@@ -105,5 +112,36 @@ public class ModToggleButton implements IUIElement {
 	public int updateOrder() {
 		return ModPanel.DEFAULT_UPDATE;
 	}
-	
+
+	@Override
+	public void set(float xPos, float yPos) {
+		x = xPos*Settings.scale;
+		y = yPos*Settings.scale;
+
+		if (extendedHitbox) {
+			UIElementModificationHelper.moveHitboxByOriginalParameters(hb, x - TOGGLE_X_EXTEND * Settings.scale,  y - TOGGLE_Y_DELTA * Settings.scale);
+		} else {
+			UIElementModificationHelper.moveHitboxByOriginalParameters(hb, x, y - TOGGLE_Y_DELTA * Settings.scale);
+		}
+	}
+
+	@Override
+	public void setX(float xPos) {
+		set(xPos, y/Settings.scale);
+	}
+
+	@Override
+	public void setY(float yPos) {
+		set(x/Settings.scale, yPos);
+	}
+
+	@Override
+	public float getX() {
+		return x/Settings.scale;
+	}
+
+	@Override
+	public float getY() {
+		return y/Settings.scale;
+	}
 }

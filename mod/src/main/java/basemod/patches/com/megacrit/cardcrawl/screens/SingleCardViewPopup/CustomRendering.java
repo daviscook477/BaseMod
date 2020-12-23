@@ -102,6 +102,7 @@ public class CustomRendering {
         if (img != null)
             sb.draw(img, x + img.offsetX - (float)img.originalWidth / 2.0F, y + img.offsetY - (float)img.originalHeight / 2.0F, (float)img.originalWidth / 2.0F - img.offsetX, (float)img.originalHeight / 2.0F - img.offsetY, (float)img.packedWidth, (float)img.packedHeight, Settings.scale, Settings.scale, 0.0F);
     }
+
     private static void dynamicFrameRenderHelper(SpriteBatch sb, TextureAtlas.AtlasRegion img, float xOffset, float drawScale, float xScale) {
         if (img != null)
             sb.draw(img, (float)Settings.WIDTH / 2.0F + img.offsetX - (float)img.originalWidth / 2.0F + xOffset * drawScale, (float)Settings.HEIGHT / 2.0F + img.offsetY - (float)img.originalHeight / 2.0F, (float)img.originalWidth / 2.0F - img.offsetX, (float)img.originalHeight / 2.0F - img.offsetY, (float)img.packedWidth, (float)img.packedHeight, Settings.scale * xScale, Settings.scale, 0.0F);

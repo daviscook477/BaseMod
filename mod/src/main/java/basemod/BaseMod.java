@@ -1,7 +1,8 @@
 package basemod;
 
-import basemod.devcommands.ConsoleCommand;
 import basemod.abstracts.*;
+import basemod.eventUtil.AddEventParams;
+import basemod.eventUtil.EventUtils;
 import basemod.helpers.RelicType;
 import basemod.helpers.dynamicvariables.BlockVariable;
 import basemod.helpers.dynamicvariables.DamageVariable;
@@ -9,6 +10,7 @@ import basemod.helpers.dynamicvariables.MagicNumberVariable;
 import basemod.interfaces.*;
 import basemod.patches.com.megacrit.cardcrawl.helpers.TopPanel.TopPanelHelper;
 import basemod.patches.com.megacrit.cardcrawl.screens.select.GridCardSelectScreen.GridCardSelectScreenFields;
+import basemod.patches.com.megacrit.cardcrawl.unlock.UnlockTracker.CountModdedUnlockCards;
 import basemod.patches.whatmod.WhatMod;
 import basemod.screens.ModalChoiceScreen;
 import com.badlogic.gdx.Gdx;
@@ -66,8 +68,8 @@ import com.megacrit.cardcrawl.screens.custom.CustomModeCharacterButton;
 import com.megacrit.cardcrawl.shop.ShopScreen;
 import com.megacrit.cardcrawl.shop.StorePotion;
 import com.megacrit.cardcrawl.shop.StoreRelic;
+import com.megacrit.cardcrawl.unlock.AbstractUnlock;
 import com.megacrit.cardcrawl.unlock.UnlockTracker;
-import javafx.util.Pair;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.NotFoundException;
@@ -152,6 +154,7 @@ public class BaseMod {
 	private static ArrayList<PreRoomRenderSubscriber> preRoomRenderSubscribers;
 	private static ArrayList<OnPlayerLoseBlockSubscriber> onPlayerLoseBlockSubscribers;
 	private static ArrayList<OnPlayerDamagedSubscriber> onPlayerDamagedSubscribers;
+	private static ArrayList<OnCreateDescriptionSubscriber> onCreateDescriptionSubscribers;
 
 	private static ArrayList<AbstractCard> redToAdd;
 	private static ArrayList<String> redToRemove;
@@ -234,6 +237,8 @@ public class BaseMod {
 	private static HashMap<AbstractCard.CardColor, TextureAtlas.AtlasRegion> colorCardEnergyOrbAtlasRegionMap;
 
 	private static HashMap<AbstractPlayer.PlayerClass, HashMap<Integer, CustomUnlockBundle>> unlockBundles;
+	private static HashMap<AbstractPlayer.PlayerClass, ArrayList<String>> unlockCards;
+	private static HashMap<AbstractPlayer.PlayerClass, Integer> maxUnlockLevel;
 
 	private static HashMap<String, CustomSavableRaw> customSaveFields = new HashMap<>();
 
@@ -474,6 +479,7 @@ public class BaseMod {
 		preRoomRenderSubscribers = new ArrayList<>();
 		onPlayerLoseBlockSubscribers = new ArrayList<>();
 		onPlayerDamagedSubscribers = new ArrayList<>();
+		onCreateDescriptionSubscribers = new ArrayList<>();
 	}
 
 	// initializeCardLists -
@@ -542,6 +548,8 @@ public class BaseMod {
 	// initializeUnlocks
 	private static void initializeUnlocks() {
 		unlockBundles = new HashMap<>();
+		unlockCards = new HashMap<>();
+		maxUnlockLevel = new HashMap<>();
 	}
 
 	private static void initializePotionMap() {
@@ -1265,39 +1273,41 @@ public class BaseMod {
 	// Events
 	//
 
-	//Event hashmaps
-	// Key: Event ID
-	private static HashMap<String, Class<? extends AbstractEvent>> allCustomEvents = new HashMap<>();
-	// Key: Dungeon ID
-	// Inner Key: Event ID
-	private static HashMap<String, HashMap<String, Class<? extends AbstractEvent>>> customEvents = new HashMap<>();
+	// Additional documentation can be found in EventUtils.
 
 	public static void addEvent(String eventID, Class<? extends AbstractEvent> eventClass) {
-		addEvent(eventID, eventClass, (String)null);
+		addEvent(new AddEventParams.Builder(eventID, eventClass).create());
 	}
 
 	public static void addEvent(String eventID, Class<? extends AbstractEvent> eventClass, String dungeonID) {
-		if (!customEvents.containsKey(dungeonID)) {
-			customEvents.put(dungeonID, new HashMap<>());
-		}
-		logger.info("Adding " + eventID + " to " + (dungeonID != null ? dungeonID : "ALL") + " pool");
-
-		customEvents.get(dungeonID).put(eventID, eventClass);
-		allCustomEvents.put(eventID, eventClass);
-		if (eventID.contains(" ")) {
-			underScoreEventIDs.put(eventID.replace(' ', '_'), eventID);
-		}
+		addEvent(
+				new AddEventParams.Builder(eventID, eventClass)
+						.dungeonID(dungeonID)
+						.create()
+		);
 	}
 
+	public static void addEvent(AddEventParams params) {
+		EventUtils.registerEvent(
+				params.eventID,
+				params.eventClass,
+				params.playerClass,
+				params.dungeonIDs.toArray(new String[0]),
+				params.spawnCondition,
+				params.overrideEventID,
+				params.bonusCondition,
+				params.eventType
+		);
+	}
+
+	//implemented to avoid issues if someone uses them.
+	@Deprecated //Labeled as deprecated because changes here will have no impact on what events appear.
 	public static HashMap<String, Class<? extends AbstractEvent>> getEventList(String dungeonID) {
-		if (customEvents.containsKey(dungeonID)) {
-			return customEvents.get(dungeonID);
-		}
-		return new HashMap<>();
+		return EventUtils.getDungeonEvents(dungeonID);
 	}
 
 	public static Class<? extends AbstractEvent> getEvent(String eventID) {
-		return allCustomEvents.get(eventID);
+		return EventUtils.getEventClass(eventID);
 	}
 
 	//
@@ -1573,6 +1583,10 @@ public class BaseMod {
 
 	// add new unlock bundle
 	public static void addUnlockBundle(CustomUnlockBundle bundle, AbstractPlayer.PlayerClass c, int unlockLevel) {
+		if (bundle == null) {
+			return;
+		}
+
 		if (!unlockBundles.containsKey(c)) {
 			HashMap<Integer, CustomUnlockBundle> newBundles = new HashMap<>();
 			newBundles.put(unlockLevel, bundle);
@@ -1580,6 +1594,25 @@ public class BaseMod {
 		} else {
 			HashMap<Integer, CustomUnlockBundle> bundles = unlockBundles.get(c);
 			bundles.put(unlockLevel, bundle);
+		}
+
+		if (bundle.unlockType == AbstractUnlock.UnlockType.CARD)
+		{
+			if (!unlockCards.containsKey(c))
+				unlockCards.put(c, new ArrayList<>());
+
+			for (String s : bundle.getUnlockIDs())
+			{
+				if (!unlockCards.get(c).contains(s))
+					unlockCards.get(c).add(s);
+			}
+		}
+
+		if (maxUnlockLevel.containsKey(c)) {
+			maxUnlockLevel.put(c, Math.max(maxUnlockLevel.get(c), unlockLevel));
+		}
+		else {
+			maxUnlockLevel.put(c, unlockLevel);
 		}
 	}
 
@@ -1597,6 +1630,26 @@ public class BaseMod {
 			return null;
 		}
 		return levelMap.get(unlockLevel);
+	}
+
+	// get list of unlocks (cards)
+	public static ArrayList<String> getUnlockCards(AbstractPlayer.PlayerClass c)
+	{
+		return unlockCards.get(c);
+	}
+
+	// get the number of unlock levels for class
+	public static int getMaxUnlockLevel(AbstractPlayer p)
+	{
+		return getMaxUnlockLevel(p.chosenClass);
+	}
+
+	public static int getMaxUnlockLevel(AbstractPlayer.PlayerClass c)
+	{
+		if (maxUnlockLevel.containsKey(c)) {
+			return maxUnlockLevel.get(c);
+		}
+		return 0;
 	}
 
 	//
@@ -2439,7 +2492,13 @@ public class BaseMod {
 	public static void publishEditStrings() {
 		logger.info("begin editing localization strings");
 
-		BaseMod.loadCustomStringsFile(RunModStrings.class, "localization/basemod/customMods.json");
+		EventUtils.loadBaseEvents();
+
+		String path = String.format("localization/basemod/%s/customMods.json", Settings.language.name().toLowerCase());
+		if (!Gdx.files.internal(path).exists()) {
+			path = String.format("localization/basemod/%s/customMods.json", Settings.GameLanguage.ENG.name().toLowerCase());
+		}
+		BaseMod.loadCustomStringsFile(RunModStrings.class, path);
 
 		for (EditStringsSubscriber sub : editStringsSubscribers) {
 			sub.receiveEditStrings();
@@ -2486,6 +2545,10 @@ public class BaseMod {
 		for (SetUnlocksSubscriber sub : setUnlocksSubscribers) {
 			sub.receiveSetUnlocks();
 		}
+
+		CountModdedUnlockCards.enabled = true;
+		CountModdedUnlockCards.countModdedUnlocks(); //call it manually, as the count occurs during refresh normally.
+
 		unsubscribeLaterHelper(SetUnlocksSubscriber.class);
 	}
 
@@ -2586,8 +2649,8 @@ public class BaseMod {
 		for (AbstractPlayer character : getModdedCharacters()) {
 			CustomMod mod = new CustomMod(RedCards.ID, "g", true);
 			mod.ID = character.chosenClass.name() + charMod.name;
-			mod.name = character.getLocalizedCharacterName() + charMod.name;
-			mod.description = character.getLocalizedCharacterName() + charMod.description;
+			mod.name = String.format(charMod.name, character.getLocalizedCharacterName());
+			mod.description = String.format(charMod.description, character.getLocalizedCharacterName());
 			String label = FontHelper.colorString("[" + mod.name + "]", mod.color) + " " + mod.description;
 			ReflectionHacks.setPrivate(mod, CustomMod.class, "label", label);
 			float height = -FontHelper.getSmartHeight(FontHelper.charDescFont, label, 1050.0F * Settings.scale, 32.0F * Settings.scale) + 70.0F * Settings.scale;
@@ -2654,6 +2717,17 @@ public class BaseMod {
 
 		unsubscribeLaterHelper(OnPlayerDamagedSubscriber.class);
 		return amount;
+	}
+
+	public static String publishOnCreateDescription(String rawDescription, AbstractCard card) {
+		//logger.info("publish on card description initialized"); //too much logging?
+
+		for (OnCreateDescriptionSubscriber sub : onCreateDescriptionSubscribers) {
+			rawDescription = sub.receiveCreateCardDescription(rawDescription, card);
+		}
+
+		unsubscribeLaterHelper(OnCreateDescriptionSubscriber.class);
+		return rawDescription;
 	}
 
 	//
@@ -2730,6 +2804,7 @@ public class BaseMod {
 		subscribeIfInstance(preRoomRenderSubscribers, sub, PreRoomRenderSubscriber.class);
 		subscribeIfInstance(onPlayerLoseBlockSubscribers, sub, OnPlayerLoseBlockSubscriber.class);
 		subscribeIfInstance(onPlayerDamagedSubscribers, sub, OnPlayerDamagedSubscriber.class);
+		subscribeIfInstance(onCreateDescriptionSubscribers, sub, OnCreateDescriptionSubscriber.class);
 	}
 
 	// subscribe -
@@ -2825,6 +2900,8 @@ public class BaseMod {
 			onPlayerLoseBlockSubscribers.add((OnPlayerLoseBlockSubscriber) sub);
 		} else if (additionClass.equals(OnPlayerDamagedSubscriber.class)) {
 			onPlayerDamagedSubscribers.add((OnPlayerDamagedSubscriber) sub);
+		} else if (additionClass.equals(OnCreateDescriptionSubscriber.class)) {
+			onCreateDescriptionSubscribers.add((OnCreateDescriptionSubscriber) sub);
 		}
 	}
 
@@ -2876,6 +2953,7 @@ public class BaseMod {
 		unsubscribeIfInstance(preRoomRenderSubscribers, sub, PreRoomRenderSubscriber.class);
 		unsubscribeIfInstance(onPlayerLoseBlockSubscribers, sub, OnPlayerLoseBlockSubscriber.class);
 		unsubscribeIfInstance(onPlayerDamagedSubscribers, sub, OnPlayerDamagedSubscriber.class);
+		unsubscribeIfInstance(onCreateDescriptionSubscribers, sub, OnCreateDescriptionSubscriber.class);
 	}
 
 	// unsubscribe -
@@ -2973,6 +3051,8 @@ public class BaseMod {
 			onPlayerLoseBlockSubscribers.remove(sub);
 		} else if (removalClass.equals(OnPlayerDamagedSubscriber.class)) {
 			onPlayerDamagedSubscribers.remove(sub);
+		} else if (removalClass.equals(OnCreateDescriptionSubscriber.class)) {
+			onCreateDescriptionSubscribers.remove(sub);
 		}
 	}
 

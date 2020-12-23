@@ -1,17 +1,27 @@
 package basemod.patches.com.megacrit.cardcrawl.core.CardCrawlGame;
 
+import java.util.ArrayList;
 import java.util.Map;
 
+import basemod.abstracts.AbstractCardModifier;
+import basemod.helpers.CardModifierManager;
+import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.CardModifierPatches;
+import basemod.BaseMod;
+import basemod.abstracts.CustomSavableRaw;
+import basemod.patches.com.megacrit.cardcrawl.characters.AbstractPlayer.SeenEvents;
+import basemod.patches.com.megacrit.cardcrawl.saveAndContinue.SaveFile.ModSaves;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 
-import basemod.BaseMod;
-import basemod.abstracts.CustomSavableRaw;
-import basemod.patches.com.megacrit.cardcrawl.saveAndContinue.SaveFile.ModSaves;
+import java.util.Map;
 
 @SpirePatch(clz=CardCrawlGame.class, method="loadPlayerSave")
 public class LoadPlayerSaves
@@ -28,6 +38,26 @@ public class LoadPlayerSaves
             i++;
         }
 
+        //Master deck AbstractCardModifiers
+        GsonBuilder builder = new GsonBuilder();
+        if (CardModifierPatches.modifierAdapter == null) {
+            CardModifierPatches.initializeAdapterFactory();
+        }
+        builder.registerTypeAdapterFactory(CardModifierPatches.modifierAdapter);
+        Gson gson = builder.create();
+        ModSaves.ArrayListOfJsonElement cardModifierSaves = ModSaves.cardModifierSaves.get(CardCrawlGame.saveFile);
+        i = 0;
+        for (AbstractCard card : AbstractDungeon.player.masterDeck.group) {
+            ArrayList<AbstractCardModifier> cardModifiersList = gson.fromJson(cardModifierSaves == null || i >= cardModifierSaves.size() ? null : cardModifierSaves.get(i), new TypeToken<ArrayList<AbstractCardModifier>>(){}.getType());
+            if (cardModifiersList != null) {
+                CardModifierManager.removeAllModifiers(card, true);
+                for (AbstractCardModifier mod : cardModifiersList) {
+                    CardModifierManager.addModifier(card, mod.makeCopy());
+                }
+            }
+            i++;
+        }
+
         // Relics
         ModSaves.ArrayListOfJsonElement modRelicSaves = ModSaves.modRelicSaves.get(CardCrawlGame.saveFile);
         i = 0;
@@ -37,6 +67,21 @@ public class LoadPlayerSaves
             }
             i++;
         }
+
+        // Potions
+        ModSaves.ArrayListOfJsonElement modPotionSaves = ModSaves.modPotionSaves.get(CardCrawlGame.saveFile);
+        i = 0;
+        for (AbstractPotion potion : AbstractDungeon.player.potions) {
+            if (potion instanceof CustomSavableRaw) {
+                ((CustomSavableRaw)potion).onLoadRaw(modPotionSaves == null || i >= modPotionSaves.size() ? null : modPotionSaves.get(i));
+            }
+            i++;
+        }
+
+        // Seen Events
+        ModSaves.ArrayListOfString seenEventSaves = ModSaves.eventSaves.get(CardCrawlGame.saveFile);
+        if (seenEventSaves != null)
+            SeenEvents.seenEvents.get(AbstractDungeon.player).addAll(seenEventSaves);
 
         // Custom save fields
         ModSaves.HashMapOfJsonElement modSaves = ModSaves.modSaves.get(CardCrawlGame.saveFile);

@@ -30,7 +30,7 @@ public abstract class DeckManipulator extends ConsoleCommand {
 
     protected int countIndex(String[] tokens) {
         int countIndex = tokens.length - 1;
-        while (ConvertHelper.tryParseInt(tokens[countIndex], 0) != 0) {
+        while (ConvertHelper.tryParseInt(tokens[countIndex]) != null) {
             countIndex--;
         }
         return countIndex;

@@ -1,5 +1,6 @@
 package basemod;
 
+import basemod.helpers.UIElementModificationHelper;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -110,4 +111,32 @@ public class ModColorDisplay implements IUIElement {
 	public int updateOrder() {
 		return ModPanel.DEFAULT_UPDATE;
 	}
+
+    @Override
+    public void set(float xPos, float yPos) {
+        x = xPos;
+        y = yPos;
+
+        UIElementModificationHelper.moveHitboxByOriginalParameters(hb, (x + hbShrink) * Settings.scale, (y + hbShrink) * Settings.scale);
+    }
+
+    @Override
+    public void setX(float xPos) {
+        set(xPos, y);
+    }
+
+    @Override
+    public void setY(float yPos) {
+        set(x, yPos);
+    }
+
+    @Override
+    public float getX() {
+        return x;
+    }
+
+    @Override
+    public float getY() {
+        return y;
+    }
 }
