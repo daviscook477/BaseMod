@@ -43,6 +43,20 @@ public class ConstructSaveFilePatch
         Gson gson = builder.create();
         for (AbstractCard card : AbstractDungeon.player.masterDeck.group) {
             ArrayList<AbstractCardModifier> cardModifierList = CardModifierPatches.CardModifierFields.cardModifiers.get(card);
+            ArrayList<AbstractCardModifier> saveIgnores = new ArrayList<>();
+            for (AbstractCardModifier mod : cardModifierList) {
+                if (mod.getClass().isAnnotationPresent(AbstractCardModifier.SaveIgnore.class)) {
+                    saveIgnores.add(mod);
+                }
+            }
+            if (!saveIgnores.isEmpty()) {
+                BaseMod.logger.warn("attempted to save un-savable card modifiers. Modifiers marked @SaveIgnore will not be saved on master deck.");
+                BaseMod.logger.info("affected card: " + card.cardID);
+                for (AbstractCardModifier mod : saveIgnores) {
+                    BaseMod.logger.info("saveIgnore mod: " + mod.getClass().getName());
+                }
+                cardModifierList.removeAll(saveIgnores);
+            }
             if (!cardModifierList.isEmpty()) {
                 cardModifierSaves.add(gson.toJsonTree(cardModifierList, new TypeToken<ArrayList<AbstractCardModifier>>(){}.getType()));
             } else {

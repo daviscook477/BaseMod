@@ -23,10 +23,12 @@ public class CardModifierManager
      * adds a modifier (mod) to card.
      */
     public static void addModifier(AbstractCard card, AbstractCardModifier mod) {
-        modifiers(card).add(mod);
-        Collections.sort(modifiers(card));
-        mod.onInitialApplication(card);
-        card.initializeDescription();
+        if (mod.shouldApply(card)) {
+            modifiers(card).add(mod);
+            Collections.sort(modifiers(card));
+            mod.onInitialApplication(card);
+            card.initializeDescription();
+        }
     }
 
     /**
@@ -114,8 +116,10 @@ public class CardModifierManager
                     mod.onRemove(oldCard);
                 }
                 AbstractCardModifier newMod = mod.makeCopy();
-                modifiers(newCard).add(newMod);
-                newMod.onInitialApplication(newCard);
+                if (newMod.shouldApply(newCard)) {
+                    modifiers(newCard).add(newMod);
+                    newMod.onInitialApplication(newCard);
+                }
             }
         }
         if (removeOld) {
@@ -151,6 +155,12 @@ public class CardModifierManager
     public static void onApplyPowers(AbstractCard card) {
         for (AbstractCardModifier mod : modifiers(card)) {
             mod.onApplyPowers(card);
+        }
+    }
+
+    public static void onCalculateCardDamage(AbstractCard card, AbstractMonster mo) {
+        for (AbstractCardModifier mod : modifiers(card)) {
+            mod.onCalculateCardDamage(card, mo);
         }
     }
 

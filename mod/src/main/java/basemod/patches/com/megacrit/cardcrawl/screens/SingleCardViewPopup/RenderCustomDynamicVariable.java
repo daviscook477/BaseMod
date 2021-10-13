@@ -119,6 +119,7 @@ public class RenderCustomDynamicVariable
                         start_x - current_x + gl.width + 10.0f * Settings.scale,
                         i * 1.53f * -font.getCapHeight() + draw_y - current_y + -12.0f,
                         0.0f, true, Settings.CREAM_COLOR);
+                stringBuilder.append(end);
             }
             stringBuilder.append(' ');
             gl.setText(font, stringBuilder.toString());

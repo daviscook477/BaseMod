@@ -1,5 +1,7 @@
 package basemod.patches.com.megacrit.cardcrawl.helpers.input.ScrollInputProcessor;
 
+import basemod.BaseMod;
+import basemod.interfaces.PreUpdateSubscriber;
 import basemod.interfaces.TextReceiver;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -11,7 +13,11 @@ import com.megacrit.cardcrawl.helpers.input.ScrollInputProcessor;
 
 import java.util.ArrayList;
 
-public class TextInput {
+public class TextInput implements PreUpdateSubscriber {
+    static {
+        BaseMod.subscribe(new TextInput());
+    }
+
     public static String text = "";
 
     private static final char BACKSPACE = 8;
@@ -23,7 +29,15 @@ public class TextInput {
 
     private static int currentCharLimit = -1;
 
-    private static ArrayList<TextReceiver> receivers = new ArrayList<>();
+    private static final ArrayList<TextReceiver> receivers = new ArrayList<>();
+
+    @Override
+    public void receivePreUpdate() {
+        if (receivers.size() > 0 && receivers.get(0).isDone())
+        {
+            stopTextReceiver(receivers.get(0));
+        }
+    }
 
     public static boolean isTextInputActive()
     {
@@ -52,9 +66,9 @@ public class TextInput {
     public static class receiveTyping
     {
         @SpirePrefixPatch
-        public static void readKeyboardInput(ScrollInputProcessor __instance, char character)
+        public static SpireReturn<Boolean> readKeyboardInput(ScrollInputProcessor __instance, char character)
         {
-            if (receivers.isEmpty()) return;
+            if (receivers.isEmpty()) return SpireReturn.Continue();
 
             TextReceiver t = receivers.get(receivers.size() - 1);
             String text = t.getCurrentText();
@@ -64,36 +78,42 @@ public class TextInput {
                 case ENTER_ANDROID:
                 case ENTER_DESKTOP:
                     if (t.onPushEnter())
-                        return;
+                        return SpireReturn.Return(true);
                 case TAB:
                     if (t.onPushTab())
-                        return;
+                        return SpireReturn.Return(true);
                 case BACKSPACE:
                     if (t.onPushBackspace())
-                        return;
+                        return SpireReturn.Return(true);
                     break;
                 default:
-                    if (character < 32) return;
+                    if (character < 32) return SpireReturn.Continue();
             }
 
-            if (UIUtils.isMac && Gdx.input.isKeyPressed(Input.Keys.SYM)) return;
+            if (UIUtils.isMac && Gdx.input.isKeyPressed(Input.Keys.SYM)) return SpireReturn.Continue();
 
             boolean backspace = character == BACKSPACE;
             boolean add = t.acceptCharacter(character);
 
             if (backspace && text.length() > 1) {
                 t.setText(text.substring(0, text.length() - 1));
-                return;
+                return SpireReturn.Return(true);
             }
             else if (backspace) {
                 t.setText("");
-                return;
+                return SpireReturn.Return(true);
             }
             if (add) {
                 if (currentCharLimit == -1 || text.length() < currentCharLimit) {
-                    t.setText(text.concat(String.valueOf(character)));
+                    String s = t.getAppendedText(character);
+                    if (s != null)
+                    {
+                        t.setText(text.concat(s));
+                        return SpireReturn.Return(true);
+                    }
                 }
             }
+            return SpireReturn.Continue();
         }
     }
 
