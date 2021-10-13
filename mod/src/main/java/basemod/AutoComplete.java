@@ -62,6 +62,7 @@ public class AutoComplete {
 	private static GlyphLayout glyphs;
 	
 	private static final char ID_DELIMITER = ':';
+	private static final String PACKAGE_DELIMITER = ".";
 	private static final String SPACE_AND_ID_DELIMITER = "[ :]";
 
 	public static void init() {
@@ -126,6 +127,22 @@ public class AutoComplete {
 				// complete up to that :
 				DevConsole.currentText = getTextWithoutRightmostSpaceToken()
 						+ textToInsert.substring(0, textToInsert.lastIndexOf(ID_DELIMITER)) + ID_DELIMITER;
+			} else if (textToInsert.endsWith(PACKAGE_DELIMITER)) {
+				//this is package autocomplete, no space
+				String start = getTextWithoutRightmostSpaceToken();
+				if ((start + textToInsert).length() == DevConsole.currentText.length() + 1)
+				{
+					DevConsole.currentText = start + textToInsert;
+					reset();
+				}
+				else
+				{
+					DevConsole.currentText = start
+							+ textToInsert.substring(0, textToInsert.lastIndexOf(PACKAGE_DELIMITER));
+				}
+			} else if (textToInsert.endsWith("(")) {
+				DevConsole.currentText = getTextWithoutRightmostSpaceToken() + textToInsert;
+				reset();
 			} else {
 				// otherwise complete the whole token
 				DevConsole.currentText = getTextWithoutRightmostSpaceToken() + textToInsert + " ";

@@ -1744,6 +1744,7 @@ public class BaseMod {
 		}
 		// Sort alphabetically by character name
 		options.sort(Comparator.comparing(o -> o.name));
+
 		return options;
 	}
 
