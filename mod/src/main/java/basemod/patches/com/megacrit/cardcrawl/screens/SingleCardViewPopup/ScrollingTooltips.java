@@ -44,7 +44,7 @@ public class ScrollingTooltips
 	{
 		private static ScrollBar scrollBar = new ScrollBar(
 				new ScrollListener(),
-				1300 * Settings.scale,
+				Settings.WIDTH / 2f + 340 * Settings.scale,
 				0 * Settings.scale,
 				440 * Settings.scale
 		) {
@@ -92,7 +92,7 @@ public class ScrollingTooltips
 				sb.flush();
 				Rectangle scissors = new Rectangle();
 				Rectangle clipBounds = new Rectangle(
-						1300 * Settings.scale, y[0] - IsScrolling.isScrolling.get(),
+						Settings.WIDTH / 2f + 340 * Settings.scale, y[0] - IsScrolling.isScrolling.get(),
 						320 * Settings.scale + ScrollBar.TRACK_W, IsScrolling.isScrolling.get() + 32 * Settings.scale
 				);
 				ScissorStack.calculateScissors(camera, sb.getTransformMatrix(), clipBounds, scissors);

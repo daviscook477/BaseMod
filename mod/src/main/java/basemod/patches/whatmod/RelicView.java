@@ -15,14 +15,16 @@ public class RelicView
 {
     public static void Postfix(SingleRelicViewPopup __instance, SpriteBatch sb)
     {
-        try {
-            Field relicField = SingleRelicViewPopup.class.getDeclaredField("relic");
-            relicField.setAccessible(true);
-            AbstractRelic relic = (AbstractRelic) relicField.get(__instance);
+        if (WhatMod.enabled) {
+            try {
+                Field relicField = SingleRelicViewPopup.class.getDeclaredField("relic");
+                relicField.setAccessible(true);
+                AbstractRelic relic = (AbstractRelic) relicField.get(__instance);
 
-            WhatMod.renderModTooltip(sb, relic.getClass());
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
+                WhatMod.renderModTooltip(sb, relic.getClass());
+            } catch (IllegalAccessException | NoSuchFieldException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

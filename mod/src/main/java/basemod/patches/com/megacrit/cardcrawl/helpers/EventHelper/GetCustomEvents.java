@@ -18,8 +18,8 @@ public class GetCustomEvents {
         if (EventUtils.overrideEvents.containsKey(key)) {
             for (ConditionalEvent<? extends AbstractEvent> c : EventUtils.overrideEvents.get(key)) {
                 if (c.isValid() &&
-                        (!EventUtils.overrideBonusConditions.containsKey(c)) ||
-                        EventUtils.overrideBonusConditions.get(c).test()) {
+                        (!EventUtils.overrideBonusConditions.containsKey(c) ||
+                        EventUtils.overrideBonusConditions.get(c).test())) {
                     return SpireReturn.Return(c.getEvent());
                 }
             }

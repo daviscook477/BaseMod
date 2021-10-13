@@ -35,6 +35,11 @@ public class CardModifierPatches
     )
     public static class CardModifierCalculateCardDamage
     {
+        //onCalculateCardDamage
+        public static void Postfix(AbstractCard __instance, AbstractMonster mo) {
+            CardModifierManager.onCalculateCardDamage(__instance, mo);
+        }
+
         //modifyDamage
         @SpireInsertPatch(
                 locator = DamageLocator.class,
@@ -296,7 +301,7 @@ public class CardModifierPatches
             @Override
             public int[] Locate(CtBehavior ctMethodToPatch) throws Exception
             {
-                Matcher finalMatcher = new Matcher.FieldAccessMatcher(AbstractCard.class, "timesUpgraded");
+                Matcher finalMatcher = new Matcher.FieldAccessMatcher(AbstractCard.class, "name");
                 return LineFinder.findInOrder(ctMethodToPatch, finalMatcher);
             }
         }
@@ -421,8 +426,8 @@ public class CardModifierPatches
                 locator = Locator.class
         )
         public static void Insert(UseCardAction __instance, AbstractCard card, AbstractCreature target) {
-            CardModifierManager.onUseCard(card, target, __instance);
             if (!card.dontTriggerOnUseCard) {
+                CardModifierManager.onUseCard(card, target, __instance);
                 AbstractPlayer p = AbstractDungeon.player;
                 for (AbstractCard c : p.hand.group) {
                     if (c != card) {
@@ -435,8 +440,8 @@ public class CardModifierPatches
                 for (AbstractCard c : p.discardPile.group) {
                     CardModifierManager.onOtherCardPlayed(c, card, p.discardPile);
                 }
+                CardModifierManager.removeWhenPlayedModifiers(card);
             }
-            CardModifierManager.removeWhenPlayedModifiers(card);
         }
 
         private static class Locator extends SpireInsertLocator
@@ -458,14 +463,16 @@ public class CardModifierPatches
     {
         public static void Postfix(AbstractCreature __instance) {
             AbstractPlayer p = AbstractDungeon.player;
-            for (AbstractCard c : p.drawPile.group) {
-                CardModifierManager.atEndOfTurn(c, p.drawPile);
-            }
-            for (AbstractCard c : p.discardPile.group) {
-                CardModifierManager.atEndOfTurn(c, p.discardPile);
-            }
-            for (AbstractCard c : p.hand.group) {
-                CardModifierManager.atEndOfTurn(c, p.hand);
+            if (__instance == p) {
+                for (AbstractCard c : p.drawPile.group) {
+                    CardModifierManager.atEndOfTurn(c, p.drawPile);
+                }
+                for (AbstractCard c : p.discardPile.group) {
+                    CardModifierManager.atEndOfTurn(c, p.discardPile);
+                }
+                for (AbstractCard c : p.hand.group) {
+                    CardModifierManager.atEndOfTurn(c, p.hand);
+                }
             }
         }
     }

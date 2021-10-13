@@ -20,7 +20,7 @@ public class FixCardPreviewPlacement
 			public void edit(FieldAccess f) throws CannotCompileException
 			{
 				if (f.isWriter() && f.getFieldName().equals("current_x")) {
-					f.replace("$proceed(1920f * " +Settings.class.getName() + ".scale - $1);");
+					f.replace(String.format("$proceed(%1$s.WIDTH / 2f - 475f * %1$s.scale);", Settings.class.getName()));
 				}
 			}
 		};

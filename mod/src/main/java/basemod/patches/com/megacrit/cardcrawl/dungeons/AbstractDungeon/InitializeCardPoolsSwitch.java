@@ -10,6 +10,7 @@ import com.megacrit.cardcrawl.daily.mods.BlueCards;
 import com.megacrit.cardcrawl.daily.mods.Diverse;
 import com.megacrit.cardcrawl.daily.mods.GreenCards;
 import com.megacrit.cardcrawl.daily.mods.RedCards;
+import com.megacrit.cardcrawl.daily.mods.PurpleCards;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.CardLibrary;
 import com.megacrit.cardcrawl.helpers.ModHelper;
@@ -43,7 +44,7 @@ public class InitializeCardPoolsSwitch {
 				character.getCardPool(tmpPool);
 			}
 		} else if (!BaseMod.isBaseGameCharacter(chosenClass)) {
-			// Red/Green/Blue Cards modifiers for modded characters
+			// Red/Green/Blue/Purple Cards modifiers for modded characters
 			if (AbstractPlayer.customMods.contains(RedCards.ID)) {
 				CardLibrary.addRedCards(tmpPool);
 			}
@@ -52,6 +53,9 @@ public class InitializeCardPoolsSwitch {
 			}
 			if (AbstractPlayer.customMods.contains(BlueCards.ID)) {
 				CardLibrary.addBlueCards(tmpPool);
+			}
+			if (AbstractPlayer.customMods.contains(PurpleCards.ID)) {
+				CardLibrary.addPurpleCards(tmpPool);
 			}
 		}
 

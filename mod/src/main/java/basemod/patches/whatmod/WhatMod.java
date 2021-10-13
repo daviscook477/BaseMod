@@ -26,7 +26,7 @@ public class WhatMod
 
 	static void renderModTooltip(SpriteBatch sb, Class<?> cls)
 	{
-		renderModTooltip(sb, cls, 1300.0f * Settings.scale, 700.0f * Settings.scale);
+		renderModTooltip(sb, cls, Settings.WIDTH / 2f + 340.0f * Settings.scale, 700.0f * Settings.scale);
 	}
 
 	static void renderModTooltip(SpriteBatch sb, Class<?> cls, float x, float y)
@@ -65,8 +65,12 @@ public class WhatMod
 				CtClass ctCls = pool.get(cls.getName());
 				String url = ctCls.getURL().getFile();
 				int i = url.lastIndexOf('!');
-				url = url.substring(0, i);
-				locationURL = new URL(url);
+				if (i >= 0) {
+					url = url.substring(0, i);
+				}
+				if (url.endsWith(".jar")) {
+					locationURL = new URL(url);
+				}
 			} catch (NotFoundException | MalformedURLException ignored) {
 				return null;
 			}

@@ -751,4 +751,64 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 * Add CloneablePower to base game powers introduced with v2.0 (Raz)
 * Fix crash with act command (Raz)
 
+#### v5.29.0 ####
+* Improve typing for dev console (Alchyr)
+* Fix crash to do with CardModifier with SaveIgnore in the master deck (JohnnyDevo)
+* New CardModifier hook: shouldApply (JohnnyDevo)
+* CardPowerTips (JohnnyDevo)
+  * Display a card in a tooltip
+* CardBorderGlowManager (JohnnyDevo)
+  * Allows card to have multiple glow colors at once
+* No longer cull potion rewards (erasels)
+  * BaseMod allows more than 5 combat rewards
+* Fix custom reward rendering on ultra-wide resolutions (NotInTheFace)
+* Fix character select screen on ultra-wide resolutions (NotInTheFace)
+* VfxBuilder (NotInTheFace)
+
+#### v5.30.0 ####
+* More reliable input canceling (Alchyr)
+* VfxBuilder features (NotInTheFace)
+  * New hook to call after rendering
+  * New hooks for animation phases starting/ending
+  * More interpolations
+
+#### v5.30.1 ####
+* Fix Console being openable while it's not enabled
+* Fix CardModifier atEndOfTurn triggering at the end of monster turns (JohnnyDevo)
+* Fix VFXBuilder to work with packed atlases
+
+#### v5.31.0 ####
+* New CardModifier hook: calculateCardDamage (JohnnyDevo)
+* Change CardModifier copy applying to new copied card after upgrades (JohnnyDevo)
+* * Fix EventUtil override bonus condition crash (Alchyr)
+
+#### v5.32.0 ####
+* Fix all CardMod onUse related hooks to not trigger when unplayable and autoplayed (JohnnyDevo)
+* Add standard common CardMods (Vex)
+* Make character select screen page arrows bigger (NotInTheFace)
+
+#### v5.32.1 ####
+* Fix VfxBuilder.fadeOut not working for fade times greater than 1 second (kiooeht)
+* Fix whatmod tooltip placement on ultrawide resolutions (kiooeht)
+* Fix whatmod appearing in SCV and SRV when whatmod is disabled (kiooeht)
+* Fix card preview position in SCV on ultrawide resolutions (kiooeht)
+
+#### v5.32.2 ####
+* Fix Transient crashing after turn 7 if Fading is removed (kiooeht)
+* Fix mod config panel placement on ultrawide resolutions (kiooeht)
+
+#### v5.32.3 ####
+* Fix possible crash with initializePowerMap and WhatMod (kiooeht)
+* Fix SingleCardView variable width with additional character (Alchyr)
+
+#### v5.33.0 ####
+* Fix AbstractPotion.addToTop being an infinite loop (kiooeht)
+* Reset seen events every 3 acts so they return to the pool in endless (Alchyr)
+* Add NoLibraryType annotation for CardColor SpireEnums (kiooeht)
+* Fix incorrect unlock count in character select screen (codewarrior0)
+* Fix Purple Cards run modifier not working for custom characters (codewarrior0)
+
+#### v5.33.1 ####
+* Fix scrolling tooltips on ultrawide resolutions (kiooeht)
+
 #### dev ####

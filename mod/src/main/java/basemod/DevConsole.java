@@ -5,9 +5,10 @@ import basemod.interfaces.PostEnergyRechargeSubscriber;
 import basemod.interfaces.PostInitializeSubscriber;
 import basemod.interfaces.PostRenderSubscriber;
 import basemod.interfaces.PostUpdateSubscriber;
+import basemod.interfaces.TextReceiver;
+import basemod.patches.com.megacrit.cardcrawl.helpers.input.ScrollInputProcessor.TextInput;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -30,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class DevConsole
-implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSubscriber, PostUpdateSubscriber {
+implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSubscriber, PostUpdateSubscriber, TextReceiver {
 	public static final Logger logger = LogManager.getLogger(DevConsole.class.getName());
 
 	private static final int HISTORY_SIZE = 10;
@@ -47,8 +48,6 @@ implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSub
 	public static final String PROMPT = "$> ";
 
 	public static BitmapFont consoleFont = null;
-	private static InputProcessor consoleInputProcessor;
-	private static InputProcessor otherInputProcessor = null;
 	public static Texture consoleBackground = null;
 
 	public static boolean infiniteEnergy = false;
@@ -59,6 +58,8 @@ implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSub
 	public static boolean visible = false;
 	public static int toggleKey = Keys.GRAVE;
 	public static String currentText = "";
+
+	private static boolean wasBackspace = false;
 
 	public static int priorKey = Keys.UP;
 	public static int nextKey = Keys.DOWN;
@@ -122,8 +123,6 @@ implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSub
 
 	@Override
 	public void receivePostInitialize() {
-		consoleInputProcessor = new ConsoleInputProcessor();
-
 		// Console font
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/Kreon-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
@@ -173,56 +172,67 @@ implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSub
 		}
 	}
 
+	public String getCurrentText()
+	{
+		return currentText;
+	}
+
 	@Override
-	public void receivePostUpdate() {
-		if (Gdx.input.isKeyJustPressed(toggleKey)) {
-			AutoComplete.reset();
-			if (visible) {
-				currentText = "";
-				commandPos = -1;
-			} else {
-				otherInputProcessor = Gdx.input.getInputProcessor();
-				
+	public void setText(String updatedText) {
+		currentText = updatedText;
+		AutoComplete.suggest(wasBackspace);
+		wasBackspace = false;
+	}
+
+	@Override
+	public boolean onPushBackspace() {
+		wasBackspace = true;
+		return false;
+	}
+
+	@Override
+	public boolean acceptCharacter(char c) {
+		return consoleFont.getData().hasGlyph(c) && !(Keys.toString(toggleKey) != null && Keys.toString(toggleKey).equals("" + c));
+	}
+
+	@Override
+	public boolean onKeyUp(int keycode) { //decided to keep the enter key in onKeyUp instead of onTyped.
+		if (keycode == Keys.ENTER) {
+			if (DevConsole.currentText.length() > 0) {
+				DevConsole.execute();
 				if (AutoComplete.enabled) {
+					AutoComplete.reset();
 					AutoComplete.suggest(false);
 				}
 			}
-
-			// only allow opening console when enabled but allow closing the console anytime
-			if (visible || enabled) {
-				Gdx.input.setInputProcessor(visible ? otherInputProcessor : consoleInputProcessor);
-				visible = !visible;
-			}
+			return true;
 		}
-		
-		//	If AutoComplete is enabled and the key to select a suggestion is pressed
-		//	select the next or previous suggestion
-		if (AutoComplete.enabled && Gdx.input.isKeyPressed(AutoComplete.selectKey)) {
+		return false;
+	}
 
-			if (Gdx.input.isKeyJustPressed(priorKey) ) {
-				if (visible) {
-					AutoComplete.selectUp();
+	@Override
+	public boolean onKeyDown(int keycode) {
+		if (AutoComplete.enabled) {
+			//I wanted to use a switch, but not constant :(
+			//can these even be changed? idk
+			if (keycode == priorKey) {
+				if (Gdx.input.isKeyPressed(AutoComplete.selectKey)) {
+						AutoComplete.selectUp();
 				}
-			}
-			if (Gdx.input.isKeyJustPressed(nextKey)) {
-				if (visible) {
-					AutoComplete.selectDown();
-				}
-			}
-
-		} else {
-			// get previous commands
-			if (Gdx.input.isKeyJustPressed(priorKey)) {
-				if (visible) {
+				else {
 					if (commandPos + 1 < priorCommands.size()) {
 						commandPos++;
 						currentText = priorCommands.get(commandPos);
 						AutoComplete.resetAndSuggest();
 					}
 				}
+				return true;
 			}
-			if (Gdx.input.isKeyJustPressed(nextKey)) {
-				if (visible) {
+			else if (keycode == nextKey) {
+				if (Gdx.input.isKeyPressed(AutoComplete.selectKey)) {
+					AutoComplete.selectDown();
+				}
+				else {
 					if (commandPos - 1 < 0) {
 						currentText = "";
 						commandPos = -1;
@@ -232,21 +242,50 @@ implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSub
 					}
 					AutoComplete.resetAndSuggest();
 				}
+				return true;
+			}
+			else if (keycode == AutoComplete.fillKey1 || keycode == AutoComplete.fillKey2) {
+				AutoComplete.fillInSuggestion();
+				return true;
+			}
+			else if (keycode == AutoComplete.deleteTokenKey) {
+				AutoComplete.removeOneTokenUsingSpaceAndIdDelimiter();
+				if (AutoComplete.enabled) {
+					AutoComplete.suggest(false);
+				}
+				return true;
 			}
 		}
-		// If the fill in key is pressed automaticallly fill in what the user wants
-		if (AutoComplete.enabled && (Gdx.input.isKeyJustPressed(AutoComplete.fillKey1)
-				|| Gdx.input.isKeyJustPressed(AutoComplete.fillKey2))) {
-			AutoComplete.fillInSuggestion();
-		}
+		return false;
+	}
 
-		// if the key to delete the last token is pressed, delete the rightmost token
-		if (Gdx.input.isKeyJustPressed(AutoComplete.deleteTokenKey)) {
-			AutoComplete.removeOneTokenUsingSpaceAndIdDelimiter();
-			if (AutoComplete.enabled) {
-				AutoComplete.suggest(false);
+	@Override
+	public void receivePostUpdate() {
+		if (enabled && Gdx.input.isKeyJustPressed(toggleKey)) {
+			AutoComplete.reset();
+
+			// only allow opening console when enabled but allow closing the console anytime
+			if (visible) {
+				currentText = "";
+				commandPos = -1;
+
+				TextInput.stopTextReceiver(this);
 			}
+			else if (enabled) //and not visible
+			{
+				TextInput.startTextReceiver(this);
+
+				if (AutoComplete.enabled) {
+					AutoComplete.suggest(false);
+				}
+			}
+			visible = !visible;
 		}
+	}
+
+	@Override
+	public boolean isDone() {
+		return !visible;
 	}
 
 	public static class PriorCommandsList extends ArrayList<String>
