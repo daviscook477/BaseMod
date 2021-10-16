@@ -46,6 +46,7 @@ public class AutoComplete {
 	public static int fillKey1 = Keys.RIGHT;
 	public static int fillKey2 = Keys.TAB;
 	public static int selected = 0;
+	public static boolean addWhitespace = true;
 	private static ArrayList<String> suggestions;
 	private static Stack<Pair> suggestionPairs;
 	private static String[] tokens;
@@ -145,7 +146,7 @@ public class AutoComplete {
 				reset();
 			} else {
 				// otherwise complete the whole token
-				DevConsole.currentText = getTextWithoutRightmostSpaceToken() + textToInsert + " ";
+				DevConsole.currentText = getTextWithoutRightmostSpaceToken() + textToInsert + (addWhitespace ? " " : "");
 				reset();
 			}
 			suggest(false);
@@ -338,6 +339,7 @@ public class AutoComplete {
 
 	private static void createCMDSuggestions() {
 		currentID = RESET + 1;
+		addWhitespace = true;
 		suggestions = ConsoleCommand.suggestions(tokens);
 	}
 
