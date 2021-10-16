@@ -51,7 +51,6 @@ public class TextCodeInterpreter {
         return mappedAccess.keySet();
     }
 
-
     public static class ParameterProvider {
         private final Class<?> cls;
         private final String key;
@@ -89,7 +88,6 @@ public class TextCodeInterpreter {
                 return ConsoleCommand.getCardOptions();
             }
         });
-
         registerCustomConstant(new ParameterProvider(AbstractRelic.class, "relic", (id)-> {
             id = id.replace('_', ' ');
             if (RelicLibrary.isARelic(id)) {
@@ -117,8 +115,6 @@ public class TextCodeInterpreter {
                 return potions;
             }
         });
-
-
 
         List<String> listTypes = new ArrayList<>();
         listTypes.add("empty");
@@ -775,7 +771,7 @@ public class TextCodeInterpreter {
             return null;
 
         String parameter = params[0].substring(0, index);
-        if (parameter.charAt(index - 1) == ',' || parameter.charAt(index - 1) == ')')
+        if (parameter.charAt(index - 1) == ',' || (depth == -1 && parameter.charAt(index - 1) == ')')) //remove comma after parameter or closing parentheses after last parameter
             parameter = parameter.substring(0, parameter.length() - 1);
         parameter = parameter.trim();
 
@@ -1369,7 +1365,7 @@ public class TextCodeInterpreter {
                     case "byte":
                         if (src == long.class) {
                             if ((long) o <= Byte.MAX_VALUE && (long) o >= Byte.MIN_VALUE) {
-                                return o;
+                                return ((Long) o).byteValue();
                             }
                             throw new IllegalArgumentException("Value " + o + " is too large for a byte.");
                         }
@@ -1377,7 +1373,7 @@ public class TextCodeInterpreter {
                     case "short":
                         if (src == long.class) {
                             if ((long) o <= Short.MAX_VALUE && (long) o >= Short.MIN_VALUE) {
-                                return o;
+                                return ((Long) o).shortValue();
                             }
                             throw new IllegalArgumentException("Value " + o + " is too large for a short.");
                         }
@@ -1385,7 +1381,7 @@ public class TextCodeInterpreter {
                     case "int":
                         if (src == long.class) {
                             if ((long) o <= Integer.MAX_VALUE && (long) o >= Integer.MIN_VALUE) {
-                                return o;
+                                return ((Long) o).intValue();
                             }
                             throw new IllegalArgumentException("Value " + o + " is too large for an int.");
                         }
@@ -1396,12 +1392,21 @@ public class TextCodeInterpreter {
                         }
                         break;
                     case "float":
-                        if (src == long.class || src == float.class) {
+                        if (src == long.class) {
+                            return ((Long) o).floatValue();
+                        }
+                        else if (src == float.class) {
                             return o;
                         }
                         break;
                     case "double":
-                        if (src == long.class || src == float.class || src == double.class) {
+                        if (src == long.class) {
+                            return ((Long) o).doubleValue();
+                        }
+                        else if (src == float.class) {
+                            return ((Float) o).doubleValue();
+                        }
+                        else if (src == double.class) {
                             return o;
                         }
                         break;
