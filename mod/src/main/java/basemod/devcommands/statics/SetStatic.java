@@ -126,45 +126,10 @@ public class SetStatic extends StaticsCommand {
             DevConsole.log("");
         }
     }
-
-
+    
     @Override
     public void errorMsg() {
         DevConsole.couldNotParse();
         DevConsole.log("");
-    }
-
-    private static int getTokenCount(String arg)
-    {
-        int index = 0;
-        int depth = 0;
-        int count = 0;
-        boolean inQuote = false;
-
-        while (count < 2 && index < arg.length())
-        {
-            char next = arg.charAt(index++);
-
-            switch (next)
-            {
-                case '(':
-                    if (!inQuote)
-                        ++depth;
-                    break;
-                case ')':
-                    if (!inQuote)
-                        --depth;
-                    break;
-                case '"':
-                    inQuote = !inQuote;
-                    break;
-                case '.':
-                    if (!inQuote && depth == 0)
-                        ++count;
-                    break;
-            }
-        }
-
-        return count;
     }
 }
