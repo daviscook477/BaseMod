@@ -4,6 +4,7 @@ import basemod.AutoComplete;
 import basemod.DevConsole;
 import basemod.helpers.TextCodeInterpreter;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 //Invoke a static method and output the result as toString
@@ -51,7 +52,7 @@ public class EvalStatic extends StaticsCommand {
 
                 if (output == null)
                 {
-                    DevConsole.log("Output: " + "null");
+                    DevConsole.log("Output: null");
                 }
                 else
                 {
@@ -64,8 +65,21 @@ public class EvalStatic extends StaticsCommand {
                 DevConsole.log("");
             }
         }
+        catch (InvocationTargetException e) {
+            Throwable t = e;
+            while (t instanceof InvocationTargetException) {
+                t = t.getCause();
+            }
+            if (t == null) {
+                DevConsole.log("Exception: " + e);
+            }
+            else {
+                DevConsole.log("Exception: " + t);
+            }
+            DevConsole.log("");
+        }
         catch (Exception e) {
-            DevConsole.log("Output: " + e);
+            DevConsole.log("Exception: " + e);
             DevConsole.log("");
         }
     }

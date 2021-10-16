@@ -4,6 +4,7 @@ import basemod.AutoComplete;
 import basemod.DevConsole;
 import basemod.helpers.TextCodeInterpreter;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,12 +122,25 @@ public class SetStatic extends StaticsCommand {
                 DevConsole.log("");
             }
         }
+        catch (InvocationTargetException e) {
+            Throwable t = e;
+            while (t instanceof InvocationTargetException) {
+                t = t.getCause();
+            }
+            if (t == null) {
+                DevConsole.log("Exception: " + e);
+            }
+            else {
+                DevConsole.log("Exception: " + t);
+            }
+            DevConsole.log("");
+        }
         catch (Exception e) {
-            DevConsole.log(e.getMessage());
+            DevConsole.log("Exception: " + e);
             DevConsole.log("");
         }
     }
-    
+
     @Override
     public void errorMsg() {
         DevConsole.couldNotParse();
