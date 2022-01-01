@@ -62,10 +62,10 @@ public class CardModifierPatches
 
         @SpireInsertPatch(
                 locator = MultiDamageLocator.class,
-                localvars = {"tmp", "i"}
+                localvars = {"tmp", "i", "m"}
         )
-        public static void multiDamageInsert(AbstractCard __instance, AbstractMonster m, float[] tmp, int i) {
-            tmp[i] = CardModifierManager.onModifyDamage(tmp[i], __instance, m);
+        public static void multiDamageInsert(AbstractCard __instance, AbstractMonster mo, float[] tmp, int i, ArrayList<AbstractMonster> m) {
+            tmp[i] = CardModifierManager.onModifyDamage(tmp[i], __instance, m.get(i));
         }
 
         private static class MultiDamageLocator extends SpireInsertLocator
@@ -101,10 +101,10 @@ public class CardModifierPatches
 
         @SpireInsertPatch(
                 locator = MultiDamageFinalLocator.class,
-                localvars = {"tmp", "i"}
+                localvars = {"tmp", "i", "m"}
         )
-        public static void multiDamageFinalInsert(AbstractCard __instance, AbstractMonster m, float[] tmp, int i) {
-            tmp[i] = CardModifierManager.onModifyDamageFinal(tmp[i], __instance, m);
+        public static void multiDamageFinalInsert(AbstractCard __instance, AbstractMonster mo, float[] tmp, int i, ArrayList<AbstractMonster> m) {
+            tmp[i] = CardModifierManager.onModifyDamageFinal(tmp[i], __instance, m.get(i));
         }
 
         private static class MultiDamageFinalLocator extends SpireInsertLocator

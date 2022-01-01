@@ -510,6 +510,40 @@ public class VfxBuilder {
         });
         return this;
     }
+    
+    /**
+     * Fade out the image to transparent at the end of the effect duration.
+     *
+     * @param fadeTime the time to start fading the image
+     * @param startingAlpha the alpha that the fade begins from
+     * @return this builder
+     */
+    public VfxBuilder fadeOutFromAlpha(float fadeTime, float startingAlpha) {
+        updaters.add(t -> {
+            float a = MathUtils.clamp(duration - t, 0f, fadeTime);
+            alpha = t > (duration - fadeTime) ? Interpolation.fade.apply((a / fadeTime) * startingAlpha) : startingAlpha;
+            return false;
+        });
+        return this;
+    }
+
+
+    /**
+     * Fade out the image to transparent at the end of the effect duration.
+     * Starts from alpha previously set value by the setAlpha function
+     *
+     * @param fadeTime the time to start fading the image
+     * @return this builder
+     */
+    public VfxBuilder fadeOutFromOriginalAlpha(float fadeTime) {
+        float originalAlpha = this.alpha;
+        updaters.add(t -> {
+            float a = MathUtils.clamp(duration - t, 0f, fadeTime);
+            alpha = t > (duration - fadeTime) ? Interpolation.fade.apply((a / fadeTime) * originalAlpha) : originalAlpha;
+            return false;
+        });
+        return this;
+    }
 
     /**
      * Oscillate the transparency of the image throughout the duration.

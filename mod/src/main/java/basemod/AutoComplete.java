@@ -46,6 +46,7 @@ public class AutoComplete {
 	public static int fillKey1 = Keys.RIGHT;
 	public static int fillKey2 = Keys.TAB;
 	public static int selected = 0;
+	public static boolean addWhitespace = true;
 	private static ArrayList<String> suggestions;
 	private static Stack<Pair> suggestionPairs;
 	private static String[] tokens;
@@ -62,6 +63,7 @@ public class AutoComplete {
 	private static GlyphLayout glyphs;
 	
 	private static final char ID_DELIMITER = ':';
+	private static final String PACKAGE_DELIMITER = ".";
 	private static final String SPACE_AND_ID_DELIMITER = "[ :]";
 
 	public static void init() {
@@ -126,9 +128,25 @@ public class AutoComplete {
 				// complete up to that :
 				DevConsole.currentText = getTextWithoutRightmostSpaceToken()
 						+ textToInsert.substring(0, textToInsert.lastIndexOf(ID_DELIMITER)) + ID_DELIMITER;
+			} else if (textToInsert.endsWith(PACKAGE_DELIMITER)) {
+				//this is package autocomplete, no space
+				String start = getTextWithoutRightmostSpaceToken();
+				if ((start + textToInsert).length() == DevConsole.currentText.length() + 1)
+				{
+					DevConsole.currentText = start + textToInsert;
+					reset();
+				}
+				else
+				{
+					DevConsole.currentText = start
+							+ textToInsert.substring(0, textToInsert.lastIndexOf(PACKAGE_DELIMITER));
+				}
+			} else if (textToInsert.endsWith("(")) {
+				DevConsole.currentText = getTextWithoutRightmostSpaceToken() + textToInsert;
+				reset();
 			} else {
 				// otherwise complete the whole token
-				DevConsole.currentText = getTextWithoutRightmostSpaceToken() + textToInsert + " ";
+				DevConsole.currentText = getTextWithoutRightmostSpaceToken() + textToInsert + (addWhitespace ? " " : "");
 				reset();
 			}
 			suggest(false);
@@ -321,6 +339,7 @@ public class AutoComplete {
 
 	private static void createCMDSuggestions() {
 		currentID = RESET + 1;
+		addWhitespace = true;
 		suggestions = ConsoleCommand.suggestions(tokens);
 	}
 

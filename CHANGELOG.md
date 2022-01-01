@@ -811,4 +811,24 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 #### v5.33.1 ####
 * Fix scrolling tooltips on ultrawide resolutions (kiooeht)
 
+#### v5.34.0 ####
+* Fix custom mode mods sometime persisting between runs (JohnnyDevo)
+* Console command for manipulating variables (Alchyr)
+
+#### v5.34.1 ####
+* Fix crash with custom mods being null
+
+#### v5.34.2 ####
+* Fix card border glow crash in library (JohnnyDevo)
+
+#### v5.34.3 ####
+* Fix monsters not passing to multitarget card modifiers (JohnnyDevo)
+
+#### v5.35.0 ####
+* Add fadeOutFromAlpha and fadeOutFromOriginalAlpha to VFXBuilder (EricB)
+* Dynamic text blocks on cards for pluralization cases (Mistress Alison)
+
+#### v5.35.1 ####
+* Fix weird possible crash with dynamic text blocks (kiooeht)
+
 #### dev ####

@@ -45,16 +45,16 @@ public class InitializeCardPoolsSwitch {
 			}
 		} else if (!BaseMod.isBaseGameCharacter(chosenClass)) {
 			// Red/Green/Blue/Purple Cards modifiers for modded characters
-			if (AbstractPlayer.customMods.contains(RedCards.ID)) {
+			if (ModHelper.isModEnabled(RedCards.ID)) {
 				CardLibrary.addRedCards(tmpPool);
 			}
-			if (AbstractPlayer.customMods.contains(GreenCards.ID)) {
+			if (ModHelper.isModEnabled(GreenCards.ID)) {
 				CardLibrary.addGreenCards(tmpPool);
 			}
-			if (AbstractPlayer.customMods.contains(BlueCards.ID)) {
+			if (ModHelper.isModEnabled(BlueCards.ID)) {
 				CardLibrary.addBlueCards(tmpPool);
 			}
-			if (AbstractPlayer.customMods.contains(PurpleCards.ID)) {
+			if (ModHelper.isModEnabled(PurpleCards.ID)) {
 				CardLibrary.addPurpleCards(tmpPool);
 			}
 		}
@@ -67,7 +67,7 @@ public class InitializeCardPoolsSwitch {
 					continue;
 				}
 				 String ID = character.chosenClass.name() + charMod.name;
-				 if (AbstractPlayer.customMods.contains(ID)) {
+				 if (ModHelper.isModEnabled(ID)) {
 				 	BaseMod.logger.info("[INFO] Adding " + character.getLocalizedCharacterName() + " cards into card pool.");
 				 	AbstractCard.CardColor color = character.getCardColor();
 				 	for (AbstractCard c : CardLibrary.cards.values()) {

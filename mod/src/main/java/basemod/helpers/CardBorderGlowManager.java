@@ -136,7 +136,7 @@ public class CardBorderGlowManager {
 
         public static void Prefix(AbstractCard __instance, SpriteBatch sb) {
             //run if system is active OR if system should be active
-            if (!Settings.hideCards && (colorTracker != null || hasCustomGlows(__instance))) {
+            if (!Settings.hideCards && __instance.isGlowing && (colorTracker != null || hasCustomGlows(__instance))) {
 
                 //if not already initialized, initialize colors, masks, and variables
                 if (colorTracker == null) {

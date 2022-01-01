@@ -10,6 +10,7 @@ import basemod.devcommands.draw.Draw;
 import basemod.devcommands.energy.Energy;
 import basemod.devcommands.event.Event;
 import basemod.devcommands.fight.Fight;
+import basemod.devcommands.statics.EvalStatic;
 import basemod.devcommands.gold.Gold;
 import basemod.devcommands.hand.Hand;
 import basemod.devcommands.history.History;
@@ -20,6 +21,7 @@ import basemod.devcommands.maxhp.MaxHp;
 import basemod.devcommands.potions.Potions;
 import basemod.devcommands.power.Power;
 import basemod.devcommands.relic.Relic;
+import basemod.devcommands.statics.SetStatic;
 import basemod.devcommands.unlock.Unlock;
 import basemod.DevConsole;
 import com.megacrit.cardcrawl.cards.AbstractCard;
@@ -145,6 +147,8 @@ public abstract class ConsoleCommand {
         addCommand("history", History.class);
         addCommand("act", ActCommand.class);
         addCommand("key", KeyCommand.class);
+        addCommand("setstatic", SetStatic.class);
+        addCommand("evalstatic", EvalStatic.class);
 
         ActCommand.initialize();
     }
