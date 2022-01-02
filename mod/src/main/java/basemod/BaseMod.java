@@ -156,6 +156,8 @@ public class BaseMod {
 	private static ArrayList<OnPlayerLoseBlockSubscriber> onPlayerLoseBlockSubscribers;
 	private static ArrayList<OnPlayerDamagedSubscriber> onPlayerDamagedSubscribers;
 	private static ArrayList<OnCreateDescriptionSubscriber> onCreateDescriptionSubscribers;
+	private static ArrayList<StartPlayerTurnSubscriber> startPlayerTurnSubscribers;
+	private static ArrayList<StartPlayerTurnPostDrawSubscriber> startPlayerTurnPostDrawSubscribers;
 
 	private static ArrayList<AbstractCard> redToAdd;
 	private static ArrayList<String> redToRemove;
@@ -481,6 +483,8 @@ public class BaseMod {
 		onPlayerLoseBlockSubscribers = new ArrayList<>();
 		onPlayerDamagedSubscribers = new ArrayList<>();
 		onCreateDescriptionSubscribers = new ArrayList<>();
+		startPlayerTurnSubscribers = new ArrayList<>();
+		startPlayerTurnPostDrawSubscribers = new ArrayList<>();
 	}
 
 	// initializeCardLists -
@@ -2745,6 +2749,26 @@ public class BaseMod {
 		return rawDescription;
 	}
 
+	public static void publishStartPlayerTurn(int turn) {
+		logger.info("publishStartPlayerTurn turn = " + turn);
+
+		for (StartPlayerTurnSubscriber sub : startPlayerTurnSubscribers) {
+			sub.receiveStartPlayerTurn(turn);
+		}
+
+		unsubscribeLaterHelper(OnCreateDescriptionSubscriber.class);
+	}
+
+	public static void publishStartPlayerTurnPostDraw(int turn) {
+		logger.info("publishStartPlayerTurnPostDraw turn = " + turn);
+
+		for (StartPlayerTurnPostDrawSubscriber sub : startPlayerTurnPostDrawSubscribers) {
+			sub.receiveStartPlayerTurnPostDraw(turn);
+		}
+
+		unsubscribeLaterHelper(OnCreateDescriptionSubscriber.class);
+	}
+
 	//
 	// Subscription handlers
 	//
@@ -2820,6 +2844,8 @@ public class BaseMod {
 		subscribeIfInstance(onPlayerLoseBlockSubscribers, sub, OnPlayerLoseBlockSubscriber.class);
 		subscribeIfInstance(onPlayerDamagedSubscribers, sub, OnPlayerDamagedSubscriber.class);
 		subscribeIfInstance(onCreateDescriptionSubscribers, sub, OnCreateDescriptionSubscriber.class);
+		subscribeIfInstance(startPlayerTurnSubscribers, sub, StartPlayerTurnSubscriber.class);
+		subscribeIfInstance(startPlayerTurnPostDrawSubscribers, sub, StartPlayerTurnPostDrawSubscriber.class);
 	}
 
 	// subscribe -
@@ -2917,6 +2943,10 @@ public class BaseMod {
 			onPlayerDamagedSubscribers.add((OnPlayerDamagedSubscriber) sub);
 		} else if (additionClass.equals(OnCreateDescriptionSubscriber.class)) {
 			onCreateDescriptionSubscribers.add((OnCreateDescriptionSubscriber) sub);
+		} else if (additionClass.equals(StartPlayerTurnSubscriber.class)) {
+			startPlayerTurnSubscribers.add((StartPlayerTurnSubscriber) sub);
+		} else if (additionClass.equals(StartPlayerTurnPostDrawSubscriber.class)) {
+			startPlayerTurnPostDrawSubscribers.add((StartPlayerTurnPostDrawSubscriber) sub);
 		}
 	}
 
@@ -2969,6 +2999,8 @@ public class BaseMod {
 		unsubscribeIfInstance(onPlayerLoseBlockSubscribers, sub, OnPlayerLoseBlockSubscriber.class);
 		unsubscribeIfInstance(onPlayerDamagedSubscribers, sub, OnPlayerDamagedSubscriber.class);
 		unsubscribeIfInstance(onCreateDescriptionSubscribers, sub, OnCreateDescriptionSubscriber.class);
+		unsubscribeIfInstance(startPlayerTurnSubscribers, sub, StartPlayerTurnSubscriber.class);
+		unsubscribeIfInstance(startPlayerTurnPostDrawSubscribers, sub, StartPlayerTurnPostDrawSubscriber.class);
 	}
 
 	// unsubscribe -
@@ -3068,6 +3100,10 @@ public class BaseMod {
 			onPlayerDamagedSubscribers.remove(sub);
 		} else if (removalClass.equals(OnCreateDescriptionSubscriber.class)) {
 			onCreateDescriptionSubscribers.remove(sub);
+		} else if (removalClass.equals(StartPlayerTurnSubscriber.class)) {
+			startPlayerTurnSubscribers.remove(sub);
+		} else if (removalClass.equals(StartPlayerTurnPostDrawSubscriber.class)) {
+			startPlayerTurnPostDrawSubscribers.remove(sub);
 		}
 	}
 

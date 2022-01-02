@@ -18,6 +18,9 @@ public class StartBattleHook {
     )
     public static void Insert(AbstractRoom __instance) {
         BaseMod.publishStartBattle(__instance);
+
+        // Round 1
+        BaseMod.publishStartPlayerTurn(1);
     }
 
     private static class Locator extends SpireInsertLocator {
