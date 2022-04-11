@@ -113,7 +113,6 @@ public class BaseMod {
 	private static ArrayList<PostCampfireSubscriber> postCampfireSubscribers;
 	private static ArrayList<PostDrawSubscriber> postDrawSubscribers;
 	private static ArrayList<PostExhaustSubscriber> postExhaustSubscribers;
-	private static ArrayList<OnTurnStartSubscriber> onTurnStartSubscribers;
 	private static ArrayList<OnCardUseSubscriber> onCardUseSubscribers;
 	private static ArrayList<PostDungeonInitializeSubscriber> postDungeonInitializeSubscribers;
 	private static ArrayList<PostEnergyRechargeSubscriber> postEnergyRechargeSubscribers;
@@ -439,7 +438,6 @@ public class BaseMod {
 		postCampfireSubscribers = new ArrayList<>();
 		postDrawSubscribers = new ArrayList<>();
 		postExhaustSubscribers = new ArrayList<>();
-		onTurnStartSubscribers = new ArrayList<>();
 		onCardUseSubscribers = new ArrayList<>();
 		postDungeonInitializeSubscribers = new ArrayList<>();
 		postEnergyRechargeSubscribers = new ArrayList<>();
@@ -2560,16 +2558,6 @@ public class BaseMod {
 		unsubscribeLaterHelper(SetUnlocksSubscriber.class);
 	}
 
-	// publishOnTurnStart -
-	public static void publishOnTurnStart() {
-		logger.info("publish on turn start");
-
-		for (OnTurnStartSubscriber sub : onTurnStartSubscribers) {
-			sub.receiveTurnStart();
-		}
-		unsubscribeLaterHelper(OnTurnStartSubscriber.class);
-	}
-
 	// publishOnCardUse -
 	public static void publishOnCardUse(AbstractCard c) {
 		logger.info("publish on card use: " + (c == null ? "null" : c.cardID));
@@ -2789,7 +2777,6 @@ public class BaseMod {
 		subscribeIfInstance(postCampfireSubscribers, sub, PostCampfireSubscriber.class);
 		subscribeIfInstance(postDrawSubscribers, sub, PostDrawSubscriber.class);
 		subscribeIfInstance(postExhaustSubscribers, sub, PostExhaustSubscriber.class);
-		subscribeIfInstance(onTurnStartSubscribers, sub, OnTurnStartSubscriber.class);
 		subscribeIfInstance(onCardUseSubscribers, sub, OnCardUseSubscriber.class);
 		subscribeIfInstance(postDungeonInitializeSubscribers, sub, PostDungeonInitializeSubscriber.class);
 		subscribeIfInstance(postEnergyRechargeSubscribers, sub, PostEnergyRechargeSubscriber.class);
@@ -2846,8 +2833,6 @@ public class BaseMod {
 			postDrawSubscribers.add((PostDrawSubscriber) sub);
 		} else if (additionClass.equals(PostExhaustSubscriber.class)) {
 			postExhaustSubscribers.add((PostExhaustSubscriber) sub);
-		} else if (additionClass.equals(OnTurnStartSubscriber.class)) {
-			onTurnStartSubscribers.add((OnTurnStartSubscriber) sub);
 		} else if (additionClass.equals(OnCardUseSubscriber.class)) {
 			onCardUseSubscribers.add((OnCardUseSubscriber) sub);
 		} else if (additionClass.equals(PostDungeonInitializeSubscriber.class)) {
@@ -2942,7 +2927,6 @@ public class BaseMod {
 		unsubscribeIfInstance(postCampfireSubscribers, sub, PostCampfireSubscriber.class);
 		unsubscribeIfInstance(postDrawSubscribers, sub, PostDrawSubscriber.class);
 		unsubscribeIfInstance(postExhaustSubscribers, sub, PostExhaustSubscriber.class);
-		unsubscribeIfInstance(onTurnStartSubscribers, sub, OnTurnStartSubscriber.class);
 		unsubscribeIfInstance(onCardUseSubscribers, sub, OnCardUseSubscriber.class);
 		unsubscribeIfInstance(postDungeonInitializeSubscribers, sub, PostDungeonInitializeSubscriber.class);
 		unsubscribeIfInstance(postEnergyRechargeSubscribers, sub, PostEnergyRechargeSubscriber.class);
@@ -2998,8 +2982,6 @@ public class BaseMod {
 			postDrawSubscribers.remove(sub);
 		} else if (removalClass.equals(PostExhaustSubscriber.class)) {
 			postExhaustSubscribers.remove(sub);
-		} else if (removalClass.equals(OnTurnStartSubscriber.class)) {
-			onTurnStartSubscribers.remove(sub);
 		} else if (removalClass.equals(OnCardUseSubscriber.class)) {
 			onCardUseSubscribers.remove(sub);
 		} else if (removalClass.equals(PostDungeonInitializeSubscriber.class)) {
