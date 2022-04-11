@@ -3,6 +3,9 @@ package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 import basemod.BaseMod;
 import basemod.abstracts.AbstractCardModifier;
 import basemod.helpers.CardModifierManager;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.evacipated.cardcrawl.modthespire.ModInfo;
@@ -14,11 +17,15 @@ import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.CardGroup;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.AbstractCreature;
+import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
+import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 import javassist.*;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
+import javassist.expr.MethodCall;
 import org.clapper.util.classutil.*;
 import com.evacipated.cardcrawl.modthespire.Loader;
 
@@ -279,6 +286,71 @@ public class CardModifierPatches
             //OnCreateDescription subscriber
             rawDescription = BaseMod.publishOnCreateDescription(rawDescription, card);
             return rawDescription;
+        }
+    }
+
+    public static class CardModifierOnRenderCardTitle {
+        //Constants used in AbstractCard for scale formatting
+        private static final float IMG_WIDTH = 300.0F * Settings.scale;
+        //Multipliers are slightly fudged to be more forgiving to longer names
+        private static final float TITLE_BOX_WIDTH = IMG_WIDTH * 0.7F; //Was 0.6F
+        private static final float TITLE_BOX_WIDTH_NO_COST = IMG_WIDTH * 0.8F; //Was 0.7F
+        private static final GlyphLayout gl = new GlyphLayout();
+
+        public static String buildName(AbstractCard card, boolean isSCV, BitmapFont renderFont) {
+            //Build the name we will render
+            String renderName = CardModifierManager.onRenderTitle(card, card.name);
+            //If we changed the name we change the render font
+            if (!renderName.equals(card.name)) {
+                //Prep the font and determine width
+                renderFont.getData().setScale(1.0F);
+                gl.setText(renderFont, renderName, Color.WHITE, 0.0F, 1, false);
+                if (isSCV) {
+                    //SCV needs a 2x size allowance
+                    renderFont.getData().setScale(Math.max(0.6f, Math.min(1, (card.cost == -2 ? TITLE_BOX_WIDTH_NO_COST * 2 : TITLE_BOX_WIDTH * 2) / gl.width)));
+                } else {
+                    //Cards need to multiply by their own scale
+                    renderFont.getData().setScale(card.drawScale * Math.max(0.6f, Math.min(1, (card.cost == -2 ? TITLE_BOX_WIDTH_NO_COST : TITLE_BOX_WIDTH) / gl.width)));
+                }
+                gl.reset();
+            }
+            return renderName;
+        }
+
+        @SpirePatch2(clz = AbstractCard.class, method = "renderTitle")
+        public static class CardModifierOnCardRender {
+            @SpireInstrumentPatch
+            public static ExprEditor patch() {
+                return new ExprEditor() {
+                    @Override
+                    public void edit(MethodCall m) throws CannotCompileException {
+                        if (m.getClassName().equals(FontHelper.class.getName()) && m.getMethodName().equals("renderRotatedText")) {
+                            m.replace("{" +
+                                    "$3 = " + CardModifierPatches.CardModifierOnRenderCardTitle.class.getName() + ".buildName(this, false, $2);" +
+                                    "$proceed($$);" +
+                                    "}");
+                        }
+                    }
+                };
+            }
+        }
+
+        @SpirePatch2(clz = SingleCardViewPopup.class, method = "renderTitle")
+        public static class CardModifierOnSCVRender {
+            @SpireInstrumentPatch
+            public static ExprEditor patch() {
+                return new ExprEditor() {
+                    @Override
+                    public void edit(MethodCall m) throws CannotCompileException {
+                        if (m.getClassName().equals(FontHelper.class.getName()) && m.getMethodName().equals("renderFontCentered")) {
+                            m.replace("{" +
+                                    "$3 = " + CardModifierPatches.CardModifierOnRenderCardTitle.class.getName() + ".buildName(this.card, true, $2);" +
+                                    "$proceed($$);" +
+                                    "}");
+                        }
+                    }
+                };
+            }
         }
     }
 

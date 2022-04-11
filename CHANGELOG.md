@@ -831,4 +831,30 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 #### v5.35.1 ####
 * Fix weird possible crash with dynamic text blocks (kiooeht)
 
+#### v5.36.0 ####
+* Add OnPlayerTurnStartSubscriber (kiooeht/Alchyr/herbix)
+* Add OnPlayerTurnStartPostDrawSubscriber (kiooeht/Alchyr/herbix)
+* Fix crash when no shrine events are available (modargo)
+* Fix some issues with basic cardmods (erasels)
+  * Capitalize cardmod keywords
+  * Move Exhaust cardmod to end of description
+
+#### v5.37.0 ####
+* Fix crash in card power tips (JohnnyDevo)
+* Add controller support for CustomCharacterSelectScreen pages (kobting)
+
+#### v5.37.1 ####
+* Fix main menu settings crash (herbix)
+* Fix cardmods not respecting action queue with automatic removal (JohnnyDevo)
+
+#### v5.38.0 ####
+* Add !Turn! to dynamic text (Mistress Alison)
+* Add modifyName to CardMods (Mistress Alison)
+* Fix card tintColor (herbix)
+
+#### v5.39.0 ####
+* Make dynamic text work in upgrades and upgrade previews (Mistress Alison)
+* Add CardModifier support to WhatMod (kiooeht)
+* Fix crash in ZHT with modded keywords (modargo)
+
 #### dev ####

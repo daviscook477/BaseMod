@@ -36,6 +36,7 @@ import com.evacipated.cardcrawl.modthespire.lib.SpireField;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.audio.Sfx;
 import com.megacrit.cardcrawl.audio.SoundMaster;
 import com.megacrit.cardcrawl.cards.AbstractCard;
@@ -156,6 +157,8 @@ public class BaseMod {
 	private static ArrayList<OnPlayerLoseBlockSubscriber> onPlayerLoseBlockSubscribers;
 	private static ArrayList<OnPlayerDamagedSubscriber> onPlayerDamagedSubscribers;
 	private static ArrayList<OnCreateDescriptionSubscriber> onCreateDescriptionSubscribers;
+	private static ArrayList<OnPlayerTurnStartSubscriber> onPlayerTurnStartSubscribers;
+	private static ArrayList<OnPlayerTurnStartPostDrawSubscriber> onPlayerTurnStartPostDrawSubscribers;
 
 	private static ArrayList<AbstractCard> redToAdd;
 	private static ArrayList<String> redToRemove;
@@ -481,6 +484,8 @@ public class BaseMod {
 		onPlayerLoseBlockSubscribers = new ArrayList<>();
 		onPlayerDamagedSubscribers = new ArrayList<>();
 		onCreateDescriptionSubscribers = new ArrayList<>();
+		onPlayerTurnStartSubscribers = new ArrayList<>();
+		onPlayerTurnStartPostDrawSubscribers = new ArrayList<>();
 	}
 
 	// initializeCardLists -
@@ -2745,6 +2750,22 @@ public class BaseMod {
 		return rawDescription;
 	}
 
+	public static void publishOnPlayerTurnStart() {
+		for (OnPlayerTurnStartSubscriber sub : onPlayerTurnStartSubscribers) {
+			sub.receiveOnPlayerTurnStart();
+		}
+
+		unsubscribeLaterHelper(OnPlayerTurnStartSubscriber.class);
+	}
+
+	public static void publishOnPlayerTurnStartPostDraw() {
+		for (OnPlayerTurnStartPostDrawSubscriber sub : onPlayerTurnStartPostDrawSubscribers) {
+			sub.receiveOnPlayerTurnStartPostDraw();
+		}
+
+		unsubscribeLaterHelper(OnPlayerTurnStartPostDrawSubscriber.class);
+	}
+
 	//
 	// Subscription handlers
 	//
@@ -2820,6 +2841,8 @@ public class BaseMod {
 		subscribeIfInstance(onPlayerLoseBlockSubscribers, sub, OnPlayerLoseBlockSubscriber.class);
 		subscribeIfInstance(onPlayerDamagedSubscribers, sub, OnPlayerDamagedSubscriber.class);
 		subscribeIfInstance(onCreateDescriptionSubscribers, sub, OnCreateDescriptionSubscriber.class);
+		subscribeIfInstance(onPlayerTurnStartSubscribers, sub, OnPlayerTurnStartSubscriber.class);
+		subscribeIfInstance(onPlayerTurnStartPostDrawSubscribers, sub, OnPlayerTurnStartPostDrawSubscriber.class);
 	}
 
 	// subscribe -
@@ -2917,6 +2940,10 @@ public class BaseMod {
 			onPlayerDamagedSubscribers.add((OnPlayerDamagedSubscriber) sub);
 		} else if (additionClass.equals(OnCreateDescriptionSubscriber.class)) {
 			onCreateDescriptionSubscribers.add((OnCreateDescriptionSubscriber) sub);
+		} else if (additionClass.equals(OnPlayerTurnStartSubscriber.class)) {
+			onPlayerTurnStartSubscribers.add((OnPlayerTurnStartSubscriber) sub);
+		} else if (additionClass.equals(OnPlayerTurnStartPostDrawSubscriber.class)) {
+			onPlayerTurnStartPostDrawSubscribers.add((OnPlayerTurnStartPostDrawSubscriber) sub);
 		}
 	}
 
@@ -2969,6 +2996,8 @@ public class BaseMod {
 		unsubscribeIfInstance(onPlayerLoseBlockSubscribers, sub, OnPlayerLoseBlockSubscriber.class);
 		unsubscribeIfInstance(onPlayerDamagedSubscribers, sub, OnPlayerDamagedSubscriber.class);
 		unsubscribeIfInstance(onCreateDescriptionSubscribers, sub, OnCreateDescriptionSubscriber.class);
+		unsubscribeIfInstance(onPlayerTurnStartSubscribers, sub, OnPlayerTurnStartSubscriber.class);
+		unsubscribeIfInstance(onPlayerTurnStartPostDrawSubscribers, sub, OnPlayerTurnStartPostDrawSubscriber.class);
 	}
 
 	// unsubscribe -
@@ -3068,6 +3097,10 @@ public class BaseMod {
 			onPlayerDamagedSubscribers.remove(sub);
 		} else if (removalClass.equals(OnCreateDescriptionSubscriber.class)) {
 			onCreateDescriptionSubscribers.remove(sub);
+		} else if (removalClass.equals(OnPlayerTurnStartSubscriber.class)) {
+			onPlayerTurnStartSubscribers.remove(sub);
+		} else if (removalClass.equals(OnPlayerTurnStartPostDrawSubscriber.class)) {
+			onPlayerTurnStartPostDrawSubscribers.remove(sub);
 		}
 	}
 

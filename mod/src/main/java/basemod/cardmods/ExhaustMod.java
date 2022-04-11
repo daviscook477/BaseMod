@@ -4,13 +4,14 @@ import basemod.abstracts.AbstractCardModifier;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.helpers.GameDictionary;
 import com.megacrit.cardcrawl.localization.LocalizedStrings;
+import org.apache.commons.lang3.StringUtils;
 
 public class ExhaustMod extends AbstractCardModifier {
     public static String ID = "basemod:ExhaustCardModifier";
 
     @Override
     public String modifyDescription(String rawDescription, AbstractCard card) {
-        return GameDictionary.EXHAUST.NAMES[0] + LocalizedStrings.PERIOD + " NL " + rawDescription;
+        return rawDescription + " NL " + StringUtils.capitalize(GameDictionary.EXHAUST.NAMES[0]) + LocalizedStrings.PERIOD;
     }
 
     @Override

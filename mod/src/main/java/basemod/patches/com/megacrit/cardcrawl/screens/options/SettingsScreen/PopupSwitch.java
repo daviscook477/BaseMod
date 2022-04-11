@@ -12,6 +12,11 @@ import com.megacrit.cardcrawl.screens.options.SettingsScreen;
 public class PopupSwitch {
 	@SpireInsertPatch(rloc=35)
 	public static void Insert(Object __obj_instance, Object typeObj) {
+		// Probably not in a game
+		if (AbstractDungeon.player == null) {
+			return;
+		}
+
 		SettingsScreen screen = (SettingsScreen) __obj_instance;
 		AbstractPlayer.PlayerClass selection = AbstractDungeon.player.chosenClass;
 		if (!BaseMod.isBaseGameCharacter(selection)) {

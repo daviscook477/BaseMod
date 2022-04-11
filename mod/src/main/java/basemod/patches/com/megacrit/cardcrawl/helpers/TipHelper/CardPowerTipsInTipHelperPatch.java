@@ -27,7 +27,7 @@ public class CardPowerTipsInTipHelperPatch {
     )
     public static class PowerTipHeightPatch {
         public static SpireReturn<Float> Prefix(PowerTip powerTip) {
-            if (powerTip instanceof CardPowerTip && (powerTip.header == null || powerTip.body == null)) {
+            if (powerTip instanceof CardPowerTip && ("".equals(powerTip.header) || "".equals(powerTip.body))) {
                 if (boxEdgeH == null) {
                     boxEdgeH = (float)ReflectionHacks.getPrivateStatic(TipHelper.class, "BOX_EDGE_H") * 3.15f;
                 }
@@ -37,7 +37,7 @@ public class CardPowerTipsInTipHelperPatch {
         }
 
         public static float Postfix(float __result, PowerTip powerTip) {
-            if (powerTip instanceof CardPowerTip && powerTip.header != null && powerTip.body != null) {
+            if (powerTip instanceof CardPowerTip && !"".equals(powerTip.header) && !"".equals(powerTip.body)) {
                 ((CardPowerTip)powerTip).textHeight = __result;
                 if (boxEdgeH == null) {
                     boxEdgeH = (float)ReflectionHacks.getPrivateStatic(TipHelper.class, "BOX_EDGE_H") * 3.15f;
@@ -59,10 +59,8 @@ public class CardPowerTipsInTipHelperPatch {
                     if (m.getClassName().equals(TipHelper.class.getName()) && m.getMethodName().equals("renderTipBox")) {
                         String manager = AlternateCardCosts.class.getName();
                         String energy = EnergyPanel.class.getName();
-                        m.replace("if (tip.header != null && tip.body != null) {" +
+                        m.replace("if (!\"\".equals(tip.header) && !\"\".equals(tip.body)) {" +
                                     "$proceed($$);" +
-                                "} else {" +
-                                    "tip.header = \"\";" +
                                 "}"
                         );
                     }
@@ -88,7 +86,7 @@ public class CardPowerTipsInTipHelperPatch {
                 AbstractCard card = ((CardPowerTip)tip).card;
                 card.current_x = x + (boxW / 2.0f);
                 card.current_y = y - (((CardPowerTip)tip).textHeight + ((AbstractCard.IMG_HEIGHT / 2.0f) * ((CardPowerTip)tip).cardScale));
-                if (((CardPowerTip)tip).body != null) {
+                if (!"".equals(tip.body)) {
                     if (boxEdgeH == null) {
                         boxEdgeH = (float)ReflectionHacks.getPrivateStatic(TipHelper.class, "BOX_EDGE_H") * 3.15f;
                     }
@@ -118,7 +116,7 @@ public class CardPowerTipsInTipHelperPatch {
                 localvars = {"tip", "offsetChange"}
         )
         public static void Insert(float x, float y, SpriteBatch sb, ArrayList<PowerTip> powerTips, PowerTip powerTip, @ByRef float[] offsetChange) {
-            if (powerTip instanceof CardPowerTip && (powerTip.body == null || powerTip.header == null)) {
+            if (powerTip instanceof CardPowerTip && ("".equals(powerTip.body) || "".equals(powerTip.header))) {
                 if (boxEdgeH == null) {
                     boxEdgeH = (float)ReflectionHacks.getPrivateStatic(TipHelper.class, "BOX_EDGE_H") * 3.15f;
                 }

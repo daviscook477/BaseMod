@@ -75,6 +75,14 @@ public abstract class AbstractCardModifier implements Comparable<AbstractCardMod
     }
 
     /**
+     * Intercepts the rendering of a card's name at the time that renderTitle is called.
+     * cardName can be manipulated freely at this point, and then the game will parse it as normal.
+     */
+    public String modifyName(String cardName, AbstractCard card) {
+        return cardName;
+    }
+
+    /**
      * Called when the card is used, same timing as onUseCard hooks in powers and relics.
      * If the card has no target, target will be null.
      */

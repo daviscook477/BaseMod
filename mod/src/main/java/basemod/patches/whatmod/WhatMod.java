@@ -16,29 +16,45 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class WhatMod
 {
 	public static boolean enabled = true;
 
-	private static final float BODY_TEXT_WIDTH = 280.0F * Settings.scale;
-	private static final float TIP_DESC_LINE_SPACING = 26.0F * Settings.scale;
-
-	static void renderModTooltip(SpriteBatch sb, Class<?> cls)
+	static void renderModTooltip(SpriteBatch sb, Class<?>... cls)
 	{
-		renderModTooltip(sb, cls, Settings.WIDTH / 2f + 340.0f * Settings.scale, 700.0f * Settings.scale);
+		renderModTooltip(sb, Settings.WIDTH / 2f + 340.0f * Settings.scale, 700.0f * Settings.scale, cls);
 	}
 
 	static void renderModTooltip(SpriteBatch sb, Class<?> cls, float x, float y)
 	{
+		renderModTooltip(sb, x, y, cls);
+	}
+
+	private static String getBody(Class<?>... cls)
+	{
+		Set<String> modNames = new LinkedHashSet<>();
+		for (Class<?> c : cls) {
+			String name = findModName(c);
+			if (name == null) {
+				name = "Not modded content";
+			}
+			modNames.add(name);
+		}
+		return String.join(" NL + ", modNames);
+	}
+
+	static void renderModTooltip(SpriteBatch sb, float x, float y, Class<?>... cls)
+	{
+		float BODY_TEXT_WIDTH = 280.0F * Settings.scale;
+		float TIP_DESC_LINE_SPACING = 26.0F * Settings.scale;
+
 		String title = "What mod is this from?";
-		String body;
 
 		try {
-			body = findModName(cls);
-			if (body == null) {
-				body = "Not modded content";
-			}
+			String body = getBody(cls);
 
 			Field textHeight = TipHelper.class.getDeclaredField("textHeight");
 			textHeight.setAccessible(true);
@@ -46,12 +62,30 @@ public class WhatMod
 			Method renderTipBox = TipHelper.class.getDeclaredMethod("renderTipBox", float.class, float.class, SpriteBatch.class, String.class, String.class);
 			renderTipBox.setAccessible(true);
 
-			textHeight.setFloat(null, -FontHelper.getSmartHeight(FontHelper.tipBodyFont, body, BODY_TEXT_WIDTH, TIP_DESC_LINE_SPACING) - 7.0f * Settings.scale);
+			float height = -FontHelper.getSmartHeight(FontHelper.tipBodyFont, body, BODY_TEXT_WIDTH, TIP_DESC_LINE_SPACING);
+			textHeight.setFloat(null, height - 7.0f * Settings.scale);
 
 			renderTipBox.invoke(null, x, y, sb, title, body);
 		} catch (IllegalAccessException | NoSuchFieldException | NoSuchMethodException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
+	}
+
+	static void renderModTooltipBottomLeft(SpriteBatch sb, Class<?>... cls)
+	{
+		renderModTooltipBottomLeft(sb, Settings.WIDTH / 2f + 340.0f * Settings.scale, 700.0f * Settings.scale, cls);
+	}
+
+	static void renderModTooltipBottomLeft(SpriteBatch sb, float x, float y, Class<?>... cls)
+	{
+		float BODY_TEXT_WIDTH = 280.0F * Settings.scale;
+		float TIP_DESC_LINE_SPACING = 26.0F * Settings.scale;
+
+		String body = getBody(cls);
+
+		float height = -FontHelper.getSmartHeight(FontHelper.tipBodyFont, body, BODY_TEXT_WIDTH, TIP_DESC_LINE_SPACING);
+
+		renderModTooltip(sb, x, y + height, cls);
 	}
 
 	static URL findModURL(Class<?> cls)
