@@ -17,10 +17,19 @@ public class FixLargeRelicArt
 {
 	public static void Postfix(SingleRelicViewPopup __instance, AbstractRelic ___relic, @ByRef Texture[] ___largeImg)
 	{
-		if (___largeImg[0] == null && ___relic.largeImg != null) {
-			TextureData textureData = ___relic.largeImg.getTextureData();
-			if (textureData instanceof FileTextureData) {
-				___largeImg[0] = ImageMaster.loadImage(((FileTextureData) textureData).getFileHandle().path());
+		if (___largeImg[0] == null) {
+			if (___relic.largeImg != null) {
+				TextureData textureData = ___relic.largeImg.getTextureData();
+				if (textureData instanceof FileTextureData) {
+					___largeImg[0] = ImageMaster.loadImage(((FileTextureData) textureData).getFileHandle().path());
+				}
+			}
+			else {
+				___relic.loadLargeImg();
+				if (___relic.largeImg != null) {
+					___largeImg[0] = ___relic.largeImg;
+					___relic.largeImg = null;
+				}
 			}
 		}
 	}
