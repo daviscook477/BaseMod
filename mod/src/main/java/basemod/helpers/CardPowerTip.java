@@ -12,8 +12,8 @@ public class CardPowerTip extends PowerTip {
 
     public CardPowerTip(AbstractCard card) {
         this.card = card;
-        header = null;
-        body = null;
+        header = "";
+        body = "";
         img = null;
         imgRegion = null;
     }

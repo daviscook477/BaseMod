@@ -54,7 +54,7 @@ public class CreateCardImageSwitch {
 			}
 			
 			//sets the tint and shadow colors
-			ReflectionHacks.setPrivate(__instance, AbstractCard.class, "tintColor", new Color(43.0f, 37.0f, 65.0f, 0.0f));
+			ReflectionHacks.setPrivate(__instance, AbstractCard.class, "tintColor", new Color(43.0f / 255.0f, 37.0f / 255.0f, 65.0f / 255.0f, 0.0f));
 			ReflectionHacks.setPrivate(__instance, AbstractCard.class, "frameShadowColor", 
 					((Color) ReflectionHacks.getPrivateStatic(AbstractCard.class, "FRAME_SHADOW_COLOR")).cpy());
 			

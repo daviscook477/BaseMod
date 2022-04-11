@@ -3,10 +3,12 @@ package basemod.helpers;
 import basemod.abstracts.AbstractCardModifier;
 import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.CardModifierPatches;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.actions.utility.UseCardAction;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.CardGroup;
 import com.megacrit.cardcrawl.core.AbstractCreature;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 
 import java.util.ArrayList;
@@ -129,27 +131,37 @@ public class CardModifierManager
     }
 
     public static void removeEndOfTurnModifiers(AbstractCard card) {
-        Iterator<AbstractCardModifier> it = modifiers(card).iterator();
-        while (it.hasNext()) {
-            AbstractCardModifier mod = it.next();
+        ArrayList<AbstractCardModifier> modifiers = modifiers(card);
+        for (AbstractCardModifier mod : modifiers) {
             if (mod.removeAtEndOfTurn(card)) {
-                it.remove();
-                mod.onRemove(card);
+                addToBot(new AbstractGameAction() {
+                    @Override
+                    public void update() {
+                        modifiers.remove(mod);
+                        mod.onRemove(card);
+                        card.initializeDescription();
+                        isDone = true;
+                    }
+                });
             }
         }
-        card.initializeDescription();
     }
 
     public static void removeWhenPlayedModifiers(AbstractCard card) {
-        Iterator<AbstractCardModifier> it = modifiers(card).iterator();
-        while (it.hasNext()) {
-            AbstractCardModifier mod = it.next();
+        ArrayList<AbstractCardModifier> modifiers = modifiers(card);
+        for (AbstractCardModifier mod : modifiers) {
             if (mod.removeOnCardPlayed(card)) {
-                it.remove();
-                mod.onRemove(card);
+                addToBot(new AbstractGameAction() {
+                    @Override
+                    public void update() {
+                        modifiers.remove(mod);
+                        mod.onRemove(card);
+                        card.initializeDescription();
+                        isDone = true;
+                    }
+                });
             }
         }
-        card.initializeDescription();
     }
 
     public static void onApplyPowers(AbstractCard card) {
@@ -169,6 +181,13 @@ public class CardModifierManager
             rawDescription = mod.modifyDescription(rawDescription, card);
         }
         return rawDescription;
+    }
+
+    public static String onRenderTitle(AbstractCard card, String cardName) {
+        for (AbstractCardModifier mod : modifiers(card)) {
+            cardName = mod.modifyName(cardName, card);
+        }
+        return cardName;
     }
 
     public static void onUseCard(AbstractCard card, AbstractCreature target, UseCardAction action) {
@@ -254,5 +273,13 @@ public class CardModifierManager
             }
         }
         return true;
+    }
+
+    private static void addToBot(AbstractGameAction action) {
+        AbstractDungeon.actionManager.addToBottom(action);
+    }
+
+    private static void addToTop(AbstractGameAction action) {
+        AbstractDungeon.actionManager.addToTop(action);
     }
 }

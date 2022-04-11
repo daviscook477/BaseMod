@@ -4,13 +4,14 @@ import basemod.abstracts.AbstractCardModifier;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.helpers.GameDictionary;
 import com.megacrit.cardcrawl.localization.LocalizedStrings;
+import org.apache.commons.lang3.StringUtils;
 
 public class InnateMod extends AbstractCardModifier {
     public static String ID = "basemod:InnateCardModifier";
 
     @Override
     public String modifyDescription(String rawDescription, AbstractCard card) {
-        return GameDictionary.INNATE.NAMES[0] + LocalizedStrings.PERIOD + " NL " + rawDescription;
+        return StringUtils.capitalize(GameDictionary.INNATE.NAMES[0]) + LocalizedStrings.PERIOD + " NL " + rawDescription;
     }
 
     @Override
