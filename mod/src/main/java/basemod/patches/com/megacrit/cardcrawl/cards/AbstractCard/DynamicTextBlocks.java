@@ -2,8 +2,10 @@ package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
 import basemod.BaseMod;
 import com.evacipated.cardcrawl.modthespire.lib.*;
+import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.CardGroup;
+import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.screens.ExhaustPileViewScreen;
@@ -20,8 +22,6 @@ public class DynamicTextBlocks {
     private static final String REGEX = "\\{!.*?!\\|.*?}";
     private static final String DYNAMIC_KEY = "{@@}";
     private static final Pattern PATTERN = Pattern.compile(REGEX);
-
-    //TODO: Efficiency improvements?
 
     //Spire Field for fixing the Location var in ExhaustPileViewScreen thanks to the fact it returns a copy of the card that isn't actually in the Exhaust pile when you pull up the screen
     @SpirePatch(clz= AbstractCard.class, method=SpirePatch.CLASS)
@@ -87,6 +87,28 @@ public class DynamicTextBlocks {
         public static void updateAfter(CardGroup __instance, AbstractCard c) {
             if (DynamicTextField.isDynamic.get(c)) {
                 c.initializeDescription();
+            }
+        }
+    }
+
+    //Force an update when a card is upgraded in master deck. We dont have an onUpgrade hook but basegame permanent upgrades call this method after upgrading.
+    @SpirePatch2(clz = AbstractPlayer.class, method = "bottledCardUpgradeCheck")
+    public static class UpdateOnMasterDeckUpgrade {
+        @SpirePostfixPatch
+        public static void onUpgrade(AbstractCard c) {
+            if (DynamicTextField.isDynamic.get(c)) {
+                c.initializeDescription();
+            }
+        }
+    }
+
+    //Force an update in the smithing preview
+    @SpirePatch2(clz = AbstractCard.class, method = "displayUpgrades")
+    public static class UpdateOnUpgradePreview {
+        @SpirePostfixPatch
+        public static void onPreview(AbstractCard __instance) {
+            if (DynamicTextField.isDynamic.get(__instance)) {
+                __instance.initializeDescription();
             }
         }
     }
@@ -157,8 +179,14 @@ public class DynamicTextBlocks {
                 }
             }
         } else if (parts[0].equals("!Upgrades!")) {
-            //Used to grab the amount of times the card was upgraded. Again, isn't a real dynvar
+            //Used to grab the amount of times the card was upgraded. Isn't a real dynvar
             var = c.timesUpgraded;
+        } else if (parts[0].equals("!Turn!")) {
+            //Used to grab the turn amount. Isn't a real dynvar
+            var = -1;
+            if (AbstractDungeon.player != null) {
+                var = GameActionManager.turn;
+            }
         } else if (BaseMod.cardDynamicVariableMap.containsKey(parts[0].replace("!",""))) {
             //Check to see if it's a recognized dynvar registered by some mod
             var = BaseMod.cardDynamicVariableMap.get(parts[0].replace("!","")).value(c);

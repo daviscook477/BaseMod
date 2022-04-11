@@ -7,6 +7,8 @@ import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.helpers.controller.CInputActionSet;
+import com.megacrit.cardcrawl.helpers.controller.CInputHelper;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import com.megacrit.cardcrawl.screens.charSelect.CharacterOption;
 import com.megacrit.cardcrawl.screens.charSelect.CharacterSelectScreen;
@@ -77,12 +79,50 @@ public class CustomCharacterSelectScreen extends CharacterSelectScreen {
     @Override
     public void update() {
         super.update();
+
         if (this.selectIndex < this.maxSelectIndex) {
             rightArrow.update();
         }
         if (this.selectIndex != 0) {
             leftArrow.update();
         }
+    }
+
+    /**
+     * Handles changing character select screen pages with controller.
+     * Called by {@link basemod.patches.com.megacrit.cardcrawl.screens.mainMenu.MainMenuScreen.CharacterSelectControllerSupport}
+     */
+    public boolean updateCharSelectController() {
+        for (CharacterOption option : options) {
+            if(option.selected) {
+                int indexOfOption = options.indexOf(option);
+                boolean atEndOfPage = (indexOfOption + 1) % optionsPerIndex == 0 && selectIndex != maxSelectIndex;
+                if(atEndOfPage) {
+                    if(CInputHelper.isJustPressed(CInputActionSet.right.keycode)) {
+                        setCurrentOptions(true);
+                        selectOption(0);
+                        return true;
+                    }
+                }
+
+                boolean atBeginningOfPage = indexOfOption == 0 && selectIndex != 0;
+                if(atBeginningOfPage) {
+                    if(CInputHelper.isJustPressed(CInputActionSet.left.keycode)) {
+                        setCurrentOptions(false);
+                        selectOption(options.size() - 1);
+                        return true;
+                    }
+                }
+
+            }
+        }
+        return false;
+    }
+
+    private void selectOption(int index) {
+        Hitbox nextFocusedOptionHitBox = options.get(index).hb;
+        CInputHelper.setCursor(nextFocusedOptionHitBox);
+        nextFocusedOptionHitBox.clicked = true;
     }
 
     private void positionButtons() {
