@@ -11,8 +11,12 @@ import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.DescriptionLine;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
+import com.megacrit.cardcrawl.localization.LocalizedStrings;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
+import javassist.expr.ExprEditor;
+import javassist.expr.FieldAccess;
+import javassist.expr.MethodCall;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -20,7 +24,7 @@ import java.util.regex.Pattern;
 
 public class RenderDescriptionEnergy
 {
-    private static Pattern r = Pattern.compile("\\[([RGBE])\\](\\.?) ");
+    private static Pattern r = Pattern.compile("\\[([RGBWE])\\](\\.?) ");
 
     @SpirePatch(
             clz=AbstractCard.class,
@@ -60,6 +64,74 @@ public class RenderDescriptionEnergy
         }
     }
 
+    //Energy Icon Positioning
+    @SpirePatch(
+            clz = AbstractCard.class,
+            method = "renderSmallEnergy"
+    )
+    public static class RemoveSmallEnergyOffsetExtraScaling {
+        @SpireInstrumentPatch
+        public static ExprEditor adjustParams()
+        {
+            return new ExprEditor() {
+                @Override
+                public void edit(MethodCall m) throws CannotCompileException {
+                    //This method draws based on the bottom left corner of the icon
+                    //x and y are passed in as offset from current_x and current_y to bottom left corner, ignoring card's scale and rotation.
+                    //This patch removes scaling incorrectly applied to the region's offsetX.
+                    if ("draw".equals(m.getMethodName())) {
+                        m.replace(
+                                "$proceed($1, " +
+                                        "current_x + x + region.offsetX, " +
+                                        "current_y + y + region.offsetY, " +
+                                        "-x - region.offsetX, -y - region.offsetY, " + //Use x and y as offset, meaning the scaling point is the center of the card
+                                        "$6, $7, " + //region width and height
+                                        "$8, $9, " + //Settings.scale * drawScale
+                                        "angle, " + //Rotate around card center
+                                        "$11, $12, $13, $14, $15, $16);" //region info
+                        );
+                    }
+                }
+            };
+        }
+    }
+
+    @SpirePatch(
+            clz = AbstractCard.class,
+            method = "renderDescription"
+    )
+    public static class AdjustEnergyWidth {
+        public static String PERIOD_SPACE = " "; //Updated in postInitialize
+
+        @SpireInstrumentPatch
+        public static ExprEditor adjustParams()
+        {
+            return new ExprEditor() {
+                int glWidthSetIndex = 0;
+                @Override
+                public void edit(FieldAccess f) throws CannotCompileException {
+                    if (f.isWriter() && f.getFieldName().equals("width") && f.getClassName().equals(GlyphLayout.class.getName())) {
+                        if (glWidthSetIndex < 8) {
+                            if (glWidthSetIndex == 1) {
+                                //Specifically for red energy. The original becomes way too wide at low scale.
+                                f.replace(
+                                        "gl.setText(font, \" \");" +
+                                                "gl.width = gl.width + CARD_ENERGY_IMG_WIDTH * drawScale;");
+                            }
+                            else if (glWidthSetIndex % 2 == 1) {
+                                //With period.
+                                f.replace(
+                                        "gl.setText(font, " + AdjustEnergyWidth.class.getName() + ".PERIOD_SPACE);" +
+                                                "gl.width = gl.width + CARD_ENERGY_IMG_WIDTH * drawScale;");
+                            }
+                            ++glWidthSetIndex;
+                        }
+                    }
+                }
+            };
+        }
+    }
+
     @SpirePatch(
             clz=AbstractCard.class,
             method="renderDescription"
@@ -72,6 +144,32 @@ public class RenderDescriptionEnergy
     {
         private static final float CARD_ENERGY_IMG_WIDTH = 24.0f * Settings.scale;
 
+        //Adjust standard energy rendering
+        @SpireInstrumentPatch
+        public static ExprEditor adjustParams()
+        {
+            return new ExprEditor() {
+                @Override
+                public void edit(MethodCall m) throws CannotCompileException {
+                    if ("renderSmallEnergy".equals(m.getMethodName())) {
+                        m.replace(
+                                "$proceed($1, $2, $3, " + //sb, image, and x are all fine.
+                                        "(draw_y + (float)i * 1.45F * -font.getCapHeight() - 6f - current_y" +
+                                        //offset y as used by FontHelper's render method. `-current_y` converts it to an offset.
+                                        //An exact pixel offset that is already scaled.
+                                        " + font.getCapHeight())" +
+                                        //Extra upwards adjustment based on font height because of Stupid Text Rendering Code
+                                        " / drawScale / " + Settings.class.getName() + ".scale" +
+                                        //Un-scale it because the icon rendering utilizes scaling again.
+                                        " - 26);"
+                                //Icon offset
+                        );
+                    }
+                }
+            };
+        }
+
+        //Add custom energy rendering
         @SpireInsertPatch(
                 locator=Locator.class,
                 localvars={"spacing", "i", "start_x", "draw_y", "font", "textColor", "tmp", "gl"}
@@ -81,18 +179,23 @@ public class RenderDescriptionEnergy
         {
             Matcher m = r.matcher(tmp[0]);
             if (tmp[0].equals("[E]") || m.find()) {
-                gl.width = CARD_ENERGY_IMG_WIDTH * __instance.drawScale;
-                float tmp2 = (__instance.description.size() - 4) * spacing;
                 __instance.renderSmallEnergy(sb, BaseMod.getCardSmallEnergy(__instance),
                         (start_x[0] - __instance.current_x) / Settings.scale / __instance.drawScale,
-                        -100.0f - ((__instance.description.size() - 4.0f) / 2.0f - i + 1.0f) * spacing);
+                        (draw_y + i * 1.45f * -font.getCapHeight() - 6f - __instance.current_y + font.getCapHeight()) / Settings.scale / __instance.drawScale - 26);
+
                 if (!tmp[0].equals("[E]") && m.group(2).equals(".")) {
-                    FontHelper.renderRotatedText(sb, font, ".",
+                    FontHelper.renderRotatedText(sb, font, LocalizedStrings.PERIOD,
                             __instance.current_x, __instance.current_y,
                             start_x[0] - __instance.current_x + CARD_ENERGY_IMG_WIDTH * __instance.drawScale,
                             i * 1.45f * -font.getCapHeight() + draw_y - __instance.current_y - 6.0f,
                             __instance.angle, true, textColor);
+                    gl.setText(font, AdjustEnergyWidth.PERIOD_SPACE);
+                    gl.width += CARD_ENERGY_IMG_WIDTH * __instance.drawScale;
                 }
+                else {
+                    gl.width = CARD_ENERGY_IMG_WIDTH * __instance.drawScale;
+                }
+
                 start_x[0] += gl.width;
                 tmp[0] = "";
             }
