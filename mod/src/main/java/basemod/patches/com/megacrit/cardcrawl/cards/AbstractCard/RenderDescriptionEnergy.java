@@ -293,9 +293,9 @@ public class RenderDescriptionEnergy
                 locator=Locator.class,
                 localvars={"word"}
         )
-        public static void Insert(AbstractCard __instance, @ByRef String[] word)
+        public static void Insert(AbstractCard __instance, String word)
         {
-            if (word[0].equals("[E]") && !__instance.keywords.contains("[E]")) {
+            if ("[E]".equals(word) && !__instance.keywords.contains("[E]")) {
                 __instance.keywords.add("[E]");
             }
         }
