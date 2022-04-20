@@ -287,13 +287,28 @@ public class RenderDescriptionEnergy
             clz=AbstractCard.class,
             method="initializeDescriptionCN"
     )
-    public static class AlterEnergyKeyword
+    public static class InitializeDescriptionPatches
     {
+        //Adjust width calculation
+        @SpireInstrumentPatch
+        public static ExprEditor adjustParams()
+        {
+            return new ExprEditor() {
+                @Override
+                public void edit(FieldAccess f) throws CannotCompileException {
+                    if (f.isReader() && "CARD_ENERGY_IMG_WIDTH".equals(f.getFieldName()) && AbstractCard.class.getName().equals(f.getClassName())) {
+                        f.replace("$_ = $proceed()" +
+                                " * ((Float)" + ShrinkLongDescription.Scale.class.getName() + ".descriptionScale.get(this)).floatValue();");
+                    }
+                }
+            };
+        }
+
         @SpireInsertPatch(
                 locator=Locator.class,
                 localvars={"word"}
         )
-        public static void Insert(AbstractCard __instance, String word)
+        public static void AlterEnergyKeyword(AbstractCard __instance, String word)
         {
             if ("[E]".equals(word) && !__instance.keywords.contains("[E]")) {
                 __instance.keywords.add("[E]");
