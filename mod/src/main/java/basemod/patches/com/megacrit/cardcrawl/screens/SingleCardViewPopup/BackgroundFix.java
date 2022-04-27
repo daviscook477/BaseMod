@@ -127,7 +127,7 @@ public class BackgroundFix
 		@SuppressWarnings("unused")
 		public static TextureAtlas.AtlasRegion getEnergyOrb(AbstractCard card, TextureAtlas.AtlasRegion orb)
 		{
-			if (card.color == AbstractCard.CardColor.COLORLESS) {
+			if (card.color == AbstractCard.CardColor.COLORLESS || card.color == AbstractCard.CardColor.CURSE) {
 				return orb;
 			}
 
