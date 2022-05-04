@@ -214,6 +214,13 @@ public class CardModifierManager
         }
     }
 
+    public static float onModifyBaseDamage(float damage, AbstractCard card, AbstractMonster mo) {
+        for (AbstractCardModifier mod : modifiers(card)) {
+            damage = mod.modifyBaseDamage(damage, card.damageTypeForTurn, card, mo);
+        }
+        return damage;
+    }
+
     public static float onModifyDamage(float damage, AbstractCard card, AbstractMonster mo) {
         for (AbstractCardModifier mod : modifiers(card)) {
             damage = mod.modifyDamage(damage, card.damageTypeForTurn, card, mo);
@@ -226,6 +233,13 @@ public class CardModifierManager
             damage = mod.modifyDamageFinal(damage, card.damageTypeForTurn, card, mo);
         }
         return damage;
+    }
+
+    public static float onModifyBaseBlock(float block, AbstractCard card) {
+        for (AbstractCardModifier mod : modifiers(card)) {
+            block = mod.modifyBaseBlock(block, card);
+        }
+        return block;
     }
 
     public static float onModifyBlock(float block, AbstractCard card) {
