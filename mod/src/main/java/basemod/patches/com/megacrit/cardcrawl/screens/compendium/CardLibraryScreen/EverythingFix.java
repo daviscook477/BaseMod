@@ -64,8 +64,7 @@ public class EverythingFix
             for (AbstractCard.CardColor color : Fields.cardGroupMap.keySet()) {
                 ArrayList<AbstractCard> remove = new ArrayList<>();
                 for (AbstractCard card : EverythingFix.Fields.cardGroupMap.get(color).group) {
-                    NoCompendium annotation = card.getClass().getAnnotation(NoCompendium.class);
-                    if (annotation != null && annotation.noCompendium()) {
+                    if (card.getClass().isAnnotationPresent(NoCompendium.class)) {
                         remove.add(card);
                     }
                 }

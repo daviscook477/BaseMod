@@ -20,8 +20,7 @@ public class RemoveExcludedCardsFromPools {
         for (CardGroup group : groups) {
             ArrayList<AbstractCard> remove = new ArrayList<>();
             for (AbstractCard card : group.group) {
-                NoCompendium annotation = card.getClass().getAnnotation(NoCompendium.class);
-                if (annotation != null && annotation.noPools()) {
+                if (card.getClass().isAnnotationPresent(NoPools.class)) {
                     remove.add(card);
                 }
             }
