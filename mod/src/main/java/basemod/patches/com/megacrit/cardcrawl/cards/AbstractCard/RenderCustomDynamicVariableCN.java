@@ -2,6 +2,8 @@ package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
 import basemod.BaseMod;
 import basemod.abstracts.DynamicVariable;
+import basemod.helpers.dynamicvariables.BlockVariable;
+import basemod.helpers.dynamicvariables.DamageVariable;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
@@ -41,7 +43,25 @@ public class RenderCustomDynamicVariableCN
 						tmp[0] = "[#" + dv.getDecreasedValueColor().toString() + "]" + Integer.toString(dv.value(__instance)) + "[]";
 					}
 				} else {
-					tmp[0] = Integer.toString(dv.baseValue(__instance));
+					//cardmods affect base variables
+					int num;
+					if (dv instanceof BlockVariable && CardModifierPatches.CardModifierFields.cardModHasBaseBlock.get(__instance)) {
+						num = CardModifierPatches.CardModifierFields.cardModBaseBlock.get(__instance);
+						if (num >= __instance.baseBlock) {
+							tmp[0] = "[#" + RenderCustomDynamicVariable.Inner.DARK_GREEN.toString() + "]" + Integer.toString(num) + "[]";
+						} else {
+							tmp[0] = "[#" + RenderCustomDynamicVariable.Inner.DARK_RED.toString() + "]" + Integer.toString(num) + "[]";
+						}
+					} else if (dv instanceof DamageVariable && CardModifierPatches.CardModifierFields.cardModHasBaseDamage.get(__instance)) {
+						num = CardModifierPatches.CardModifierFields.cardModBaseDamage.get(__instance);
+						if (num >= __instance.baseDamage) {
+							tmp[0] = "[#" + RenderCustomDynamicVariable.Inner.DARK_GREEN.toString() + "]" + Integer.toString(num) + "[]";
+						} else {
+							tmp[0] = "[#" + RenderCustomDynamicVariable.Inner.DARK_RED.toString() + "]" + Integer.toString(num) + "[]";
+						}
+					} else {
+						tmp[0] = Integer.toString(dv.baseValue(__instance));
+					}
 				}
 			}
 		}

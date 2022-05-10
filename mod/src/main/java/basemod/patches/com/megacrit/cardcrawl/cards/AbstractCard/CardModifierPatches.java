@@ -57,6 +57,8 @@ public class CardModifierPatches
             if (tmp[0] != __instance.baseDamage) {
                 CardModifierFields.cardModBaseDamage.set(__instance, (int)tmp[0]);
                 CardModifierFields.cardModHasBaseDamage.set(__instance, true);
+            } else {
+                CardModifierFields.cardModHasBaseDamage.set(__instance, false);
             }
         }
 
@@ -80,6 +82,8 @@ public class CardModifierPatches
             if (tmp[i] != __instance.baseDamage) {
                 CardModifierFields.cardModBaseDamage.set(__instance, (int)tmp[i]);
                 CardModifierFields.cardModHasBaseDamage.set(__instance, true);
+            } else {
+                CardModifierFields.cardModHasBaseDamage.set(__instance, false);
             }
         }
 
@@ -189,6 +193,8 @@ public class CardModifierPatches
             if (tmp[0] != __instance.baseBlock) {
                 CardModifierFields.cardModBaseBlock.set(__instance, (int)tmp[0]);
                 CardModifierFields.cardModHasBaseBlock.set(__instance, true);
+            } else {
+                CardModifierFields.cardModHasBaseBlock.set(__instance, false);
             }
             tmp[0] = CardModifierManager.onModifyBlock(tmp[0], __instance);
         }
@@ -244,6 +250,8 @@ public class CardModifierPatches
             if (tmp[0] != __instance.baseDamage) {
                 CardModifierFields.cardModBaseDamage.set(__instance, (int)tmp[0]);
                 CardModifierFields.cardModHasBaseDamage.set(__instance, true);
+            } else {
+                CardModifierFields.cardModHasBaseDamage.set(__instance, false);
             }
         }
 
@@ -267,6 +275,8 @@ public class CardModifierPatches
             if (tmp[i] != __instance.baseDamage) {
                 CardModifierFields.cardModBaseDamage.set(__instance, (int)tmp[i]);
                 CardModifierFields.cardModHasBaseDamage.set(__instance, true);
+            } else {
+                CardModifierFields.cardModHasBaseDamage.set(__instance, false);
             }
         }
 

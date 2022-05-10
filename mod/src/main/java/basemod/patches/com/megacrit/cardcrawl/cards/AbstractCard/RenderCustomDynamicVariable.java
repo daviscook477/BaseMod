@@ -57,8 +57,8 @@ public class RenderCustomDynamicVariable
     {
         private static Logger logger = LogManager.getLogger();
         private static final GlyphLayout gl = new GlyphLayout();
-        private static final Color DARK_GREEN = new Color(69f / 255f, 138f / 255f, 0f, 1.0f);
-        private static final Color DARK_RED = new Color(133f / 255f, 51f / 255f, 50f / 255f, 1.0f);
+        public static final Color DARK_GREEN = new Color(69f / 255f, 138f / 255f, 0f, 1.0f);
+        public static final Color DARK_RED = new Color(133f / 255f, 51f / 255f, 50f / 255f, 1.0f);
 
         public static float myRenderDynamicVariable(Object __obj_instance, String key, char ckey, float start_x, float draw_y, int i, BitmapFont font, SpriteBatch sb, Character cend)
         {
