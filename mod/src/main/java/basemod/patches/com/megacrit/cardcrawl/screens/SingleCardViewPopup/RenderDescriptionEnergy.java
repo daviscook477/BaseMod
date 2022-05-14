@@ -25,10 +25,6 @@ public class RenderDescriptionEnergy
             clz=SingleCardViewPopup.class,
             method="renderDescription"
     )
-    @SpirePatch(
-            clz=SingleCardViewPopup.class,
-            method="renderDescriptionCN"
-    )
     public static class RenderCustomEnergy {
         public static ExprEditor Instrument()
         {
@@ -38,7 +34,7 @@ public class RenderDescriptionEnergy
                 public void edit(MethodCall m) throws CannotCompileException
                 {
                     if (redOrb >= 2 && greenOrb < 2 && m.getClassName().equals(String.class.getName()) && m.getMethodName().equals("equals")) {
-                        m.replace("$_ = " + RenderCustomEnergy.class.getName() + ".replaceEquals(tmp, (java.lang.String)$1);");
+                        m.replace("$_ = " + RenderDescriptionEnergy.class.getName() + ".replaceEquals(tmp, (java.lang.String)$1);");
                     }
                     else if ("renderSmallEnergy".equals(m.getMethodName())) {
                         m.replace(
@@ -58,7 +54,7 @@ public class RenderDescriptionEnergy
                 {
                     if (m.getClassName().equals(AbstractCard.class.getName())) {
                         if (m.getFieldName().equals("orb_green")) {
-                            m.replace("$_ = " + RenderCustomEnergy.class.getName() + ".replaceOrbField(tmp, this.card);");
+                            m.replace("$_ = " + RenderDescriptionEnergy.class.getName() + ".replaceOrbField(tmp, this.card);");
                             ++greenOrb;
                         }
                         else if (m.getFieldName().equals("orb_red")) {
@@ -68,36 +64,81 @@ public class RenderDescriptionEnergy
                 }
             };
         }
+    }
 
-        @SuppressWarnings("unused")
-        public static boolean replaceEquals(String tmp, String originalArg)
+    @SpirePatch(
+            clz=SingleCardViewPopup.class,
+            method="renderDescriptionCN"
+    )
+    public static class RenderCustomEnergyCN {
+        public static ExprEditor Instrument()
         {
-            if (tmp.equals(originalArg)) {
-                return true;
-            }
-            if (tmp.length() != originalArg.length())
-                return false;
-            for (int i = 0; i < tmp.length(); ++i) {
-                if (i == 1) {
-                    if (tmp.charAt(i) != 'E' || originalArg.charAt(i) != 'G')
-                        return false;
+            return new ExprEditor() {
+                int redOrb = 0, greenOrb = 0;
+
+                public void edit(MethodCall m) throws CannotCompileException
+                {
+                    if (redOrb >= 1 && greenOrb < 1 && m.getClassName().equals(String.class.getName()) && m.getMethodName().equals("equals")) {
+                        m.replace("$_ = " + RenderDescriptionEnergy.class.getName() + ".replaceEquals(tmp, (java.lang.String)$1);");
+                    }
+                    else if ("renderSmallEnergy".equals(m.getMethodName())) {
+                        m.replace(
+                                "$proceed($1, $2, $3, " + //sb, image, and x are all fine.
+                                        "(draw_y + (float)i * 1.53F * -font.getCapHeight() - 12f - current_y" +
+                                        //offset y as used by FontHelper's render method. `-current_y` converts it to an offset.
+                                        //An exact pixel offset that is already scaled.
+                                        " + font.getCapHeight())" +
+                                        //Extra upwards adjustment based on font height because of Stupid Text Rendering Code
+                                        " / drawScale / " + Settings.class.getName() + ".scale" +
+                                        //Un-scale it because the icon rendering utilizes scaling again.
+                                        ");"
+                        );
+                    }
                 }
-                else {
-                    if (tmp.charAt(i) != originalArg.charAt(i))
-                        return false;
+                public void edit(FieldAccess m) throws CannotCompileException
+                {
+                    if (m.getClassName().equals(AbstractCard.class.getName())) {
+                        if (m.getFieldName().equals("orb_green")) {
+                            m.replace("$_ = " + RenderDescriptionEnergy.class.getName() + ".replaceOrbField(tmp, this.card);");
+                            ++greenOrb;
+                        }
+                        else if (m.getFieldName().equals("orb_red")) {
+                            ++redOrb;
+                        }
+                    }
                 }
-            }
+            };
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static boolean replaceEquals(String tmp, String originalArg)
+    {
+        if (tmp.equals(originalArg)) {
             return true;
         }
-
-        @SuppressWarnings("unused")
-        public static TextureAtlas.AtlasRegion replaceOrbField(String tmp, Object card)
-        {
-            if (tmp.charAt(1) == 'E') { // tmp.equals("[E]") || tmp.equals("[E] ") || tmp.equals("[E]. ")) {
-                return BaseMod.getCardSmallEnergy((AbstractCard)card);
+        if (tmp.length() != originalArg.length())
+            return false;
+        for (int i = 0; i < tmp.length(); ++i) {
+            if (i == 1) {
+                if (tmp.charAt(i) != 'E' || originalArg.charAt(i) != 'G')
+                    return false;
             }
-            return AbstractCard.orb_green;
+            else {
+                if (tmp.charAt(i) != originalArg.charAt(i))
+                    return false;
+            }
         }
+        return true;
+    }
+
+    @SuppressWarnings("unused")
+    public static TextureAtlas.AtlasRegion replaceOrbField(String tmp, Object card)
+    {
+        if (tmp.charAt(1) == 'E') { // tmp.equals("[E]") || tmp.equals("[E] ") || tmp.equals("[E]. ")) {
+            return BaseMod.getCardSmallEnergy((AbstractCard)card);
+        }
+        return AbstractCard.orb_green;
     }
 
     @SpirePatch(

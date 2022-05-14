@@ -14,6 +14,10 @@ public class ShrinkLongDescription
 			clz=SingleCardViewPopup.class,
 			method="renderDescription"
 	)
+	@SpirePatch(
+			clz=SingleCardViewPopup.class,
+			method="renderDescriptionCN"
+	)
 	public static class ShiftSizeLineDescription
 	{
 		@SpireInsertPatch(
