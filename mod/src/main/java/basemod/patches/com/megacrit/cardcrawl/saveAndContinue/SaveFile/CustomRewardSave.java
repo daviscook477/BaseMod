@@ -5,9 +5,7 @@ import basemod.BaseMod;
 import basemod.abstracts.CustomReward;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 
-import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.rewards.RewardItem;
-import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.saveAndContinue.SaveFile;
 import javassist.CtBehavior;
 
@@ -20,16 +18,15 @@ import javassist.CtBehavior;
 public class CustomRewardSave
 {
 	@SpireInsertPatch(
-			locator = Locator.class
+			locator = Locator.class,
+			localvars = { "i" }
 	)
-	public static void Insert(SaveFile __instance, SaveFile.SaveType saveType)
+	public static void Insert(SaveFile __instance, SaveFile.SaveType saveType, RewardItem i)
 	{
-		for (RewardItem item : AbstractDungeon.getCurrRoom().rewards) {
-			if (item instanceof CustomReward) {
-				CustomReward customReward = (CustomReward) item;
-				if (BaseMod.customRewardTypeExists(customReward.type)) {
-					__instance.combat_rewards.add(BaseMod.saveCustomReward(customReward));
-				}
+		if (i instanceof CustomReward) {
+			CustomReward customReward = (CustomReward) i;
+			if (BaseMod.customRewardTypeExists(customReward.type)) {
+				__instance.combat_rewards.add(BaseMod.saveCustomReward(customReward));
 			}
 		}
 	}
@@ -39,7 +36,7 @@ public class CustomRewardSave
 		@Override
 		public int[] Locate(CtBehavior ctBehavior) throws Exception
 		{
-			Matcher matcher = new Matcher.FieldAccessMatcher(AbstractRoom.class, "rewards");
+			Matcher matcher = new Matcher.FieldAccessMatcher(RewardItem.class, "type");
 			return LineFinder.findInOrder(ctBehavior, matcher);
 		}
 	}

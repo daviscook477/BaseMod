@@ -8,6 +8,7 @@ import basemod.helpers.dynamicvariables.BlockVariable;
 import basemod.helpers.dynamicvariables.DamageVariable;
 import basemod.helpers.dynamicvariables.MagicNumberVariable;
 import basemod.interfaces.*;
+import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.RenderDescriptionEnergy;
 import basemod.patches.com.megacrit.cardcrawl.helpers.TopPanel.TopPanelHelper;
 import basemod.patches.com.megacrit.cardcrawl.screens.select.GridCardSelectScreen.GridCardSelectScreenFields;
 import basemod.patches.com.megacrit.cardcrawl.unlock.UnlockTracker.CountModdedUnlockCards;
@@ -2250,6 +2251,8 @@ public class BaseMod {
 
 		// setup the necessary bits for custom animations to work
 		setupAnimationGfx();
+
+		RenderDescriptionEnergy.AdjustEnergyWidth.PERIOD_SPACE = LocalizedStrings.PERIOD + " ";
 
 		// Publish
 		for (PostInitializeSubscriber sub : postInitializeSubscribers) {

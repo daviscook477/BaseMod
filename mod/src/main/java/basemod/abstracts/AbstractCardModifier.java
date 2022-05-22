@@ -46,6 +46,11 @@ public abstract class AbstractCardModifier implements Comparable<AbstractCardMod
      * all card parameters pass the instance of the card which the mod is applied to.
      * AbstractMonster parameters will pass null when called from ApplyPowers.
      */
+    //called before any damage increases, will also render outside the hand
+    public float modifyBaseDamage(float damage, DamageInfo.DamageType type, AbstractCard card, AbstractMonster target) {
+        return damage;
+    }
+
     //called before related power functions, for flat increases, to happen before vulnerable.
     public float modifyDamage(float damage, DamageInfo.DamageType type, AbstractCard card, AbstractMonster target) {
         return damage;
@@ -54,6 +59,11 @@ public abstract class AbstractCardModifier implements Comparable<AbstractCardMod
     //called before "final" power functions, to apply percentage increases, but before things like intangible.
     public float modifyDamageFinal(float damage, DamageInfo.DamageType type, AbstractCard card, AbstractMonster target) {
         return damage;
+    }
+
+    //called before any block increases, will also render outside the hand
+    public float modifyBaseBlock(float block, AbstractCard card) {
+        return block;
     }
 
     //called before power functions, for flat increases.

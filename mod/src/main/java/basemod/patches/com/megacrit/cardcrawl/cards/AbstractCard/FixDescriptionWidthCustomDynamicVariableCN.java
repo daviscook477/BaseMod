@@ -18,19 +18,19 @@ public class FixDescriptionWidthCustomDynamicVariableCN
 			localvars={"word", "currentWidth", "sbuilder", "numLines", "CN_DESC_BOX_WIDTH"}
 	)
 	public static void Insert(AbstractCard __instance, @ByRef String[] word, @ByRef float[] currentWidth,
-							  @ByRef StringBuilder[] currentLine, @ByRef int[] numLines,
+							  StringBuilder currentLine, @ByRef int[] numLines,
 							  float CN_DESC_BOX_WIDTH)
 	{
 		if (word[0].startsWith("!")) {
 			GlyphLayout gl = new GlyphLayout(FontHelper.cardDescFont_N, "!M!");
 			if (currentWidth[0] + gl.width > CN_DESC_BOX_WIDTH) {
 				++numLines[0];
-				__instance.description.add(new DescriptionLine(currentLine[0].toString(), currentWidth[0]));
-				currentLine[0] = new StringBuilder();
+				__instance.description.add(new DescriptionLine(currentLine.toString(), currentWidth[0]));
+				currentLine.setLength(0);
 				currentWidth[0] = gl.width;
-				currentLine[0].append(" ").append(word[0]).append("! ");
+				currentLine.append(" ").append(word[0]).append("! ");
 			} else {
-				currentLine[0].append(" ").append(word[0]).append("! ");
+				currentLine.append(" ").append(word[0]).append("! ");
 				currentWidth[0] += gl.width;
 			}
 			word[0] = "";

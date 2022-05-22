@@ -2,6 +2,8 @@ package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
 import basemod.BaseMod;
 import basemod.abstracts.DynamicVariable;
+import basemod.helpers.dynamicvariables.BlockVariable;
+import basemod.helpers.dynamicvariables.DamageVariable;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -55,6 +57,8 @@ public class RenderCustomDynamicVariable
     {
         private static Logger logger = LogManager.getLogger();
         private static final GlyphLayout gl = new GlyphLayout();
+        public static final Color DARK_GREEN = new Color(69f / 255f, 138f / 255f, 0f, 1.0f);
+        public static final Color DARK_RED = new Color(133f / 255f, 51f / 255f, 50f / 255f, 1.0f);
 
         public static float myRenderDynamicVariable(Object __obj_instance, String key, char ckey, float start_x, float draw_y, int i, BitmapFont font, SpriteBatch sb, Character cend)
         {
@@ -101,6 +105,29 @@ public class RenderCustomDynamicVariable
             }
             c = c.cpy();
             c.a = textColor.a;
+
+            //cardmods affect base variables
+            if (dv instanceof BlockVariable) {
+                if (!__instance.isBlockModified && CardModifierPatches.CardModifierFields.cardModHasBaseBlock.get(__instance)) {
+                    num = CardModifierPatches.CardModifierFields.cardModBaseBlock.get(__instance);
+                    if (num >= __instance.baseBlock) {
+                        c = DARK_GREEN.cpy();
+                    } else {
+                        c = DARK_RED.cpy();
+                    }
+                    c.a = textColor.a;
+                }
+            } else if (dv instanceof DamageVariable) {
+                if (!__instance.isDamageModified && CardModifierPatches.CardModifierFields.cardModHasBaseDamage.get(__instance)) {
+                    num = CardModifierPatches.CardModifierFields.cardModBaseDamage.get(__instance);
+                    if (num >= __instance.baseDamage) {
+                        c = DARK_GREEN.cpy();
+                    } else {
+                        c = DARK_RED.cpy();
+                    }
+                    c.a = textColor.a;
+                }
+            }
 
             stringBuilder.append(num);
             gl.setText(font, stringBuilder.toString());

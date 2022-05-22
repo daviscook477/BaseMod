@@ -14,10 +14,7 @@ import javassist.CtBehavior;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  *
@@ -62,6 +59,16 @@ public class EverythingFix
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+
+            for (AbstractCard.CardColor color : Fields.cardGroupMap.keySet()) {
+                ArrayList<AbstractCard> remove = new ArrayList<>();
+                for (AbstractCard card : EverythingFix.Fields.cardGroupMap.get(color).group) {
+                    if (card.getClass().isAnnotationPresent(NoCompendium.class)) {
+                        remove.add(card);
+                    }
+                }
+                Fields.cardGroupMap.get(color).group.removeAll(remove);
             }
         }
 

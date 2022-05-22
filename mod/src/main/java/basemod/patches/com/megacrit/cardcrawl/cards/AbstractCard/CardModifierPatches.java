@@ -47,6 +47,57 @@ public class CardModifierPatches
             CardModifierManager.onCalculateCardDamage(__instance, mo);
         }
 
+        //modifyBaseDamage
+        @SpireInsertPatch(
+                locator = BaseDamageLocator.class,
+                localvars = {"tmp"}
+        )
+        public static void baseDamageInsert(AbstractCard __instance, AbstractMonster m, @ByRef float[] tmp) {
+            tmp[0] = CardModifierManager.onModifyBaseDamage(tmp[0], __instance, m);
+            if (tmp[0] != __instance.baseDamage) {
+                CardModifierFields.cardModBaseDamage.set(__instance, (int)tmp[0]);
+                CardModifierFields.cardModHasBaseDamage.set(__instance, true);
+            } else {
+                CardModifierFields.cardModHasBaseDamage.set(__instance, false);
+            }
+        }
+
+        private static class BaseDamageLocator extends SpireInsertLocator
+        {
+            @Override
+            public int[] Locate(CtBehavior ctMethodToPatch) throws Exception
+            {
+                Matcher finalMatcher = new Matcher.FieldAccessMatcher(AbstractPlayer.class, "powers");
+                int[] tmp = LineFinder.findAllInOrder(ctMethodToPatch, finalMatcher);
+                return new int[] {tmp[0]};
+            }
+        }
+
+        @SpireInsertPatch(
+                locator = MultiBaseDamageLocator.class,
+                localvars = {"tmp", "i", "m"}
+        )
+        public static void multiBaseDamageInsert(AbstractCard __instance, AbstractMonster mo, float[] tmp, int i, ArrayList<AbstractMonster> m) {
+            tmp[i] = CardModifierManager.onModifyBaseDamage(tmp[i], __instance, m.get(i));
+            if (tmp[i] != __instance.baseDamage) {
+                CardModifierFields.cardModBaseDamage.set(__instance, (int)tmp[i]);
+                CardModifierFields.cardModHasBaseDamage.set(__instance, true);
+            } else {
+                CardModifierFields.cardModHasBaseDamage.set(__instance, false);
+            }
+        }
+
+        private static class MultiBaseDamageLocator extends SpireInsertLocator
+        {
+            @Override
+            public int[] Locate(CtBehavior ctMethodToPatch) throws Exception
+            {
+                Matcher finalMatcher = new Matcher.FieldAccessMatcher(AbstractPlayer.class, "relics");
+                int[] tmp = LineFinder.findAllInOrder(ctMethodToPatch, finalMatcher);
+                return new int[] {tmp[1]};
+            }
+        }
+
         //modifyDamage
         @SpireInsertPatch(
                 locator = DamageLocator.class,
@@ -138,6 +189,13 @@ public class CardModifierPatches
                 localvars = {"tmp"}
         )
         public static void blockInsert(AbstractCard __instance, @ByRef float[] tmp) {
+            tmp[0] = CardModifierManager.onModifyBaseBlock(tmp[0], __instance);
+            if (tmp[0] != __instance.baseBlock) {
+                CardModifierFields.cardModBaseBlock.set(__instance, (int)tmp[0]);
+                CardModifierFields.cardModHasBaseBlock.set(__instance, true);
+            } else {
+                CardModifierFields.cardModHasBaseBlock.set(__instance, false);
+            }
             tmp[0] = CardModifierManager.onModifyBlock(tmp[0], __instance);
         }
 
@@ -180,6 +238,57 @@ public class CardModifierPatches
         //onApplyPowers
         public static void Postfix(AbstractCard __instance) {
             CardModifierManager.onApplyPowers(__instance);
+        }
+
+        //modifyBaseDamage
+        @SpireInsertPatch(
+                locator = BaseDamageLocator.class,
+                localvars = {"tmp"}
+        )
+        public static void baseDamageInsert(AbstractCard __instance, @ByRef float[] tmp) {
+            tmp[0] = CardModifierManager.onModifyBaseDamage(tmp[0], __instance, null);
+            if (tmp[0] != __instance.baseDamage) {
+                CardModifierFields.cardModBaseDamage.set(__instance, (int)tmp[0]);
+                CardModifierFields.cardModHasBaseDamage.set(__instance, true);
+            } else {
+                CardModifierFields.cardModHasBaseDamage.set(__instance, false);
+            }
+        }
+
+        private static class BaseDamageLocator extends SpireInsertLocator
+        {
+            @Override
+            public int[] Locate(CtBehavior ctMethodToPatch) throws Exception
+            {
+                Matcher finalMatcher = new Matcher.FieldAccessMatcher(AbstractPlayer.class, "relics");
+                int[] tmp = LineFinder.findAllInOrder(ctMethodToPatch, finalMatcher);
+                return new int[] {tmp[0]};
+            }
+        }
+
+        @SpireInsertPatch(
+                locator = MultiDamageLocator.class,
+                localvars = {"tmp", "i"}
+        )
+        public static void multiBaseDamageInsert(AbstractCard __instance, float[] tmp, int i) {
+            tmp[i] = CardModifierManager.onModifyBaseDamage(tmp[i], __instance, null);
+            if (tmp[i] != __instance.baseDamage) {
+                CardModifierFields.cardModBaseDamage.set(__instance, (int)tmp[i]);
+                CardModifierFields.cardModHasBaseDamage.set(__instance, true);
+            } else {
+                CardModifierFields.cardModHasBaseDamage.set(__instance, false);
+            }
+        }
+
+        private static class MultiBaseDamageLocator extends SpireInsertLocator
+        {
+            @Override
+            public int[] Locate(CtBehavior ctMethodToPatch) throws Exception
+            {
+                Matcher finalMatcher = new Matcher.FieldAccessMatcher(AbstractPlayer.class, "relics");
+                int[] tmp = LineFinder.findAllInOrder(ctMethodToPatch, finalMatcher);
+                return new int[] {tmp[1]};
+            }
         }
 
         //modifyDamage
@@ -435,6 +544,10 @@ public class CardModifierPatches
     public static class CardModifierFields
     {
         public static SpireField<ArrayList<AbstractCardModifier>> cardModifiers = new SpireField<>(ArrayList::new);
+        public static SpireField<Integer> cardModBaseDamage = new SpireField<>(() -> 0);
+        public static SpireField<Boolean> cardModHasBaseDamage = new SpireField<>(() -> false);
+        public static SpireField<Integer> cardModBaseBlock = new SpireField<>(() -> 0);
+        public static SpireField<Boolean> cardModHasBaseBlock = new SpireField<>(() -> false);
     }
 
     @SpirePatch(
