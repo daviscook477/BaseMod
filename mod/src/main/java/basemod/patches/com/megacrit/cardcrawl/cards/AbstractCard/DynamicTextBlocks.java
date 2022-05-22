@@ -77,7 +77,7 @@ public class DynamicTextBlocks {
     @SpirePatch2(clz = AbstractCard.class, method = "renderDescriptionCN")
     public static class UpdateOnRender {
         @SpirePrefixPatch
-        public static void onPreview(AbstractCard __instance) {
+        public static void onRender(AbstractCard __instance) {
             if (DynamicTextField.isDynamic.get(__instance)) {
                 String varData = parseVarData(__instance);
                 if (!DynamicTextField.varData.get(__instance).equals(varData)) {
@@ -93,7 +93,7 @@ public class DynamicTextBlocks {
     @SpirePatch2(clz = SingleCardViewPopup.class, method = "renderDescriptionCN")
     public static class UpdateOnRenderSCV {
         @SpirePrefixPatch
-        public static void onPreview(SingleCardViewPopup __instance, AbstractCard ___card) {
+        public static void onRender(SingleCardViewPopup __instance, AbstractCard ___card) {
             if (DynamicTextField.isDynamic.get(___card)) {
                 String varData = parseVarData(___card);
                 if (!DynamicTextField.varData.get(___card).equals(varData)) {
