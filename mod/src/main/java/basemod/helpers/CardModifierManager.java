@@ -3,6 +3,7 @@ package basemod.helpers;
 import basemod.abstracts.AbstractCardModifier;
 import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.CardModifierPatches;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.evacipated.cardcrawl.modthespire.lib.SpireField;
 import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.actions.utility.UseCardAction;
 import com.megacrit.cardcrawl.cards.AbstractCard;
@@ -29,6 +30,7 @@ public class CardModifierManager
             modifiers(card).add(mod);
             Collections.sort(modifiers(card));
             mod.onInitialApplication(card);
+            testBaseValues(card);
             card.initializeDescription();
         }
     }
@@ -127,7 +129,31 @@ public class CardModifierManager
         if (removeOld) {
             oldCard.initializeDescription();
         }
+        testBaseValues(newCard);
         newCard.initializeDescription();
+    }
+
+    private static void testBaseValues(AbstractCard card) {
+        float damage = card.baseDamage;
+        float block = card.baseBlock;
+        for (AbstractCardModifier modifier : modifiers(card)) {
+            damage = modifier.modifyBaseDamage(damage, card.damageTypeForTurn, card, null);
+            block = modifier.modifyBaseBlock(block, card);
+        }
+        damage = (int)damage;
+        block = (int)block;
+        if (damage != card.baseDamage) {
+            CardModifierPatches.CardModifierFields.cardModBaseDamage.set(card, (int)damage);
+            CardModifierPatches.CardModifierFields.cardModHasBaseDamage.set(card, true);
+        } else {
+            CardModifierPatches.CardModifierFields.cardModHasBaseDamage.set(card, false);
+        }
+        if (block != card.baseBlock) {
+            CardModifierPatches.CardModifierFields.cardModBaseBlock.set(card, (int)block);
+            CardModifierPatches.CardModifierFields.cardModHasBaseBlock.set(card, true);
+        } else {
+            CardModifierPatches.CardModifierFields.cardModHasBaseBlock.set(card, false);
+        }
     }
 
     public static void removeEndOfTurnModifiers(AbstractCard card) {

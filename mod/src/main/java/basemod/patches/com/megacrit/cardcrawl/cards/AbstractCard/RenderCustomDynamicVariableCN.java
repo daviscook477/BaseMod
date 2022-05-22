@@ -44,24 +44,13 @@ public class RenderCustomDynamicVariableCN
 					}
 				} else {
 					//cardmods affect base variables
-					int num;
-					if (dv instanceof BlockVariable && CardModifierPatches.CardModifierFields.cardModHasBaseBlock.get(__instance)) {
+					int num = dv.baseValue(__instance);
+					if (dv instanceof BlockVariable && CardModifierPatches.CardModifierFields.cardModHasBaseBlock.get(__instance) && !__instance.isBlockModified) {
 						num = CardModifierPatches.CardModifierFields.cardModBaseBlock.get(__instance);
-						if (num >= __instance.baseBlock) {
-							tmp[0] = "[#" + RenderCustomDynamicVariable.Inner.DARK_GREEN.toString() + "]" + Integer.toString(num) + "[]";
-						} else {
-							tmp[0] = "[#" + RenderCustomDynamicVariable.Inner.DARK_RED.toString() + "]" + Integer.toString(num) + "[]";
-						}
-					} else if (dv instanceof DamageVariable && CardModifierPatches.CardModifierFields.cardModHasBaseDamage.get(__instance)) {
+					} else if (dv instanceof DamageVariable && CardModifierPatches.CardModifierFields.cardModHasBaseDamage.get(__instance) && !__instance.isDamageModified) {
 						num = CardModifierPatches.CardModifierFields.cardModBaseDamage.get(__instance);
-						if (num >= __instance.baseDamage) {
-							tmp[0] = "[#" + RenderCustomDynamicVariable.Inner.DARK_GREEN.toString() + "]" + Integer.toString(num) + "[]";
-						} else {
-							tmp[0] = "[#" + RenderCustomDynamicVariable.Inner.DARK_RED.toString() + "]" + Integer.toString(num) + "[]";
-						}
-					} else {
-						tmp[0] = Integer.toString(dv.baseValue(__instance));
 					}
+					tmp[0] = Integer.toString(num);
 				}
 			}
 		}

@@ -2,6 +2,9 @@ package basemod.patches.com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 
 import basemod.BaseMod;
 import basemod.abstracts.DynamicVariable;
+import basemod.helpers.dynamicvariables.BlockVariable;
+import basemod.helpers.dynamicvariables.DamageVariable;
+import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.CardModifierPatches;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -106,6 +109,18 @@ public class RenderCustomDynamicVariable
             } else {
                 logger.error("No dynamic card variable found for key \"" + key + "\"!");
             }
+
+            //cardmods affect base variables
+            if (dv instanceof BlockVariable) {
+                if ((!card.isBlockModified || card.upgradedBlock) && CardModifierPatches.CardModifierFields.cardModHasBaseBlock.get(card)) {
+                    num = CardModifierPatches.CardModifierFields.cardModBaseBlock.get(card);
+                }
+            } else if (dv instanceof DamageVariable) {
+                if ((!card.isDamageModified || card.upgradedDamage) && CardModifierPatches.CardModifierFields.cardModHasBaseDamage.get(card)) {
+                    num = CardModifierPatches.CardModifierFields.cardModBaseDamage.get(card);
+                }
+            }
+
             stringBuilder.append(num);
             gl.setText(font, stringBuilder.toString());
             FontHelper.renderRotatedText(sb, font, stringBuilder.toString(),
