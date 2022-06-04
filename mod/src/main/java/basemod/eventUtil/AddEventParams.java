@@ -23,6 +23,8 @@ public class AddEventParams
 
 	public String overrideEventID = null;
 
+	public boolean endsWithRewardsUI = false;
+
 	public static class Builder
 	{
 		private AddEventParams params = new AddEventParams();
@@ -77,6 +79,11 @@ public class AddEventParams
 		public Builder eventType(EventUtils.EventType eventType)
 		{
 			params.eventType = eventType;
+			return this;
+		}
+
+		public Builder endsWithRewardsUI(boolean value) {
+			params.endsWithRewardsUI = value;
 			return this;
 		}
 	}
