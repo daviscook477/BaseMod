@@ -44,6 +44,7 @@ public class ApplyScreenPostProcessor {
 
         setDefaultFrameBuffer(primaryFrameBuffer);
         primaryFrameBuffer.begin();
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     }
 
     public static class BeginLocator extends SpireInsertLocator {
@@ -69,6 +70,7 @@ public class ApplyScreenPostProcessor {
 
             setDefaultFrameBuffer(primaryFrameBuffer);
             primaryFrameBuffer.begin();
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
             sb.begin();
 
             postProcessor.postProcess(sb, secondaryFboRegion, camera);
