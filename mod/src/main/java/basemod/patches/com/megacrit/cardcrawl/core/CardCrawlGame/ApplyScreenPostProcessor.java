@@ -106,4 +106,21 @@ public class ApplyScreenPostProcessor {
     private static void setDefaultFrameBuffer(FrameBuffer fbo) {
         ReflectionHacks.setPrivateStatic(GLFrameBuffer.class, "defaultFramebufferHandle", fbo.getFramebufferHandle());
     }
+
+    @SpirePatch2(
+            clz = SpriteBatch.class,
+            method = "setupMatrices"
+    )
+    @SpirePatch2(
+            clz = PolygonSpriteBatch.class,
+            method = "setupMatrices"
+    )
+    private static class ShaderScreenSizeUniform {
+        private static void Postfix(ShaderProgram ___customShader) {
+            if (___customShader != null) {
+                ___customShader.setUniformf("u_scale", Settings.scale);
+                ___customShader.setUniformf("u_screenSize", Settings.WIDTH, Settings.HEIGHT);
+            }
+        }
+    }
 }
