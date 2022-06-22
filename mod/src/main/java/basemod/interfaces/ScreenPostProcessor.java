@@ -6,4 +6,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public interface ScreenPostProcessor {
     void postProcess(SpriteBatch sb, TextureRegion frameTexture, OrthographicCamera camera);
+
+    // Lower = earlier
+    default int priority() {
+        return 50;
+    }
 }
