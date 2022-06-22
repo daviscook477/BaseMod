@@ -1,13 +1,15 @@
 package basemod.patches.com.megacrit.cardcrawl.core.CardCrawlGame;
 
+import basemod.ReflectionHacks;
 import basemod.interfaces.ScreenPostProcessor;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
@@ -16,26 +18,32 @@ import javassist.CtBehavior;
 import java.util.ArrayList;
 import java.util.List;
 
-@SpirePatch(clz = CardCrawlGame.class, method = "render")
+@SpirePatch2(
+        clz = CardCrawlGame.class,
+        method = "render"
+)
 public class ApplyScreenPostProcessor {
     public static final List<ScreenPostProcessor> postProcessors = new ArrayList<>();
+
+    private static int defaultFramebufferHandle;
 
     private static FrameBuffer primaryFrameBuffer;
     private static FrameBuffer secondaryFrameBuffer;
     private static TextureRegion primaryFboRegion;
     private static TextureRegion secondaryFboRegion;
-    private static boolean usingFrameBuffer = false;
+
+    public static Texture getFrameBufferTexture() {
+        return primaryFrameBuffer.getColorBufferTexture();
+    }
 
     @SpireInsertPatch(locator = BeginLocator.class)
-    public static void BeforeSpriteBatchBegin(CardCrawlGame __instance) {
-        if (!postProcessors.isEmpty()) {
-            if (primaryFrameBuffer == null) {
-                initFrameBuffer();
-            }
-
-            usingFrameBuffer = true;
-            primaryFrameBuffer.begin();
+    public static void BeforeSpriteBatchBegin() {
+        if (primaryFrameBuffer == null) {
+            initFrameBuffer();
         }
+
+        setDefaultFrameBuffer(primaryFrameBuffer);
+        primaryFrameBuffer.begin();
     }
 
     public static class BeginLocator extends SpireInsertLocator {
@@ -47,10 +55,6 @@ public class ApplyScreenPostProcessor {
     }
 
     public static void BeforeSpriteBatchEnd(SpriteBatch sb, OrthographicCamera camera) {
-        if (!usingFrameBuffer) {
-            return;
-        }
-
         sb.end();
         primaryFrameBuffer.end();
 
@@ -63,6 +67,7 @@ public class ApplyScreenPostProcessor {
             primaryFboRegion = secondaryFboRegion;
             secondaryFboRegion = tempRegion;
 
+            setDefaultFrameBuffer(primaryFrameBuffer);
             primaryFrameBuffer.begin();
             sb.begin();
 
@@ -73,16 +78,17 @@ public class ApplyScreenPostProcessor {
         }
 
         sb.setShader(null);
+        Gdx.gl20.glBindFramebuffer(GL20.GL_FRAMEBUFFER, defaultFramebufferHandle);
         sb.begin();
         sb.setColor(Color.WHITE);
 
         sb.setProjectionMatrix(camera.combined);
         sb.draw(primaryFboRegion, 0, 0, Settings.WIDTH, Settings.HEIGHT);
-
-        usingFrameBuffer = false;
     }
 
     private static void initFrameBuffer() {
+        defaultFramebufferHandle = ReflectionHacks.<Integer>getPrivateStatic(GLFrameBuffer.class, "defaultFramebufferHandle");
+
         int width = Gdx.graphics.getWidth();
         int height = Gdx.graphics.getHeight();
 
@@ -93,5 +99,9 @@ public class ApplyScreenPostProcessor {
         secondaryFrameBuffer = new FrameBuffer(Pixmap.Format.RGB888, width, height, false);
         secondaryFboRegion = new TextureRegion(secondaryFrameBuffer.getColorBufferTexture());
         secondaryFboRegion.flip(false, true);
+    }
+
+    private static void setDefaultFrameBuffer(FrameBuffer fbo) {
+        ReflectionHacks.setPrivateStatic(GLFrameBuffer.class, "defaultFramebufferHandle", fbo.getFramebufferHandle());
     }
 }
