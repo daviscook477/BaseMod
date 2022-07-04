@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.helpers.ScreenShake;
 import javassist.CtBehavior;
 
 import java.util.ArrayList;
@@ -81,6 +82,15 @@ public class ApplyScreenPostProcessor {
 
         sb.setShader(null);
         Gdx.gl20.glBindFramebuffer(GL20.GL_FRAMEBUFFER, defaultFramebufferHandle);
+
+        // Fix screen shake
+        if (Settings.SCREEN_SHAKE &&
+                ReflectionHacks.<Float>getPrivate(CardCrawlGame.screenShake, ScreenShake.class, "duration") > 0 &&
+                CardCrawlGame.viewport.getScreenWidth() > 0 &&
+                CardCrawlGame.viewport.getScreenHeight() > 0) {
+            CardCrawlGame.viewport.apply();
+        }
+
         sb.begin();
         sb.setColor(Color.WHITE);
         sb.setBlendFunction(GL20.GL_ONE, GL20.GL_ZERO);
