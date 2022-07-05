@@ -1312,7 +1312,8 @@ public class BaseMod {
 				params.spawnCondition,
 				params.overrideEventID,
 				params.bonusCondition,
-				params.eventType
+				params.eventType,
+				params
 		);
 	}
 

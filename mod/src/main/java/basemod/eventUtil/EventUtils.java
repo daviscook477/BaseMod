@@ -2,7 +2,6 @@ package basemod.eventUtil;
 
 import basemod.eventUtil.util.Condition;
 import basemod.eventUtil.util.ConditionalEvent;
-import com.evacipated.cardcrawl.modthespire.lib.SpireReturn;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.events.AbstractEvent;
 import com.megacrit.cardcrawl.localization.EventStrings;
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.function.Predicate;
 
 public class EventUtils {
     /* D O C U M E N T A T I O N
@@ -68,10 +66,25 @@ public class EventUtils {
     private static int id = 0;
 
     public static <T extends AbstractEvent> void registerEvent(String ID, Class<T> eventClass, AbstractPlayer.PlayerClass playerClass, String[] actIDs, Condition spawnCondition, String overrideEvent, Condition bonusCondition, EventType type) {
+        registerEvent(ID, eventClass, playerClass, actIDs, spawnCondition, overrideEvent, bonusCondition, type, null);
+    }
+
+    public static <T extends AbstractEvent> void registerEvent(String ID, Class<T> eventClass, AbstractPlayer.PlayerClass playerClass, String[] actIDs, Condition spawnCondition, String overrideEvent, Condition bonusCondition, EventType type, AddEventParams additionalParams) {
         /*if (!(overrideEvent != null || spawnCondition != null || actIDs != null || playerClass != null || bonusCondition != null)) {
             eventLogger.info("Event " + eventClass.getName() + " has no special conditions, and should be registered through BaseMod instead.");
             return;
         }*/
+
+        if (additionalParams == null) {
+            additionalParams = new AddEventParams.Builder(ID, eventClass)
+                    .eventType(type)
+                    .playerClass(playerClass)
+                    .dungeonIDs(actIDs)
+                    .spawnCondition(spawnCondition)
+                    .bonusCondition(bonusCondition)
+                    .overrideEvent(overrideEvent)
+                    .create();
+        }
 
         ID = ID.replace(' ', '_');
 
@@ -83,7 +96,8 @@ public class EventUtils {
         ConditionalEvent<T> c = new ConditionalEvent<T>(eventClass,
                 playerClass,
                 spawnCondition,
-                actIDs == null ? new String[]{} : actIDs);
+                actIDs == null ? new String[]{} : actIDs,
+                additionalParams);
 
         if (type == EventType.FULL_REPLACE && overrideEvent != null) {
             c.overrideEvent = ID;

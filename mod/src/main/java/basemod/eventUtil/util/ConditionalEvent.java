@@ -1,5 +1,7 @@
 package basemod.eventUtil.util;
 
+import basemod.eventUtil.AddEventParams;
+import basemod.patches.com.megacrit.cardcrawl.events.AbstractEvent.AdditionalEventParameters;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.events.AbstractEvent;
@@ -18,10 +20,13 @@ public class ConditionalEvent<T extends AbstractEvent> {
 
     public String overrideEvent = "";
 
-    public ConditionalEvent(Class<T> eventClass, AbstractPlayer.PlayerClass playerClass, Condition spawnCondition, String[] actIDs) {
+    private final AddEventParams additionalParams;
+
+    public ConditionalEvent(Class<T> eventClass, AbstractPlayer.PlayerClass playerClass, Condition spawnCondition, String[] actIDs, AddEventParams additionalParams) {
         this.eventClass = eventClass;
         this.playerClass = playerClass;
         this.spawnCondition = spawnCondition;
+        this.additionalParams = additionalParams;
 
         if (spawnCondition == null)
             this.spawnCondition = () -> true;
@@ -31,7 +36,9 @@ public class ConditionalEvent<T extends AbstractEvent> {
 
     public AbstractEvent getEvent() {
         try {
-            return eventClass.getConstructor().newInstance();
+            AbstractEvent event = eventClass.getConstructor().newInstance();
+            AdditionalEventParameters.additionalParameters.set(event, additionalParams);
+            return event;
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             eventLogger.info("Failed to instantiate event " + eventClass.getName());
             e.printStackTrace();

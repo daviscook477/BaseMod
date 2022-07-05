@@ -2,6 +2,7 @@ package basemod.cardmods;
 
 import basemod.abstracts.AbstractCardModifier;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.GameDictionary;
 import com.megacrit.cardcrawl.localization.LocalizedStrings;
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +12,7 @@ public class ExhaustMod extends AbstractCardModifier {
 
     @Override
     public String modifyDescription(String rawDescription, AbstractCard card) {
-        return rawDescription + " NL " + StringUtils.capitalize(GameDictionary.EXHAUST.NAMES[0]) + LocalizedStrings.PERIOD;
+        return rawDescription + " NL " + StringUtils.capitalize(GameDictionary.EXHAUST.NAMES[0]) + (Settings.lineBreakViaCharacter ? " " : "") + LocalizedStrings.PERIOD;
     }
 
     @Override

@@ -64,10 +64,11 @@ public class RenderHooks {
 	    
 		@SpireInsertPatch(
 				locator=Locator.class,
-				localvars={"sb"}
+				localvars={"sb", "camera"}
 		)
-	    public static void Insert(Object __obj_instance, SpriteBatch sb) {
+	    public static void Insert(Object __obj_instance, SpriteBatch sb, OrthographicCamera camera) {
 	        BaseMod.publishPostRender(sb);
+			ApplyScreenPostProcessor.BeforeSpriteBatchEnd(sb, camera);
 	    }
 
 	    private static class Locator extends SpireInsertLocator

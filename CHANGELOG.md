@@ -882,4 +882,21 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
   * Fix rotation and position when card is rotated
   * Fix scale when card description gets shrunk for being long
 
+#### v5.42.0 ####
+* Fix CN card descriptions not shrinking (Alchyr)
+* CardModifiers (JohnnyDevo)
+  * Apply base stuff on initial application
+  * Render in SCV
+* Dynamic text block fixes (Mistress Alison)
+  * Reinitialize description if any dynamic variables updated
+  * Remove issues needing manual initializeDescription
+  * Remove need for -1 case for uninitialized values in compendium
+* Fix CN keywords added by basic CardModifiers (herbix)
+* Add option for custom events that end with a reward screen (herbix)
+* Add screen-space rendering postprocess (herbix/kiooeht)
+
+#### v5.42.1 ####
+* Fix screen shake (herbix)
+* Add safety checks to post-processing initialization (kiooeht)
+
 #### dev ####
