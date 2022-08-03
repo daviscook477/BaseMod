@@ -16,12 +16,22 @@ import javassist.expr.MethodCall;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 public class DynamicTextBlocks {
     private static final String REGEX = "\\{!.*?!\\|.*?}";
     private static final String DYNAMIC_KEY = "{@@}";
     private static final Pattern PATTERN = Pattern.compile(REGEX);
+    private static final HashMap<String, Function<AbstractCard, Integer>> customChecks = new HashMap<>();
+
+    public static void registerCustomCheck(String s, Function<AbstractCard, Integer> f) {
+        if (s.charAt(0) != '!' && !s.endsWith("!")) {
+            s = "!" + s + "!";
+        }
+        customChecks.put(s, f);
+    }
 
     //Spire Field for fixing the Location var in ExhaustPileViewScreen thanks to the fact it returns a copy of the card that isn't actually in the Exhaust pile when you pull up the screen
     @SpirePatch(clz= AbstractCard.class, method=SpirePatch.CLASS)
@@ -146,9 +156,11 @@ public class DynamicTextBlocks {
             var = c.magicNumber;
         } else if (dynvarKey.equals("!Location!")) {
             //Used to grab the location of the card. Isn't a real dynvar, but we can pretend
-            var = -1; //Master Deck, Compendium, Limbo, modded CardGroups
+            var = -2; //Compendium or otherwise not in a run
             if (CardCrawlGame.dungeon != null && AbstractDungeon.player != null) {
-                if (AbstractDungeon.player.hand.contains(c)) {
+                if (AbstractDungeon.player.masterDeck.contains(c)) {
+                    var = -1;
+                } else if (AbstractDungeon.player.hand.contains(c) || AbstractDungeon.player.limbo.contains(c)) {
                     var = 0;
                 } else if (AbstractDungeon.player.drawPile.contains(c)) {
                     var = 1;
@@ -157,6 +169,9 @@ public class DynamicTextBlocks {
                 } else if (AbstractDungeon.player.exhaustPile.contains(c) || ExhaustViewFixField.exhaustViewCopy.get(c)) {
                     //This is where we need the field. Without it this will default back to -1 as the cards shown in the Exhaust View are copies that aren't actually in the exhaust pile
                     var = 3;
+                } else {
+                    //This will cover any time the player does not actually own the card (Shop / Reward / Events)
+                    var = 4;
                 }
             }
         } else if (dynvarKey.equals("!Upgrades!")) {
@@ -171,6 +186,8 @@ public class DynamicTextBlocks {
         } else if (BaseMod.cardDynamicVariableMap.containsKey(dynvarKey.replace("!",""))) {
             //Check to see if it's a recognized dynvar registered by some mod
             var = BaseMod.cardDynamicVariableMap.get(dynvarKey.replace("!","")).value(c);
+        } else if (customChecks.containsKey(dynvarKey)) {
+            var = customChecks.get(dynvarKey).apply(c);
         }
         return var;
     }
