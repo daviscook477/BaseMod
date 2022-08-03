@@ -899,4 +899,12 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 * Fix screen shake (herbix)
 * Add safety checks to post-processing initialization (kiooeht)
 
+#### v5.42.2 ####
+* Fix post-processing blend function to not apply alpha again (kiooeht)
+* Fix post-processing rendering causing a crash on Mac (kiooeht)
+
+#### v5.43.0 ####
+* Fixrendering on super ultrawide (kiooeht)
+* Add custom multi-page FTUE (herbix)
+
 #### dev ####

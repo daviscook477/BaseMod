@@ -67,10 +67,10 @@ public class ApplyScreenPostProcessor {
     }
 
     public static void BeforeSpriteBatchEnd(SpriteBatch sb, OrthographicCamera camera) {
-        if (failedInitialized) {
+        if (failedInitialized || primaryFrameBuffer == null) {
             return;
         }
-        
+
         sb.end();
         primaryFrameBuffer.end();
 
@@ -84,7 +84,7 @@ public class ApplyScreenPostProcessor {
             Gdx.gl.glClearColor(0, 0, 0, 0);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | GL20.GL_STENCIL_BUFFER_BIT);
             sb.begin();
-            sb.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            sb.setBlendFunction(GL20.GL_ONE, GL20.GL_ZERO);
 
             postProcessor.postProcess(sb, secondaryFboRegion, camera);
 
@@ -108,7 +108,7 @@ public class ApplyScreenPostProcessor {
         sb.setBlendFunction(GL20.GL_ONE, GL20.GL_ZERO);
 
         sb.setProjectionMatrix(camera.combined);
-        sb.draw(primaryFboRegion, 0, 0, Settings.WIDTH, Settings.HEIGHT);
+        sb.draw(primaryFboRegion, -Settings.VERT_LETTERBOX_AMT, -Settings.HORIZ_LETTERBOX_AMT);
         sb.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
         // I don't know why, but this solves some problems
@@ -134,16 +134,16 @@ public class ApplyScreenPostProcessor {
             int width = Gdx.graphics.getWidth();
             int height = Gdx.graphics.getHeight();
 
-            primaryFrameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, true, true);
+            primaryFrameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false, false);
             primaryFboRegion = new TextureRegion(primaryFrameBuffer.getColorBufferTexture());
             primaryFboRegion.flip(false, true);
 
-            secondaryFrameBuffer = new FrameBuffer(Pixmap.Format.RGB888, width, height, true, true);
+            secondaryFrameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false, false);
             secondaryFboRegion = new TextureRegion(secondaryFrameBuffer.getColorBufferTexture());
             secondaryFboRegion.flip(false, true);
         } catch (Exception e) {
             failedInitialized = true;
-            e.printStackTrace();
+            System.out.println(e.getMessage());
 
             if (primaryFrameBuffer != null) {
                 primaryFrameBuffer.dispose();
@@ -155,6 +155,8 @@ public class ApplyScreenPostProcessor {
                 secondaryFrameBuffer = null;
                 secondaryFboRegion = null;
             }
+
+            e.printStackTrace();
         }
     }
 
