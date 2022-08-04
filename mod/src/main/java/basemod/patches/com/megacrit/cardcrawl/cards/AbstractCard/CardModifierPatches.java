@@ -22,6 +22,7 @@ import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
+import com.megacrit.cardcrawl.screens.runHistory.TinyCard;
 import javassist.*;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
@@ -460,6 +461,21 @@ public class CardModifierPatches
                     }
                 };
             }
+        }
+    }
+
+    @SpirePatch2(clz = TinyCard.class, method = "getText")
+    public static class CardModNamesInRunHistory {
+        @SpireInstrumentPatch
+        public static ExprEditor patch() {
+            return new ExprEditor() {
+                @Override
+                public void edit(FieldAccess f) throws CannotCompileException {
+                    if (f.getClassName().equals(AbstractCard.class.getName()) && f.getFieldName().equals("name")) {
+                        f.replace("$_ = " + CardModifierManager.class.getName() + ".onRenderTitle($0, $proceed($$));");
+                    }
+                }
+            };
         }
     }
 
