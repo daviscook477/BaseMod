@@ -88,7 +88,7 @@ public interface DraggableUI {
 
     static SpireConfig getConfig() {
         try {
-            SpireConfig spireConfig = new SpireConfig("StsLib","DraggableUI");
+            SpireConfig spireConfig = new SpireConfig("BaseMod","DraggableUI");
             spireConfig.load();
             return spireConfig;
         } catch (IOException e) {
