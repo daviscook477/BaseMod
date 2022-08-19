@@ -70,7 +70,7 @@ public interface DraggableUI {
                 hb.x = InputHelper.mX - hb.width / 2f;
                 hb.y = InputHelper.mY - hb.height / 2f;
 
-                if (draggableUiConfig != null) {
+                if (!allowRegisteringMultipleInstances && draggableUiConfig != null) {
                     draggableUiConfig.setFloat(e.getClass().getName() + "_x", e.getCenterX());
                     draggableUiConfig.setFloat(e.getClass().getName() + "_y", e.getCenterY());
                     try {
