@@ -1,12 +1,11 @@
 package basemod.devcommands.kill;
 
-import basemod.devcommands.ConsoleCommand;
 import basemod.DevConsole;
-import com.megacrit.cardcrawl.actions.AbstractGameAction;
-import com.megacrit.cardcrawl.actions.common.DamageAllEnemiesAction;
+import basemod.devcommands.ConsoleCommand;
 import com.megacrit.cardcrawl.actions.common.LoseHPAction;
-import com.megacrit.cardcrawl.cards.DamageInfo;
+import com.megacrit.cardcrawl.actions.common.SuicideAction;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.monsters.AbstractMonster;
 
 import java.util.ArrayList;
 
@@ -20,16 +19,13 @@ public class Kill extends ConsoleCommand {
 
     @Override
     public void execute(String[] tokens, int depth) {
-        if (tokens[1].toLowerCase().equals("all")) {
-            int monsterCount = AbstractDungeon.getCurrRoom().monsters.monsters.size();
-            int[] multiDamage = new int[monsterCount];
-            for (int i = 0; i < monsterCount; ++i) {
-                multiDamage[i] = 999;
+        if (tokens[1].equalsIgnoreCase("all")) {
+            for (AbstractMonster m : AbstractDungeon.getCurrRoom().monsters.monsters) {
+                AbstractDungeon.actionManager.addToTop(
+                        new SuicideAction(m, true)
+                );
             }
-
-            AbstractDungeon.actionManager.addToTop(new DamageAllEnemiesAction(AbstractDungeon.player, multiDamage,
-                    DamageInfo.DamageType.HP_LOSS, AbstractGameAction.AttackEffect.NONE));
-        } else if (tokens[1].toLowerCase().equals("self")) {
+        } else if (tokens[1].equalsIgnoreCase("self")) {
             AbstractDungeon.actionManager
                     .addToTop(new LoseHPAction(AbstractDungeon.player, AbstractDungeon.player, 999));
         } else {

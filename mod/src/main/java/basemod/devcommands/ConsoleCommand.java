@@ -10,6 +10,7 @@ import basemod.devcommands.draw.Draw;
 import basemod.devcommands.energy.Energy;
 import basemod.devcommands.event.Event;
 import basemod.devcommands.fight.Fight;
+import basemod.devcommands.statics.EvalCode;
 import basemod.devcommands.statics.EvalStatic;
 import basemod.devcommands.gold.Gold;
 import basemod.devcommands.hand.Hand;
@@ -149,6 +150,7 @@ public abstract class ConsoleCommand {
         addCommand("key", KeyCommand.class);
         addCommand("setstatic", SetStatic.class);
         addCommand("evalstatic", EvalStatic.class);
+        addCommand("evalcode", EvalCode.class);
 
         ActCommand.initialize();
     }

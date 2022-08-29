@@ -7,7 +7,7 @@ import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.DescriptionLine;
 import com.megacrit.cardcrawl.core.Settings;
 
-import java.util.regex.Matcher;
+import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 
 @SpirePatch(
@@ -18,6 +18,15 @@ public class SmithPreview
 {
 	public static void Postfix(AbstractCard __instance)
 	{
+		ForEachDynamicVariable(__instance, (card, dv) -> {
+			if (dv.upgraded(card)) {
+				dv.setIsModified(card, true);
+			}
+		});
+	}
+
+	public static void ForEachDynamicVariable(AbstractCard card, BiConsumer<AbstractCard, DynamicVariable> callback)
+	{
 		Pattern pattern;
 		if (Settings.lineBreakViaCharacter) {
 			pattern = Pattern.compile("\\$(.+)\\$\\$");
@@ -25,7 +34,7 @@ public class SmithPreview
 			pattern = Pattern.compile("!(.+)!.*");
 		}
 
-		for (DescriptionLine line : __instance.description) {
+		for (DescriptionLine line : card.description) {
 			String[] tokenized;
 			if (Settings.lineBreakViaCharacter) {
 				tokenized = line.getCachedTokenizedTextCN();
@@ -33,15 +42,13 @@ public class SmithPreview
 				tokenized = line.getCachedTokenizedText();
 			}
 			for (String word : tokenized) {
-				Matcher matcher = pattern.matcher(word);
+				java.util.regex.Matcher matcher = pattern.matcher(word);
 				if (matcher.find()) {
 					word = matcher.group(1);
 
 					DynamicVariable dv = BaseMod.cardDynamicVariableMap.get(word);
 					if (dv != null) {
-						if (dv.upgraded(__instance)) {
-							dv.setIsModified(__instance, true);
-						}
+						callback.accept(card, dv);
 					}
 				}
 			}

@@ -8,13 +8,19 @@ import java.util.ArrayList;
 
 public class Debug extends ConsoleCommand {
     public Debug() {
-        minExtraTokens = 1;
+        minExtraTokens = 0;
         maxExtraTokens = 1;
         simpleCheck = true;
     }
 
     @Override
     public void execute(String[] tokens, int depth) {
+        if (tokens.length < 2) {
+            Settings.isDebug = !Settings.isDebug;
+            DevConsole.log("Setting debug mode to: " + Settings.isDebug);
+            return;
+        }
+
         if(tokens[1].equals("true") || tokens[1].equals("false")) {
             try {
                 Settings.isDebug = Boolean.parseBoolean(tokens[1]);
