@@ -65,25 +65,23 @@ public interface DraggableUI {
         DraggableUI e = grabbedUiElement[0];
         if (e != null) {
             Hitbox hb = e.getHitbox();
-                e.setCenterX(InputHelper.mX);
-                e.setCenterY(InputHelper.mY);
-                hb.x = InputHelper.mX - hb.width / 2f;
-                hb.y = InputHelper.mY - hb.height / 2f;
-
-                if (!allowRegisteringMultipleInstances && draggableUiConfig != null) {
-                    draggableUiConfig.setFloat(e.getClass().getName() + "_x", e.getCenterX());
-                    draggableUiConfig.setFloat(e.getClass().getName() + "_y", e.getCenterY());
-                    try {
-                        draggableUiConfig.save();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
+            hb.x = InputHelper.mX - hb.width / 2f;
+            hb.y = InputHelper.mY - hb.height / 2f;
+            e.setCenterX(InputHelper.mX);
+            e.setCenterY(InputHelper.mY);
+            if (!allowRegisteringMultipleInstances && draggableUiConfig != null) {
+                draggableUiConfig.setFloat(e.getClass().getName() + "_x", e.getCenterX());
+                draggableUiConfig.setFloat(e.getClass().getName() + "_y", e.getCenterY());
+                try {
+                    draggableUiConfig.save();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
                 }
             }
+        }
         if (InputHelper.justReleasedClickLeft) {
             grabbedUiElement[0] = null;
         }
-
     }
 
     static SpireConfig getConfig() {
