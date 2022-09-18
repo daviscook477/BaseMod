@@ -1,6 +1,7 @@
 package basemod.patches.com.megacrit.cardcrawl.screens.mainMenu.ColorTabBar;
 
 import basemod.BaseMod;
+import basemod.ReflectionHacks;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.*;
@@ -12,6 +13,7 @@ import com.megacrit.cardcrawl.helpers.CardLibrary;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.helpers.controller.CInputActionSet;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import com.megacrit.cardcrawl.screens.mainMenu.ColorTabBar;
 import com.megacrit.cardcrawl.screens.mainMenu.TabBarListener;
@@ -19,7 +21,6 @@ import javassist.CtBehavior;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Map;
 
 public class ColorTabBarFix
 {
@@ -97,21 +98,51 @@ public class ColorTabBarFix
                 }
                 if (InputHelper.justClickedLeft) {
                     if (Fields.modTabs.get(i).hb.hovered) {
-                        try {
-                            Field curTab = ColorTabBar.class.getDeclaredField("curTab");
-                            curTab.setAccessible(true);
-                            ColorTabBar.CurrentTab oldTab = (ColorTabBar.CurrentTab)curTab.get(__instance);
-                            if (oldTab != Enums.MOD || Fields.modTabIndex != i) {
-                                curTab.set(__instance, Enums.MOD);
-                                Fields.modTabIndex = i;
-                                Field f = ColorTabBar.class.getDeclaredField("delegate");
-                                f.setAccessible(true);
-                                TabBarListener delegate = (TabBarListener)f.get(__instance);
+                        ColorTabBar.CurrentTab oldTab = __instance.curTab;
+                        if (oldTab != Enums.MOD || Fields.modTabIndex != i) {
+                            __instance.curTab = Enums.MOD;
+                            Fields.modTabIndex = i;
+                            TabBarListener delegate = ReflectionHacks.getPrivate(__instance, ColorTabBar.class, "delegate");
+                            if (delegate != null) {
                                 delegate.didChangeTab(__instance, Enums.MOD);
                             }
-                        } catch (IllegalAccessException | NoSuchFieldException e) {
-                            e.printStackTrace();
                         }
+                    }
+                }
+            }
+
+            if (Settings.isControllerMode) {
+                if (CInputActionSet.pageRightViewExhaust.isJustPressed()) {
+                    // update from original game already updated it to RED
+                    if (__instance.curTab == ColorTabBar.CurrentTab.RED) {
+                        __instance.curTab = Enums.MOD;
+                        Fields.modTabIndex = 0;
+                    } else if (__instance.curTab == Enums.MOD) {
+                        Fields.modTabIndex += 1;
+                        if (Fields.modTabIndex >= Fields.modTabs.size()) {
+                            __instance.curTab = ColorTabBar.CurrentTab.RED;
+                        }
+                    }
+
+                    TabBarListener delegate = ReflectionHacks.getPrivate(__instance, ColorTabBar.class, "delegate");
+                    if (delegate != null) {
+                        delegate.didChangeTab(__instance, __instance.curTab);
+                    }
+                } else if (CInputActionSet.pageLeftViewDeck.isJustPressed()) {
+                    // update from original game already updated it to CURSE
+                    if (__instance.curTab == ColorTabBar.CurrentTab.CURSE) {
+                        __instance.curTab = Enums.MOD;
+                        Fields.modTabIndex = Fields.modTabs.size() - 1;
+                    } else if (__instance.curTab == Enums.MOD) {
+                        Fields.modTabIndex -= 1;
+                        if (Fields.modTabIndex < 0) {
+                            __instance.curTab = ColorTabBar.CurrentTab.CURSE;
+                        }
+                    }
+
+                    TabBarListener delegate = ReflectionHacks.getPrivate(__instance, ColorTabBar.class, "delegate");
+                    if (delegate != null) {
+                        delegate.didChangeTab(__instance, __instance.curTab);
                     }
                 }
             }
