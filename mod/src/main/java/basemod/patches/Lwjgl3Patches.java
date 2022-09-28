@@ -10,6 +10,8 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Cursor;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowConfiguration;
 import com.badlogic.gdx.graphics.Cursor;
+import com.evacipated.cardcrawl.modthespire.Loader;
+import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch2;
 import com.evacipated.cardcrawl.modthespire.lib.SpireReturn;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
@@ -183,6 +185,17 @@ public class Lwjgl3Patches
 		public static SpireReturn<Void> Prefix(long windowHandle) {
 			GLFW.glfwSetInputMode(windowHandle, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_HIDDEN);
 			return SpireReturn.Return();
+		}
+	}
+
+	@SpirePatch2(
+			clz = Lwjgl3Application.class,
+			method = SpirePatch.CONSTRUCTOR
+	)
+	public static class Exit {
+		public static void Postfix() {
+			// TODO the MTS crash dump info
+			Loader.closeWindow();
 		}
 	}
 }
