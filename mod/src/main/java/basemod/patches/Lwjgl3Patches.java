@@ -7,14 +7,18 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl.LwjglGraphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Cursor;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowConfiguration;
+import com.badlogic.gdx.graphics.Cursor;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch2;
 import com.evacipated.cardcrawl.modthespire.lib.SpireReturn;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.desktop.DesktopLauncher;
 import com.megacrit.cardcrawl.helpers.controller.CInputHelper;
 import javassist.*;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
+import org.lwjgl.glfw.GLFW;
 
 // TODO some way to choose to enable/disable this with a launch flag
 public class Lwjgl3Patches
@@ -149,6 +153,35 @@ public class Lwjgl3Patches
 	)
 	public static class DisableController {
 		public static SpireReturn<Void> Prefix() {
+			return SpireReturn.Return();
+		}
+	}
+
+	@SpirePatch2(
+			clz = CardCrawlGame.class,
+			method = "create"
+	)
+	public static class SetHiddenCursor {
+		public static ExprEditor Instrument() {
+			return new ExprEditor() {
+				@Override
+				public void edit(MethodCall m) throws CannotCompileException
+				{
+					if (m.getMethodName().equals("setCursor")) {
+						m.replace("$0.setSystemCursor(" + Cursor.SystemCursor.class.getName() + ".Hand);");
+					}
+				}
+			};
+		}
+	}
+
+	@SpirePatch2(
+			clz = Lwjgl3Cursor.class,
+			method = "setSystemCursor"
+	)
+	public static class FixHiddenCursor {
+		public static SpireReturn<Void> Prefix(long windowHandle) {
+			GLFW.glfwSetInputMode(windowHandle, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_HIDDEN);
 			return SpireReturn.Return();
 		}
 	}
