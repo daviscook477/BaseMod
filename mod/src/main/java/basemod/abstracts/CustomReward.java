@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 public abstract class CustomReward extends RewardItem
 {
 	public Texture icon;
+	public TextureRegion iconRegion;
 	public ArrayList<AbstractGameEffect> effects;
 
 	public CustomReward(Texture icon, String text, RewardItem.RewardType type)
@@ -32,6 +34,13 @@ public abstract class CustomReward extends RewardItem
 		if (!BaseMod.customRewardTypeExists(type)) {
 			BaseMod.logger.info("CUSTOM REWARD WILL NOT BE SAVED PROPERLY WITHOUT BEING REGISTERED");
 		}
+	}
+
+	public CustomReward(TextureRegion icon, String text, RewardItem.RewardType type)
+	{
+		this((Texture) null, text, type);
+
+		this.iconRegion = icon;
 	}
 
 	public abstract boolean claimReward();
@@ -102,7 +111,30 @@ public abstract class CustomReward extends RewardItem
 
 		sb.setColor(Color.WHITE.cpy());
 
-		sb.draw(this.icon, RewardItem.REWARD_ITEM_X - 32.0f, this.y - 32.0f - 2.0f * Settings.scale, 32.0f, 32.0f, 64.0f, 64.0f, Settings.scale, Settings.scale, 0.0f, 0, 0, 64, 64, false, false);
+		if (icon != null) {
+			sb.draw(
+					icon,
+					RewardItem.REWARD_ITEM_X - 32.0f,
+					this.y - 32.0f - 2.0f * Settings.scale,
+					32.0f, 32.0f,
+					64.0f, 64.0f,
+					Settings.scale, Settings.scale,
+					0.0f,
+					0, 0,
+					64, 64,
+					false, false
+			);
+		} else {
+			sb.draw(
+					iconRegion,
+					RewardItem.REWARD_ITEM_X - 32f,
+					y - 32f - 2f * Settings.scale,
+					32f, 32f,
+					64f, 64f,
+					Settings.scale, Settings.scale,
+					0f
+			);
+		}
 
 		Color c = Settings.CREAM_COLOR.cpy();
 		if (this.hb.hovered) {

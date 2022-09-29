@@ -1,19 +1,18 @@
 package basemod;
 
 import basemod.devcommands.ConsoleCommand;
-import basemod.interfaces.PostEnergyRechargeSubscriber;
-import basemod.interfaces.PostInitializeSubscriber;
-import basemod.interfaces.PostRenderSubscriber;
-import basemod.interfaces.PostUpdateSubscriber;
-import basemod.interfaces.TextReceiver;
+import basemod.interfaces.*;
 import basemod.patches.com.megacrit.cardcrawl.helpers.input.ScrollInputProcessor.TextInput;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.scenes.scene2d.utils.UIUtils;
+import com.badlogic.gdx.utils.Clipboard;
 import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
@@ -212,6 +211,12 @@ implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSub
 
 	@Override
 	public boolean onKeyDown(int keycode) {
+		if (keycode == Input.Keys.V && UIUtils.ctrl()) {
+			System.out.println("PASTE");
+			Clipboard clipboard = Gdx.app.getClipboard();
+			setText(getCurrentText().concat(clipboard.getContents()));
+		}
+
 		if (AutoComplete.enabled) {
 			//I wanted to use a switch, but not constant :(
 			//can these even be changed? idk

@@ -1,5 +1,6 @@
 package basemod;
 
+import com.badlogic.gdx.utils.Pool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -8,13 +9,81 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ReflectionHacks
 {
 	public static final Logger logger = LogManager.getLogger(ReflectionHacks.class.getName());
 
-	private static final Map<Pair<Class<?>, String>, Field> fieldMap = new HashMap<>();
+	private static final Map<FieldInfo, Field> fieldMap = new HashMap<>();
 	private static final Map<String, Method> methodMap = new HashMap<>();
+
+	private static final FieldInfoPool fieldInfoPool = new FieldInfoPool();
+
+	private static class FieldInfoPool extends Pool<FieldInfo>
+	{
+
+		@Override
+		protected FieldInfo newObject()
+		{
+			return new FieldInfo();
+		}
+
+		public FieldInfo obtain(Class<?> clz, String fieldName)
+		{
+			FieldInfo ret = obtain();
+			ret.clz = clz;
+			ret.fieldName = fieldName;
+			return ret;
+		}
+	}
+
+	private static class FieldInfo implements Pool.Poolable
+	{
+		private Class<?> clz;
+		private String fieldName;
+
+		public FieldInfo()
+		{
+			this(null, null);
+		}
+
+		public FieldInfo(Class<?> key, String value)
+		{
+			this.clz = key;
+			this.fieldName = value;
+		}
+
+		@Override
+		public String toString()
+		{
+			return clz + "." + fieldName;
+		}
+
+		@Override
+		public boolean equals(Object o)
+		{
+			if (!(o instanceof FieldInfo)) {
+				return false;
+			}
+
+			FieldInfo other = (FieldInfo) o;
+			return Objects.equals(clz, other.clz) && Objects.equals(fieldName, other.fieldName);
+		}
+
+		@Override
+		public int hashCode()
+		{
+			return Objects.hash(clz, fieldName);
+		}
+
+		@Override
+		public void reset()
+		{
+			clz = null;
+			fieldName = null;
+		}
+	}
 
 	public static class RMethod
 	{
@@ -111,17 +180,19 @@ public class ReflectionHacks
 	 */
 	public static Field getCachedField(Class<?> clz, String fieldName)
 	{
-		Pair<Class<?>, String> pair = new Pair<>(clz, fieldName);
-		Field ret = fieldMap.get(pair);
+		FieldInfo fieldInfo = fieldInfoPool.obtain(clz, fieldName);
+		Field ret = fieldMap.get(fieldInfo);
 		if (ret == null) {
 			try {
 				ret = clz.getDeclaredField(fieldName);
 				ret.setAccessible(true);
-				fieldMap.put(pair, ret);
+				fieldMap.put(fieldInfo, ret);
 			} catch (NoSuchFieldException e) {
 				logger.error("Exception occurred when getting field " + fieldName + " of " + clz.getName(), e);
 				e.printStackTrace();
 			}
+		} else {
+			fieldInfoPool.free(fieldInfo);
 		}
 		return ret;
 	}

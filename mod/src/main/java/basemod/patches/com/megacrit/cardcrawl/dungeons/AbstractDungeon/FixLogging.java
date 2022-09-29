@@ -7,6 +7,14 @@ import javassist.expr.MethodCall;
 
 public class FixLogging
 {
+    //Makes it possible to prefix/postfix patch these methods instead of making the default branch almost impossible to patch
+    public static void unknownScreenUpdate() {
+
+    }
+    public static void unknownScreenRender() {
+
+    }
+
     @SpirePatch(
             cls="com.megacrit.cardcrawl.dungeons.AbstractDungeon",
             method="update"
@@ -19,7 +27,7 @@ public class FixLogging
                 public void edit(MethodCall m) throws CannotCompileException
                 {
                     if (m.getMethodName().equals("info")) {
-                        m.replace("");
+                        m.replace(FixLogging.class.getName() + ".unknownScreenUpdate();");
                     }
                 }
             };
@@ -38,7 +46,7 @@ public class FixLogging
                 public void edit(MethodCall m) throws CannotCompileException
                 {
                     if (m.getMethodName().equals("info")) {
-                        m.replace("");
+                        m.replace(FixLogging.class.getName() + ".unknownScreenRender();");
                     }
                 }
             };

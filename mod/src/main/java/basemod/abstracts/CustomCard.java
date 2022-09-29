@@ -5,6 +5,7 @@ import basemod.ReflectionHacks;
 import basemod.helpers.BaseModCardTags;
 import basemod.helpers.TooltipInfo;
 import basemod.patches.com.megacrit.cardcrawl.screens.SingleCardViewPopup.TitleFontSize;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -20,6 +21,7 @@ import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.localization.LocalizedStrings;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
+import com.megacrit.cardcrawl.unlock.UnlockTracker;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,7 +30,9 @@ import java.util.Map;
 
 public abstract class CustomCard extends AbstractCard {
 	public static HashMap<String, Texture> imgMap;
-	
+	public static HashMap<String, Texture> betaImgMap;
+
+	public static final String BETA_ENDING = "_b";
 	public static final String PORTRAIT_ENDING = "_p";
 	
 	public static Texture getPortraitImage(CustomCard card) {
@@ -57,6 +61,7 @@ public abstract class CustomCard extends AbstractCard {
 
 	static {
 		imgMap = new HashMap<>();
+		betaImgMap = new HashMap<>();
 	}
 
 	
@@ -381,13 +386,37 @@ public abstract class CustomCard extends AbstractCard {
 			cardTexture = imgMap.get(img);
 		} else {
 			cardTexture = ImageMaster.loadImage(img);
+			cardTexture.setFilter(Texture.TextureFilter.Linear,  Texture.TextureFilter.Linear);
 			imgMap.put(img, cardTexture);
 		}
-		cardTexture.setFilter(Texture.TextureFilter.Linear,  Texture.TextureFilter.Linear);
 		int tw = cardTexture.getWidth();
 		int th = cardTexture.getHeight();
-		TextureAtlas.AtlasRegion cardImg = new AtlasRegion(cardTexture, 0, 0, tw, th);
-		ReflectionHacks.setPrivateInherited(this, CustomCard.class, "portrait", cardImg);
+		portrait = new AtlasRegion(cardTexture, 0, 0, tw, th); //It'd probably be better to just use one AtlasRegion instance but whatever
+
+		//Attempt to load beta portrait once. If it doesn't exist, will store null here and then do nothing.
+		if (betaImgMap.containsKey(img)) {
+			cardTexture = betaImgMap.get(img);
+		}
+		else {
+			int endingIndex = img.lastIndexOf(".");
+			String betaPath = img.substring(0, endingIndex) +
+					BETA_ENDING + img.substring(endingIndex);
+
+			if (Gdx.files.internal(betaPath).exists()) { //To avoid unnecessary logging.
+				cardTexture = ImageMaster.loadImage(betaPath);
+				cardTexture.setFilter(Texture.TextureFilter.Linear,  Texture.TextureFilter.Linear);
+			}
+			else {
+				cardTexture = null;
+			}
+			betaImgMap.put(img, cardTexture);
+		}
+
+		if (cardTexture != null) {
+			tw = cardTexture.getWidth();
+			th = cardTexture.getHeight();
+			jokePortrait = new AtlasRegion(cardTexture, 0, 0, tw, th);
+		}
 	}
 
 	public List<TooltipInfo> getCustomTooltips()
@@ -494,14 +523,26 @@ public abstract class CustomCard extends AbstractCard {
 		if (textureImg == null) {
 			return null;
 		}
-		int endingIndex = textureImg.lastIndexOf(".");
-		String newPath = textureImg.substring(0, endingIndex) +
-				PORTRAIT_ENDING + textureImg.substring(endingIndex);
+
+		String newPath;
+		if ((Settings.PLAYTESTER_ART_MODE || UnlockTracker.betaCardPref.getBoolean(this.cardID, true)) &&
+				betaImgMap.get(textureImg) != null) {
+			int endingIndex = textureImg.lastIndexOf(".");
+			newPath = textureImg.substring(0, endingIndex) +
+					BETA_ENDING + PORTRAIT_ENDING + textureImg.substring(endingIndex);
+		}
+		else {
+			int endingIndex = textureImg.lastIndexOf(".");
+			newPath = textureImg.substring(0, endingIndex) +
+					PORTRAIT_ENDING + textureImg.substring(endingIndex);
+		}
+
 		System.out.println("Finding texture: " + newPath);
 		Texture portraitTexture;
 		try {
 			portraitTexture = ImageMaster.loadImage(newPath);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			portraitTexture = null;
 		}
 		return portraitTexture;

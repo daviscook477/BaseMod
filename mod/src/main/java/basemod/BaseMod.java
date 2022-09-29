@@ -2374,6 +2374,7 @@ public class BaseMod {
 			sub.receivePostUpdate();
 		}
 		unsubscribeLaterHelper(PostUpdateSubscriber.class);
+		DraggableUI.update();
 	}
 
 	// publishPostDungeonUpdate -

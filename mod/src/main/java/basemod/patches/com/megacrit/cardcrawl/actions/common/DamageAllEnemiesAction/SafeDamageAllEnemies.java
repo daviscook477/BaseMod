@@ -19,7 +19,7 @@ public class SafeDamageAllEnemies {
     )
     public static void checkSafety(DamageAllEnemiesAction __instance, boolean utilizeBaseDamage)
     {
-        if (!utilizeBaseDamage && __instance.damage.length != AbstractDungeon.getCurrRoom().monsters.monsters.size()) //There's a problem.
+        if (!utilizeBaseDamage && __instance.damage != null && __instance.damage.length != AbstractDungeon.getCurrRoom().monsters.monsters.size()) //There's a problem.
         {
             int[] newDamage = new int[AbstractDungeon.getCurrRoom().monsters.monsters.size()];
 

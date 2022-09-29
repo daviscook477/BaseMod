@@ -2,6 +2,7 @@ package basemod.devcommands.kill;
 
 import basemod.DevConsole;
 import basemod.devcommands.ConsoleCommand;
+import com.megacrit.cardcrawl.actions.common.InstantKillAction;
 import com.megacrit.cardcrawl.actions.common.LoseHPAction;
 import com.megacrit.cardcrawl.actions.common.SuicideAction;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -22,7 +23,7 @@ public class Kill extends ConsoleCommand {
         if (tokens[1].equalsIgnoreCase("all")) {
             for (AbstractMonster m : AbstractDungeon.getCurrRoom().monsters.monsters) {
                 AbstractDungeon.actionManager.addToTop(
-                        new SuicideAction(m, true)
+                        new InstantKillAction(m)
                 );
             }
         } else if (tokens[1].equalsIgnoreCase("self")) {

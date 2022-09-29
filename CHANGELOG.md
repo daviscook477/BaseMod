@@ -922,4 +922,20 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 #### v5.44.1 ####
 * Fix possible crash in other mods when using CustomReward (kiooeht)
 
+#### v5.45.0 ####
+* Fix kill all command softlocking Darklings and not stopping the Heart music (kiooeht)
+* Fix right-click release also triggering left-click release (kiooeht)
+  * This fixes bugs like SRV instantly closing when right-clicking the shop relic in shops
+* Let CustomReward accept TextureRegions for the icon (kiooeht)
+* Fix ReflectionHacks.getCachedField memory churn (kiooeht)
+* Allow Ctrl-V to paste into the console (kiooeht)
+* Fix evalcode command breaking if code doesn't have a return value (kiooeht)
+* Add beta art support for CustomCard (Alchyr)
+* Make anti-log spam patch slightly more interactable (Alchyr)
+* Add DraggableUI interface (Pandemonium)
+* Add controller navigation support to card library (herbix)
+* Update SafeDamageAllEnemies (Alchyr)
+* Fix memory churn caused by the constant in-combat particle effects (kiooeht)
+* Allow CustomCard to have different card art in SCV on upgrade (kiooeht/Vex)
+
 #### dev ####

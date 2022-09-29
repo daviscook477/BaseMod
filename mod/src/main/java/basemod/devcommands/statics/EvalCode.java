@@ -4,10 +4,7 @@ import basemod.DevConsole;
 import basemod.devcommands.ConsoleCommand;
 import com.evacipated.cardcrawl.modthespire.Loader;
 import javassist.*;
-import javassist.bytecode.BadBytecode;
-import javassist.bytecode.Bytecode;
-import javassist.bytecode.CodeIterator;
-import javassist.bytecode.ConstPool;
+import javassist.bytecode.*;
 import javassist.convert.Transformer;
 
 import java.lang.reflect.InvocationTargetException;
@@ -57,7 +54,18 @@ public class EvalCode extends ConsoleCommand
 
             CtMethod ctMethod = CtNewMethod.make(src, ctClass);
             ctClass.addMethod(ctMethod);
-            ReturnCodeConvertor codeConvertor = new ReturnCodeConvertor();
+            CodeAttribute code = ctMethod.getMethodInfo().getCodeAttribute();
+            boolean stackUnderflow = false;
+            try {
+                code.computeMaxStack();
+            } catch (BadBytecode e) {
+                if (e.getMessage().startsWith("stack underflow")) {
+                    stackUnderflow = true;
+                } else {
+                    throw e;
+                }
+            }
+            ReturnCodeConvertor codeConvertor = new ReturnCodeConvertor(stackUnderflow);
             ctMethod.instrument(codeConvertor);
 
             Class<?> cls = ctClass.toClass(EvalCode.class.getClassLoader(), null);
@@ -91,16 +99,19 @@ public class EvalCode extends ConsoleCommand
 
     private static class ReturnCodeConvertor extends CodeConverter
     {
-        public ReturnCodeConvertor()
+        public ReturnCodeConvertor(boolean stackUnderflow)
         {
-            transformers = new TransformPrimitiveReturn(transformers);
+            transformers = new TransformPrimitiveReturn(transformers, stackUnderflow);
         }
 
         private static class TransformPrimitiveReturn extends Transformer
         {
-            public TransformPrimitiveReturn(Transformer t)
+            private final boolean voidReturn;
+
+            public TransformPrimitiveReturn(Transformer t, boolean stackUnderflow)
             {
                 super(t);
+                voidReturn = stackUnderflow;
             }
 
             @Override
@@ -110,6 +121,9 @@ public class EvalCode extends ConsoleCommand
                 ClassPool pool = clazz.getClassPool();
                 int c = iterator.byteAt(pos);
                 CtPrimitiveType primitiveType = null;
+                if (c == IRETURN && voidReturn) {
+                    c = RETURN;
+                }
                 switch (c) {
                     case IRETURN: // int
                         primitiveType = (CtPrimitiveType) CtClass.intType;
@@ -125,10 +139,9 @@ public class EvalCode extends ConsoleCommand
                         break;
                     case RETURN: // void
                     {
-                        iterator.writeByte(NOP, pos);
+                        iterator.writeByte(ARETURN, pos);
                         Bytecode bytecode = new Bytecode(cp);
                         bytecode.add(ACONST_NULL);
-                        bytecode.add(ARETURN);
                         iterator.insert(pos, bytecode.get());
                         break;
                     }
