@@ -8,16 +8,23 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Texture;
-import com.megacrit.cardcrawl.actions.common.InstantKillAction;
+import com.megacrit.cardcrawl.actions.AbstractGameAction;
+import com.megacrit.cardcrawl.actions.common.*;
+import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
+import com.megacrit.cardcrawl.powers.AbstractPower;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import imgui.ImGui;
+import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImInt;
+
+import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  *
@@ -136,43 +143,122 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 
 	@Override
 	public void receiveImGui() {
-		if (AbstractDungeon.player != null) {
-			if (ImGui.treeNode("Player")) {
-				ImInt hp = new ImInt(AbstractDungeon.player.currentHealth);
-				ImGui.sliderInt("HP", hp.getData(), 1, AbstractDungeon.player.maxHealth);
-				if (hp.get() != AbstractDungeon.player.currentHealth) {
-					AbstractDungeon.player.currentHealth = hp.get();
-					AbstractDungeon.player.healthBarUpdatedEvent();
-					ReflectionHacks.setPrivate(AbstractDungeon.player, AbstractCreature.class, "healthBarAnimTimer", 0.2f);
+		if (ImGui.collapsingHeader("Combat")) {
+			if (AbstractDungeon.player != null) {
+				if (ImGui.treeNodeEx("Player", ImGuiTreeNodeFlags.DefaultOpen)) {
+					creatureInfo(AbstractDungeon.player, p -> {
+						// max hp
+						ImInt data = new ImInt(p.maxHealth);
+						ImGui.inputInt("Max HP", data, 1, 10);
+						if (data.get() < 1) {
+							data.set(1);
+						}
+						if (data.get() != p.maxHealth) {
+							p.maxHealth = data.get();
+							p.currentHealth = Integer.min(p.currentHealth, p.maxHealth);
+							p.healthBarUpdatedEvent();
+							ReflectionHacks.setPrivate(p, AbstractCreature.class, "healthBarAnimTimer", 0.2f);
+						}
+						//gold
+						data.set(p.gold);
+						ImGui.inputInt("Gold", data, 1, 100);
+						if (data.get() < 0) {
+							data.set(0);
+						}
+						if (data.get() != p.gold) {
+							p.gold = data.get();
+							p.displayGold = p.gold;
+						}
+						// hand
+						ArrayList<AbstractCard> cards = AbstractDungeon.player.hand.group;
+						if (ImGui.treeNode(String.format("Hand (%d)###hand", cards.size()))) {
+							if (ImGui.button("Draw Card")) {
+								addToTop(new DrawCardAction(1));
+							}
+							ImGui.sameLine();
+							if (ImGui.button("Discard All")) {
+								addToTop(new DiscardAction(p, p, cards.size(), false));
+							}
+							for (int i=0; i<cards.size(); ++i) {
+								ImGui.bulletText(cards.get(i).name);
+								ImGui.sameLine();
+								if (ImGui.button("Discard##discard" + i)) {
+									addToTop(new DiscardSpecificCardAction(cards.get(i)));
+								}
+							}
+							ImGui.treePop();
+						}
+					});
+					ImGui.treePop();
 				}
-				ImGui.treePop();
 			}
+
+			if (inCombat()) {
+				if (ImGui.treeNodeEx("Monsters", ImGuiTreeNodeFlags.DefaultOpen)) {
+					Boolean openAction = null;
+					if (ImGui.button("Open All")) {
+						openAction = true;
+					}
+					ImGui.sameLine();
+					if (ImGui.button("Close All")) {
+						openAction = false;
+					}
+
+					int i = 0;
+					for (AbstractMonster m : AbstractDungeon.getCurrRoom().monsters.monsters) {
+						monsterInfo(i, m, openAction);
+						++i;
+					}
+					ImGui.treePop();
+				}
+			}
+		}
+	}
+
+	private void monsterInfo(int i, AbstractMonster c, Boolean openAction) {
+		if (c.isDeadOrEscaped()) return;
+		if (openAction != null) {
+			ImGui.setNextItemOpen(openAction);
+		}
+		if (ImGui.treeNode(i, c.name)) {
+			creatureInfo(c, m -> {
+				ImGui.sameLine();
+				if (ImGui.button("Kill")) {
+					addToTop(new InstantKillAction(m));
+				}
+			});
+			ImGui.treePop();
+		}
+	}
+
+	private void creatureInfo(AbstractCreature c, Consumer<AbstractCreature> callback) {
+		// current hp
+		ImInt hp = new ImInt(c.currentHealth);
+		ImGui.sliderInt("HP", hp.getData(), 1, c.maxHealth);
+		if (hp.get() != c.currentHealth) {
+			c.currentHealth = hp.get();
+			c.healthBarUpdatedEvent();
+			ReflectionHacks.setPrivate(c, AbstractCreature.class, "healthBarAnimTimer", 0.2f);
+		}
+		if (callback != null) {
+			callback.accept(c);
 		}
 
-		if (inCombat()) {
-			if (ImGui.treeNode("Monsters")) {
-				int i = 0;
-				for (AbstractMonster m : AbstractDungeon.getCurrRoom().monsters.monsters) {
-					if (m.isDeadOrEscaped()) continue;
-					if (ImGui.treeNode(i, m.name)) {
-						ImInt hp = new ImInt(m.currentHealth);
-						ImGui.sliderInt("HP", hp.getData(), 1, m.maxHealth);
-						if (hp.get() != m.currentHealth) {
-							m.currentHealth = hp.get();
-							m.healthBarUpdatedEvent();
-							ReflectionHacks.setPrivate(m, AbstractCreature.class, "healthBarAnimTimer", 0.2f);
-						}
-						ImGui.sameLine();
-						if (ImGui.button("Kill")) {
-							AbstractDungeon.actionManager.addToTop(new InstantKillAction(m));
-						}
-						ImGui.treePop();
-					}
-					++i;
+		// powers
+		if (!c.powers.isEmpty() && ImGui.treeNode("Powers")) {
+			for (AbstractPower p : c.powers) {
+				ImGui.bulletText(p.name);
+				ImGui.sameLine();
+				if (ImGui.button("Remove")) {
+					addToTop(new RemoveSpecificPowerAction(c, c, p));
 				}
-				ImGui.treePop();
 			}
+			ImGui.treePop();
 		}
+	}
+
+	private void addToTop(AbstractGameAction action) {
+		AbstractDungeon.actionManager.addToTop(action);
 	}
 
 	private boolean inCombat() {
