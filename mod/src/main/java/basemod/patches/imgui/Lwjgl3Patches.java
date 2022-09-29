@@ -1,4 +1,4 @@
-package basemod.patches;
+package basemod.patches.imgui;
 
 import basemod.ReflectionHacks;
 import com.badlogic.gdx.ApplicationListener;
