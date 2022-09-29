@@ -174,7 +174,7 @@ public class ImGuiPatches
 
 		public static SpireReturn<Boolean> Prefix(int ___keycode)
 		{
-			if (suppressedKeys.contains(___keycode)) {
+			if (ImGui.getIO().getWantCaptureKeyboard() || suppressedKeys.contains(___keycode)) {
 				return SpireReturn.Return(false);
 			}
 			return SpireReturn.Continue();
