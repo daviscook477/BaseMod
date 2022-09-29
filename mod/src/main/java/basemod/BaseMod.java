@@ -73,6 +73,7 @@ import com.megacrit.cardcrawl.shop.StorePotion;
 import com.megacrit.cardcrawl.shop.StoreRelic;
 import com.megacrit.cardcrawl.unlock.AbstractUnlock;
 import com.megacrit.cardcrawl.unlock.UnlockTracker;
+import imgui.ImGui;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.NotFoundException;
@@ -2780,7 +2781,9 @@ public class BaseMod {
 
 	public static void publishImGui() {
 		for (ImGuiSubscriber sub : imGuiSubscribers) {
+			ImGui.pushID(sub.getClass().getName());
 			sub.receiveImGui();
+			ImGui.popID();
 		}
 
 		unsubscribeLaterHelper(ImGuiSubscriber.class);
