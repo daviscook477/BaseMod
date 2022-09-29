@@ -1,5 +1,6 @@
 package basemod;
 
+import basemod.interfaces.ImGuiSubscriber;
 import basemod.interfaces.PostInitializeSubscriber;
 import basemod.patches.whatmod.WhatMod;
 import com.badlogic.gdx.Gdx;
@@ -7,16 +8,23 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Texture;
+import com.megacrit.cardcrawl.actions.common.InstantKillAction;
+import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.monsters.AbstractMonster;
+import com.megacrit.cardcrawl.rooms.AbstractRoom;
+import imgui.ImGui;
+import imgui.type.ImInt;
 
 /**
  *
  * Handles the creation of the ModBadge and settings panel for BaseMod
  *
  */
-public class BaseModInit implements PostInitializeSubscriber {
+public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 	public static final String MODNAME = "BaseMod";
 	public static final String AUTHOR = "t-larson, test447, FlipskiZ, Haashi, Blank The Evil, kiooeht, robojumper, Skrelpoid";
 	public static final String DESCRIPTION = "Modding API and Dev console.";
@@ -126,4 +134,48 @@ public class BaseModInit implements PostInitializeSubscriber {
 		BaseMod.initializeEncounters();
 	}
 
+	@Override
+	public void receiveImGui() {
+		if (AbstractDungeon.player != null) {
+			if (ImGui.treeNode("Player")) {
+				ImInt hp = new ImInt(AbstractDungeon.player.currentHealth);
+				ImGui.sliderInt("HP", hp.getData(), 1, AbstractDungeon.player.maxHealth);
+				if (hp.get() != AbstractDungeon.player.currentHealth) {
+					AbstractDungeon.player.currentHealth = hp.get();
+					AbstractDungeon.player.healthBarUpdatedEvent();
+					ReflectionHacks.setPrivate(AbstractDungeon.player, AbstractCreature.class, "healthBarAnimTimer", 0.2f);
+				}
+				ImGui.treePop();
+			}
+		}
+
+		if (inCombat()) {
+			if (ImGui.treeNode("Monsters")) {
+				int i = 0;
+				for (AbstractMonster m : AbstractDungeon.getCurrRoom().monsters.monsters) {
+					if (m.isDeadOrEscaped()) continue;
+					if (ImGui.treeNode(i, m.name)) {
+						ImInt hp = new ImInt(m.currentHealth);
+						ImGui.sliderInt("HP", hp.getData(), 1, m.maxHealth);
+						if (hp.get() != m.currentHealth) {
+							m.currentHealth = hp.get();
+							m.healthBarUpdatedEvent();
+							ReflectionHacks.setPrivate(m, AbstractCreature.class, "healthBarAnimTimer", 0.2f);
+						}
+						ImGui.sameLine();
+						if (ImGui.button("Kill")) {
+							AbstractDungeon.actionManager.addToTop(new InstantKillAction(m));
+						}
+						ImGui.treePop();
+					}
+					++i;
+				}
+				ImGui.treePop();
+			}
+		}
+	}
+
+	private boolean inCombat() {
+		return AbstractDungeon.currMapNode != null && AbstractDungeon.getCurrRoom() != null && AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMBAT;
+	}
 }

@@ -1,5 +1,6 @@
 package basemod.patches.imgui;
 
+import basemod.BaseMod;
 import basemod.ReflectionHacks;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -9,7 +10,6 @@ import com.badlogic.gdx.graphics.Cursor;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.GameCursor;
-import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.input.InputAction;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import imgui.ImGui;
@@ -18,7 +18,6 @@ import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImBoolean;
-import imgui.type.ImInt;
 import javassist.CtBehavior;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
@@ -68,7 +67,6 @@ public class ImGuiPatches
 	{
 		private static boolean enabled = false;
 		private static final ImBoolean SHOW_DEMO_WINDOW = new ImBoolean(false);
-		private static final ImInt PLAYER_HP = new ImInt(0);
 
 		public static void Prefix()
 		{
@@ -95,17 +93,7 @@ public class ImGuiPatches
 				// the GUI
 				ImGui.checkbox("Show Demo Window", SHOW_DEMO_WINDOW);
 
-				if (AbstractDungeon.player != null) {
-					if (ImGui.treeNode("Player")) {
-						PLAYER_HP.set(AbstractDungeon.player.currentHealth);
-						ImGui.sliderInt("HP", PLAYER_HP.getData(), 1, AbstractDungeon.player.maxHealth);
-						if (PLAYER_HP.get() != AbstractDungeon.player.currentHealth) {
-							AbstractDungeon.player.currentHealth = PLAYER_HP.get();
-							AbstractDungeon.player.healthBarUpdatedEvent();
-						}
-						ImGui.treePop();
-					}
-				}
+				BaseMod.publishImGui();
 
 				if (SHOW_DEMO_WINDOW.get()) {
 					ImGui.showDemoWindow(SHOW_DEMO_WINDOW);

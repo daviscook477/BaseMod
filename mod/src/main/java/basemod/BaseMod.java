@@ -160,6 +160,7 @@ public class BaseMod {
 	private static ArrayList<OnCreateDescriptionSubscriber> onCreateDescriptionSubscribers;
 	private static ArrayList<OnPlayerTurnStartSubscriber> onPlayerTurnStartSubscribers;
 	private static ArrayList<OnPlayerTurnStartPostDrawSubscriber> onPlayerTurnStartPostDrawSubscribers;
+	private static ArrayList<ImGuiSubscriber> imGuiSubscribers;
 
 	private static ArrayList<AbstractCard> redToAdd;
 	private static ArrayList<String> redToRemove;
@@ -492,6 +493,7 @@ public class BaseMod {
 		onCreateDescriptionSubscribers = new ArrayList<>();
 		onPlayerTurnStartSubscribers = new ArrayList<>();
 		onPlayerTurnStartPostDrawSubscribers = new ArrayList<>();
+		imGuiSubscribers = new ArrayList<>();
 	}
 
 	// initializeCardLists -
@@ -2776,6 +2778,14 @@ public class BaseMod {
 		unsubscribeLaterHelper(OnPlayerTurnStartPostDrawSubscriber.class);
 	}
 
+	public static void publishImGui() {
+		for (ImGuiSubscriber sub : imGuiSubscribers) {
+			sub.receiveImGui();
+		}
+
+		unsubscribeLaterHelper(ImGuiSubscriber.class);
+	}
+
 	//
 	// Subscription handlers
 	//
@@ -2853,6 +2863,7 @@ public class BaseMod {
 		subscribeIfInstance(onCreateDescriptionSubscribers, sub, OnCreateDescriptionSubscriber.class);
 		subscribeIfInstance(onPlayerTurnStartSubscribers, sub, OnPlayerTurnStartSubscriber.class);
 		subscribeIfInstance(onPlayerTurnStartPostDrawSubscribers, sub, OnPlayerTurnStartPostDrawSubscriber.class);
+		subscribeIfInstance(imGuiSubscribers, sub, ImGuiSubscriber.class);
 	}
 
 	// subscribe -
@@ -2954,6 +2965,8 @@ public class BaseMod {
 			onPlayerTurnStartSubscribers.add((OnPlayerTurnStartSubscriber) sub);
 		} else if (additionClass.equals(OnPlayerTurnStartPostDrawSubscriber.class)) {
 			onPlayerTurnStartPostDrawSubscribers.add((OnPlayerTurnStartPostDrawSubscriber) sub);
+		} else if (additionClass.equals(ImGuiSubscriber.class)) {
+			imGuiSubscribers.add((ImGuiSubscriber) sub);
 		}
 	}
 
@@ -3008,6 +3021,7 @@ public class BaseMod {
 		unsubscribeIfInstance(onCreateDescriptionSubscribers, sub, OnCreateDescriptionSubscriber.class);
 		unsubscribeIfInstance(onPlayerTurnStartSubscribers, sub, OnPlayerTurnStartSubscriber.class);
 		unsubscribeIfInstance(onPlayerTurnStartPostDrawSubscribers, sub, OnPlayerTurnStartPostDrawSubscriber.class);
+		unsubscribeIfInstance(imGuiSubscribers, sub, ImGuiSubscriber.class);
 	}
 
 	// unsubscribe -
@@ -3111,6 +3125,8 @@ public class BaseMod {
 			onPlayerTurnStartSubscribers.remove(sub);
 		} else if (removalClass.equals(OnPlayerTurnStartPostDrawSubscriber.class)) {
 			onPlayerTurnStartPostDrawSubscribers.remove(sub);
+		} else if (removalClass.equals(ImGuiSubscriber.class)) {
+			imGuiSubscribers.remove(sub);
 		}
 	}
 
