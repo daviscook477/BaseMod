@@ -1,6 +1,7 @@
 package basemod.patches;
 
 import basemod.ReflectionHacks;
+import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -190,7 +191,11 @@ public class Lwjgl3Patches
 
 	@SpirePatch2(
 			clz = Lwjgl3Application.class,
-			method = SpirePatch.CONSTRUCTOR
+			method = SpirePatch.CONSTRUCTOR,
+			paramtypez = {
+					ApplicationListener.class,
+					Lwjgl3ApplicationConfiguration.class
+			}
 	)
 	public static class Exit {
 		public static void Postfix() {
