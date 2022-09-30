@@ -939,3 +939,4 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 * Allow CustomCard to have different card art in SCV on upgrade (kiooeht/Vex)
 
 #### dev ####
+* Fix black screen when using post-processing effects and cursor is hidden (kiooeht)
