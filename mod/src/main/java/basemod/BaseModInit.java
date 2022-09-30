@@ -14,17 +14,25 @@ import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.helpers.CardLibrary;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.powers.AbstractPower;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
+import com.megacrit.cardcrawl.unlock.UnlockTracker;
+import com.megacrit.cardcrawl.vfx.cardManip.ShowCardAndObtainEffect;
 import imgui.ImGui;
+import imgui.ImGuiTextFilter;
+import imgui.ImVec2;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImInt;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -213,6 +221,8 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 				}
 			}
 		}
+
+		cardSearch();
 	}
 
 	private void monsterInfo(int i, AbstractMonster c, Boolean openAction) {
@@ -255,6 +265,113 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			}
 			ImGui.treePop();
 		}
+	}
+
+	private String cardModIDFilter = "##ALL";
+	private final ImGuiTextFilter cardFilter = new ImGuiTextFilter();
+	private String selectedCardId = null;
+	private final ImInt cardCount = new ImInt(1);
+	private final ImInt cardUpgrades = new ImInt(0);
+
+	private void cardSearch() {
+		if (ImGui.collapsingHeader("Card Search")) {
+			ArrayList<AbstractCard> allCards = CardLibrary.getAllCards();
+			List<String> modIDs = allCards.stream()
+					.map(c -> getModID(c.cardID))
+					.distinct()
+					.collect(Collectors.toList());
+			modIDs.add(0, "##ALL");
+			// modid
+			ImGui.pushItemWidth(90);
+			if (ImGui.beginCombo("##modid", cardModIDFilter)) {
+				for (String modID : modIDs) {
+					boolean isSelected = cardModIDFilter.equals(modID);
+					if (ImGui.selectable(modID, isSelected)) {
+						cardModIDFilter = modID;
+					}
+
+					if (isSelected) {
+						ImGui.setItemDefaultFocus();
+					}
+				}
+				ImGui.endCombo();
+			}
+			ImGui.popItemWidth();
+			ImGui.sameLine();
+			// filter
+			cardFilter.draw("");
+			// card search
+			if (ImGui.beginListBox("##all cards", -Float.MIN_VALUE, 7 * ImGui.getTextLineHeightWithSpacing())) {
+				ImVec2 textSize = new ImVec2();
+				for (AbstractCard card : allCards) {
+					if ((cardFilter.passFilter(card.name) || cardFilter.passFilter(card.cardID)) && ("##ALL".equals(cardModIDFilter) || getModID(card.cardID).equals(cardModIDFilter))) {
+						boolean isSelected = selectedCardId != null && selectedCardId.equals(card.cardID);
+						if (ImGui.selectable(String.format("%s###%s", card.name, card.cardID), isSelected)) {
+							selectedCardId = card.cardID;
+						}
+						if (!Objects.equals(card.name, card.cardID)) {
+							String text = String.format("id: %s", card.cardID);
+							ImGui.calcTextSize(textSize, text);
+							ImGui.sameLine(ImGui.getWindowContentRegionMaxX() - textSize.x);
+							ImGui.text(text);
+						}
+
+						if (isSelected) {
+							ImGui.setItemDefaultFocus();
+						}
+					}
+				}
+				ImGui.endListBox();
+			}
+			// card count
+			ImGui.pushItemWidth(90);
+			ImGui.inputInt("Count", cardCount);
+			if (cardCount.get() < 1) {
+				cardCount.set(1);
+			}
+			ImGui.sameLine();
+			// upgrades
+			ImGui.inputInt("Upgrades", cardUpgrades);
+			ImGui.popItemWidth();
+			ImGui.beginDisabled(selectedCardId == null || !inCombat());
+			// add buttons
+			if (ImGui.button("Add to hand")) {
+				addToTop(new MakeTempCardInHandAction(getCardAndUpgrade(selectedCardId, cardUpgrades.get()), cardCount.get(), true));
+			}
+			ImGui.sameLine();
+			ImGui.endDisabled();
+			ImGui.beginDisabled(selectedCardId == null || AbstractDungeon.player == null);
+			if (ImGui.button("Add to deck")) {
+				UnlockTracker.markCardAsSeen(selectedCardId);
+				for (int i=0; i<cardCount.get(); ++i){
+					AbstractDungeon.effectList.add(
+							new ShowCardAndObtainEffect(
+									getCardAndUpgrade(selectedCardId, cardUpgrades.get()),
+									Settings.WIDTH / 2.0f,
+									Settings.HEIGHT / 2.0f
+							)
+					);
+				}
+			}
+			ImGui.endDisabled();
+		}
+	}
+
+	private String getModID(String cardID) {
+		int idx = cardID.indexOf(':');
+		if (idx < 0) return "Base game";
+		return cardID.substring(0, idx);
+	}
+
+	private AbstractCard getCardAndUpgrade(String cardId, int upgrades) {
+		AbstractCard ret = CardLibrary.getCard(cardId);
+		if (ret != null) {
+			ret = ret.makeCopy();
+			for (int i=0; i<upgrades; ++i) {
+				ret.upgrade();
+			}
+		}
+		return ret;
 	}
 
 	private void addToTop(AbstractGameAction action) {
