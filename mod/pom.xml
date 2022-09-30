@@ -89,6 +89,11 @@
             <version>${lwjgl.version}</version>
             <classifier>natives-macos</classifier>
         </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-openal</artifactId>
+            <version>${lwjgl.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.badlogicgames.gdx</groupId>
