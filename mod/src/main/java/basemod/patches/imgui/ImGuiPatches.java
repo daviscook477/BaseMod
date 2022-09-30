@@ -6,7 +6,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
-import com.badlogic.gdx.graphics.Cursor;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.GameCursor;
@@ -15,6 +14,7 @@ import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiConfigFlags;
+import imgui.flag.ImGuiMouseCursor;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImBoolean;
@@ -75,21 +75,18 @@ public class ImGuiPatches
 			if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) && Gdx.input.isKeyJustPressed(Input.Keys.E)) {
 				SuppressHotkey.suppressedKeys.add(Input.Keys.E);
 				enabled = !enabled;
-				if (enabled) {
-					GameCursor.hidden = true;
-				} else {
-					Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
-					GameCursor.hidden = false;
-				}
+				GameCursor.hidden = enabled;
 			}
 		}
 
 		public static void Postfix()
 		{
-			if (enabled) {
-				imGuiGlfw.newFrame();
-				ImGui.newFrame();
+			imGuiGlfw.newFrame();
+			ImGui.newFrame();
 
+			if (enabled) {
+				GameCursor.hidden = true;
+				
 				// the GUI
 				ImGui.checkbox("Show Demo Window", SHOW_DEMO_WINDOW);
 
@@ -98,14 +95,16 @@ public class ImGuiPatches
 				if (SHOW_DEMO_WINDOW.get()) {
 					ImGui.showDemoWindow(SHOW_DEMO_WINDOW);
 				}
+			} else {
+				ImGui.setMouseCursor(ImGuiMouseCursor.None);
+			}
 
-				ImGui.render();
-				imGuiGl3.renderDrawData(ImGui.getDrawData());
+			ImGui.render();
+			imGuiGl3.renderDrawData(ImGui.getDrawData());
 
-				if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-					ImGui.updatePlatformWindows();
-					ImGui.renderPlatformWindowsDefault();
-				}
+			if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+				ImGui.updatePlatformWindows();
+				ImGui.renderPlatformWindowsDefault();
 			}
 		}
 	}
