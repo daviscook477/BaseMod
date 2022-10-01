@@ -26,6 +26,7 @@ import com.megacrit.cardcrawl.vfx.cardManip.ShowCardAndObtainEffect;
 import imgui.ImGui;
 import imgui.ImGuiTextFilter;
 import imgui.ImVec2;
+import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiDataType;
 import imgui.flag.ImGuiSliderFlags;
 import imgui.flag.ImGuiTableColumnFlags;
@@ -158,6 +159,9 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 
 	@Override
 	public void receiveImGui() {
+		ImVec2 wPos = ImGui.getMainViewport().getPos();
+		ImGui.setNextWindowPos(wPos.x + 7, wPos.y + 70, ImGuiCond.FirstUseEver);
+		ImGui.setNextWindowSize(465, 465, ImGuiCond.FirstUseEver);
 		if (ImGui.begin("BaseMod")) {
 			ImGui.checkbox("Show Demo Window", SHOW_DEMO_WINDOW);
 			combatPanel();
@@ -399,6 +403,9 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 	}
 
 	private void actionQueueWindow() {
+		ImVec2 wPos = ImGui.getMainViewport().getPos();
+		ImGui.setNextWindowPos(wPos.x + 1560, wPos.y + 160, ImGuiCond.FirstUseEver);
+		ImGui.setNextWindowSize(340, 270, ImGuiCond.FirstUseEver);
 		if (ImGui.begin("Action Queue")) {
 			if (AbstractDungeon.actionManager.actions.isEmpty()) {
 				ImGui.text("Empty");
@@ -446,6 +453,9 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 	private final ImInt cardUpgrades = new ImInt(0);
 
 	private void cardSearchWindow() {
+		ImVec2 wPos = ImGui.getMainViewport().getPos();
+		ImGui.setNextWindowPos(wPos.x + 7, wPos.y + 550, ImGuiCond.FirstUseEver);
+		ImGui.setNextWindowSize(465, 225, ImGuiCond.FirstUseEver);
 		if (ImGui.begin("Card Search")) {
 			ArrayList<AbstractCard> allCards = CardLibrary.getAllCards();
 			List<String> modIDs = allCards.stream()
