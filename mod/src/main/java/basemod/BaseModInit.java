@@ -25,6 +25,7 @@ import com.megacrit.cardcrawl.vfx.cardManip.ShowCardAndObtainEffect;
 import imgui.ImGui;
 import imgui.ImGuiTextFilter;
 import imgui.ImVec2;
+import imgui.flag.ImGuiTableColumnFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 
@@ -211,12 +212,37 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 					if (ImGui.button("Discard All")) {
 						addToTop(new DiscardAction(p, p, cards.size(), false));
 					}
-					for (int i=0; i<cards.size(); ++i) {
-						ImGui.bulletText(cards.get(i).name);
-						ImGui.sameLine();
-						if (ImGui.button("Discard##discard" + i)) {
-							addToTop(new DiscardSpecificCardAction(cards.get(i)));
+					if (ImGui.beginTable("hand cards", 4)) {
+						ImGui.tableSetupColumn("index", ImGuiTableColumnFlags.WidthFixed);
+						ImGui.tableSetupColumn("card name");
+						ImGui.tableSetupColumn("upgrade", ImGuiTableColumnFlags.WidthFixed);
+						ImGui.tableSetupColumn("discard", ImGuiTableColumnFlags.WidthFixed);
+
+						for (int i=0; i<cards.size(); ++i) {
+							AbstractCard card = cards.get(i);
+							ImGui.tableNextRow();
+							// index
+							ImGui.tableSetColumnIndex(0);
+							ImGui.text(Integer.toString(i+1));
+							// name
+							ImGui.tableSetColumnIndex(1);
+							ImGui.text(card.name);
+							// upgrade
+							ImGui.tableSetColumnIndex(2);
+							ImGui.beginDisabled(!card.canUpgrade());
+							if (ImGui.button("Upgrade##upgrade" + i)) {
+								card.upgrade();
+								card.superFlash();
+								card.applyPowers();
+							}
+							ImGui.endDisabled();
+							// discard
+							ImGui.tableSetColumnIndex(3);
+							if (ImGui.button("Discard##discard" + i)) {
+								addToTop(new DiscardSpecificCardAction(card));
+							}
 						}
+						ImGui.endTable();
 					}
 					ImGui.treePop();
 				}
