@@ -18,8 +18,10 @@ import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.CardLibrary;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.helpers.RelicLibrary;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.powers.AbstractPower;
+import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.unlock.UnlockTracker;
 import com.megacrit.cardcrawl.vfx.cardManip.ShowCardAndObtainEffect;
@@ -168,7 +170,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 		}
 		ImGui.end();
 
-		cardSearchWindow();
+		searchWindow();
 
 		actionQueueWindow();
 
@@ -446,17 +448,28 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 		return ImGui.button("Remove##remove" + i);
 	}
 
-	private String cardModIDFilter = "##ALL";
+	private void searchWindow() {
+		ImVec2 wPos = ImGui.getMainViewport().getPos();
+		ImGui.setNextWindowPos(wPos.x + 7, wPos.y + 550, ImGuiCond.FirstUseEver);
+		ImGui.setNextWindowSize(465, 255, ImGuiCond.FirstUseEver);
+		if (ImGui.begin("Search")) {
+			if (ImGui.beginTabBar("SearchTabBar")) {
+				cardSearchTab();
+				relicSearchTab();
+				ImGui.endTabBar();
+			}
+		}
+		ImGui.end();
+	}
+
+	private String modIDFilter = "##ALL";
 	private final ImGuiTextFilter cardFilter = new ImGuiTextFilter();
 	private String selectedCardId = null;
 	private final ImInt cardCount = new ImInt(1);
 	private final ImInt cardUpgrades = new ImInt(0);
 
-	private void cardSearchWindow() {
-		ImVec2 wPos = ImGui.getMainViewport().getPos();
-		ImGui.setNextWindowPos(wPos.x + 7, wPos.y + 550, ImGuiCond.FirstUseEver);
-		ImGui.setNextWindowSize(465, 225, ImGuiCond.FirstUseEver);
-		if (ImGui.begin("Card Search")) {
+	private void cardSearchTab() {
+		if (ImGui.beginTabItem("Card Search")) {
 			ArrayList<AbstractCard> allCards = CardLibrary.getAllCards();
 			List<String> modIDs = allCards.stream()
 					.map(c -> getModID(c.cardID))
@@ -465,11 +478,11 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			modIDs.add(0, "##ALL");
 			// modid
 			ImGui.pushItemWidth(90);
-			if (ImGui.beginCombo("##modid", cardModIDFilter)) {
+			if (ImGui.beginCombo("##modid", modIDFilter)) {
 				for (String modID : modIDs) {
-					boolean isSelected = cardModIDFilter.equals(modID);
+					boolean isSelected = modIDFilter.equals(modID);
 					if (ImGui.selectable(modID, isSelected)) {
-						cardModIDFilter = modID;
+						modIDFilter = modID;
 					}
 
 					if (isSelected) {
@@ -486,7 +499,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			if (ImGui.beginListBox("##all cards", -Float.MIN_VALUE, 7 * ImGui.getTextLineHeightWithSpacing())) {
 				ImVec2 textSize = new ImVec2();
 				for (AbstractCard card : allCards) {
-					if ((cardFilter.passFilter(card.name) || cardFilter.passFilter(card.cardID)) && ("##ALL".equals(cardModIDFilter) || getModID(card.cardID).equals(cardModIDFilter))) {
+					if ((cardFilter.passFilter(card.name) || cardFilter.passFilter(card.cardID)) && ("##ALL".equals(modIDFilter) || getModID(card.cardID).equals(modIDFilter))) {
 						boolean isSelected = selectedCardId != null && selectedCardId.equals(card.cardID);
 						if (ImGui.selectable(String.format("%s###%s", card.name, card.cardID), isSelected)) {
 							selectedCardId = card.cardID;
@@ -536,8 +549,79 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 				}
 			}
 			ImGui.endDisabled();
+			ImGui.endTabItem();
 		}
-		ImGui.end();
+	}
+
+	private final ImGuiTextFilter relicFilter = new ImGuiTextFilter();
+	private String selectedRelicId = null;
+
+	private void relicSearchTab() {
+		if (ImGui.beginTabItem("Relic Search")) {
+			List<String> allRelicIDs = BaseMod.listAllRelicIDs();
+			List<String> modIDs = allRelicIDs.stream()
+					.map(this::getModID)
+					.distinct()
+					.collect(Collectors.toList());
+			modIDs.add(0, "##ALL");
+			// modid
+			ImGui.pushItemWidth(90);
+			if (ImGui.beginCombo("##modid", modIDFilter)) {
+				for (String modID : modIDs) {
+					boolean isSelected = modIDFilter.equals(modID);
+					if (ImGui.selectable(modID, isSelected)) {
+						modIDFilter = modID;
+					}
+
+					if (isSelected) {
+						ImGui.setItemDefaultFocus();
+					}
+				}
+				ImGui.endCombo();
+			}
+			ImGui.popItemWidth();
+			ImGui.sameLine();
+			// filter
+			relicFilter.draw("##");
+			// relic search
+			if (ImGui.beginListBox("##all relics", -Float.MIN_VALUE, 7 * ImGui.getTextLineHeightWithSpacing())) {
+				ImVec2 textSize = new ImVec2();
+				for (String relicID : allRelicIDs) {
+					AbstractRelic relic = RelicLibrary.getRelic(relicID);
+					if ((relicFilter.passFilter(relic.name) || relicFilter.passFilter(relic.relicId)) && ("##ALL".equals(modIDFilter) || getModID(relic.relicId).equals(modIDFilter))) {
+						boolean isSelected = selectedRelicId != null && selectedRelicId.equals(relic.relicId);
+						if (ImGui.selectable(String.format("%s###%s", relic.name, relic.relicId), isSelected)) {
+							selectedRelicId = relic.relicId;
+						}
+						if (!Objects.equals(relic.name, relic.relicId)) {
+							String text = String.format("id: %s", relic.relicId);
+							ImGui.calcTextSize(textSize, text);
+							ImGui.sameLine(ImGui.getWindowContentRegionMaxX() - textSize.x);
+							ImGui.text(text);
+						}
+
+						if (isSelected) {
+							ImGui.setItemDefaultFocus();
+						}
+					}
+				}
+				ImGui.endListBox();
+			}
+			// add button
+			ImGui.beginDisabled(
+					selectedRelicId == null || AbstractDungeon.player == null ||
+							AbstractDungeon.currMapNode == null || AbstractDungeon.getCurrRoom() == null
+			);
+			if (ImGui.button("Obtain")) {
+				AbstractRelic relic = RelicLibrary.getRelic(selectedRelicId).makeCopy();
+				AbstractDungeon.getCurrRoom().spawnRelicAndObtain(
+						Settings.WIDTH / 2f, Settings.HEIGHT / 2f,
+						relic
+				);
+			}
+			ImGui.endDisabled();
+			ImGui.endTabItem();
+		}
 	}
 
 	private String getModID(String cardID) {
