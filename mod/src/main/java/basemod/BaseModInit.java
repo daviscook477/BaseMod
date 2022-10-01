@@ -329,7 +329,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 
 		// block
 		ImInt data = new ImInt(c.currentBlock);
-		ImGui.dragScalar("Block", ImGuiDataType.S32, data, 1, 0, 999, "%d", ImGuiSliderFlags.AlwaysClamp);
+		ImGui.dragScalar("Block", ImGuiDataType.S32, data, 0.25f, 0, 999, "%d", ImGuiSliderFlags.AlwaysClamp);
 		if (data.get() != c.currentBlock) {
 			if (c.currentBlock <= 0) {
 				ReflectionHacks.privateMethod(AbstractCreature.class, "gainBlockAnimation").invoke(c);
