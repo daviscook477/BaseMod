@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.actions.common.*;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -34,7 +35,6 @@ import imgui.type.ImInt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -154,6 +154,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 
 	private boolean firstTime = true;
 	private final ImBoolean SHOW_DEMO_WINDOW = new ImBoolean(false);
+	private final ImInt iData = new ImInt();
 
 	@Override
 	public void receiveImGui() {
@@ -181,109 +182,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 		ImGui.beginDisabled(AbstractDungeon.player == null);
 		if (AbstractDungeon.player == null) ImGui.setNextItemOpen(false);
 		if (ImGui.collapsingHeader("Player")) {
-			creatureInfo(AbstractDungeon.player, p -> {
-				// max hp
-				ImInt data = new ImInt(p.maxHealth);
-				ImGui.inputInt("Max HP", data, 1, 10);
-				if (data.get() < 1) {
-					data.set(1);
-				}
-				if (data.get() != p.maxHealth) {
-					p.maxHealth = data.get();
-					p.currentHealth = Integer.min(p.currentHealth, p.maxHealth);
-					p.healthBarUpdatedEvent();
-					ReflectionHacks.setPrivate(p, AbstractCreature.class, "healthBarAnimTimer", 0.2f);
-				}
-				//gold
-				data.set(p.gold);
-				ImGui.inputInt("Gold", data, 1, 100);
-				if (data.get() < 0) {
-					data.set(0);
-				}
-				if (data.get() != p.gold) {
-					p.gold = data.get();
-					p.displayGold = p.gold;
-				}
-				//deck
-				ArrayList<AbstractCard> cards = AbstractDungeon.player.masterDeck.group;
-				if (ImGui.treeNode(String.format("Deck (%d)###deck", cards.size()))) {
-					if (ImGui.beginTable("deck cards", 4)) {
-						ImGui.tableSetupColumn("index", ImGuiTableColumnFlags.WidthFixed);
-						ImGui.tableSetupColumn("card name");
-						ImGui.tableSetupColumn("upgrade", ImGuiTableColumnFlags.WidthFixed);
-						ImGui.tableSetupColumn("discard", ImGuiTableColumnFlags.WidthFixed);
-
-						for (int i=0; i<cards.size(); ++i) {
-							AbstractCard card = cards.get(i);
-							ImGui.tableNextRow();
-							// index
-							ImGui.tableSetColumnIndex(0);
-							ImGui.text(Integer.toString(i+1));
-							// name
-							ImGui.tableSetColumnIndex(1);
-							ImGui.text(card.name);
-							// upgrade
-							ImGui.tableSetColumnIndex(2);
-							ImGui.beginDisabled(!card.canUpgrade());
-							if (ImGui.button("Upgrade##upgrade" + i)) {
-								card.upgrade();
-							}
-							ImGui.endDisabled();
-							// remove
-							ImGui.tableSetColumnIndex(3);
-							if (ImGui.button("Remove##remove" + i)) {
-								AbstractDungeon.player.masterDeck.removeCard(card);
-							}
-						}
-						ImGui.endTable();
-					}
-					ImGui.treePop();
-				}
-				// hand
-				cards = AbstractDungeon.player.hand.group;
-				if (ImGui.treeNode(String.format("Hand (%d)###hand", cards.size()))) {
-					if (ImGui.button("Draw Card")) {
-						addToTop(new DrawCardAction(1));
-					}
-					ImGui.sameLine();
-					if (ImGui.button("Discard All")) {
-						addToTop(new DiscardAction(p, p, cards.size(), false));
-					}
-					if (ImGui.beginTable("hand cards", 4)) {
-						ImGui.tableSetupColumn("index", ImGuiTableColumnFlags.WidthFixed);
-						ImGui.tableSetupColumn("card name");
-						ImGui.tableSetupColumn("upgrade", ImGuiTableColumnFlags.WidthFixed);
-						ImGui.tableSetupColumn("discard", ImGuiTableColumnFlags.WidthFixed);
-
-						for (int i=0; i<cards.size(); ++i) {
-							AbstractCard card = cards.get(i);
-							ImGui.tableNextRow();
-							// index
-							ImGui.tableSetColumnIndex(0);
-							ImGui.text(Integer.toString(i+1));
-							// name
-							ImGui.tableSetColumnIndex(1);
-							ImGui.text(card.name);
-							// upgrade
-							ImGui.tableSetColumnIndex(2);
-							ImGui.beginDisabled(!card.canUpgrade());
-							if (ImGui.button("Upgrade##upgrade" + i)) {
-								card.upgrade();
-								card.superFlash();
-								card.applyPowers();
-							}
-							ImGui.endDisabled();
-							// discard
-							ImGui.tableSetColumnIndex(3);
-							if (ImGui.button("Discard##discard" + i)) {
-								addToTop(new DiscardSpecificCardAction(card));
-							}
-						}
-						ImGui.endTable();
-					}
-					ImGui.treePop();
-				}
-			});
+			playerInfo(AbstractDungeon.player);
 		}
 		ImGui.endDisabled();
 
@@ -308,47 +207,157 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 		ImGui.endDisabled();
 	}
 
+	private void playerInfo(AbstractPlayer p) {
+		// gold
+		iData.set(p.gold);
+		ImGui.inputInt("Gold", iData, 1, 100);
+		if (iData.get() < 0) {
+			iData.set(0);
+		}
+		if (iData.get() != p.gold) {
+			p.gold = iData.get();
+			p.displayGold = p.gold;
+		}
+		// max hp
+		iData.set(p.maxHealth);
+		ImGui.inputInt("Max HP", iData, 1, 10);
+		if (iData.get() < 1) {
+			iData.set(1);
+		}
+		if (iData.get() != p.maxHealth) {
+			p.maxHealth = iData.get();
+			p.currentHealth = Integer.min(p.currentHealth, p.maxHealth);
+			p.healthBarUpdatedEvent();
+			ReflectionHacks.setPrivate(p, AbstractCreature.class, "healthBarAnimTimer", 0.2f);
+		}
+		// hp
+		creatureHP(p);
+		// block
+		creatureBlock(p);
+		// powers
+		creaturePowers(p);
+		//deck
+		ArrayList<AbstractCard> cards = AbstractDungeon.player.masterDeck.group;
+		if (ImGui.treeNode(String.format("Deck (%d)###deck", cards.size()))) {
+			if (ImGui.beginTable("deck cards", 4)) {
+				ImGui.tableSetupColumn("index", ImGuiTableColumnFlags.WidthFixed);
+				ImGui.tableSetupColumn("card name");
+				ImGui.tableSetupColumn("upgrade", ImGuiTableColumnFlags.WidthFixed);
+				ImGui.tableSetupColumn("discard", ImGuiTableColumnFlags.WidthFixed);
+
+				for (int i=0; i<cards.size(); ++i) {
+					AbstractCard card = cards.get(i);
+					ImGui.tableNextRow();
+					// index
+					ImGui.tableSetColumnIndex(0);
+					ImGui.text(Integer.toString(i+1));
+					// name
+					ImGui.tableSetColumnIndex(1);
+					ImGui.text(card.name);
+					// upgrade
+					ImGui.tableSetColumnIndex(2);
+					ImGui.beginDisabled(!card.canUpgrade());
+					if (ImGui.button("Upgrade##upgrade" + i)) {
+						card.upgrade();
+					}
+					ImGui.endDisabled();
+					// remove
+					ImGui.tableSetColumnIndex(3);
+					if (ImGui.button("Remove##remove" + i)) {
+						AbstractDungeon.player.masterDeck.removeCard(card);
+					}
+				}
+				ImGui.endTable();
+			}
+			ImGui.treePop();
+		}
+		// hand
+		cards = AbstractDungeon.player.hand.group;
+		if (ImGui.treeNode(String.format("Hand (%d)###hand", cards.size()))) {
+			if (ImGui.button("Draw Card")) {
+				addToTop(new DrawCardAction(1));
+			}
+			ImGui.sameLine();
+			if (ImGui.button("Discard All")) {
+				addToTop(new DiscardAction(p, p, cards.size(), false));
+			}
+			if (ImGui.beginTable("hand cards", 4)) {
+				ImGui.tableSetupColumn("index", ImGuiTableColumnFlags.WidthFixed);
+				ImGui.tableSetupColumn("card name");
+				ImGui.tableSetupColumn("upgrade", ImGuiTableColumnFlags.WidthFixed);
+				ImGui.tableSetupColumn("discard", ImGuiTableColumnFlags.WidthFixed);
+
+				for (int i=0; i<cards.size(); ++i) {
+					AbstractCard card = cards.get(i);
+					ImGui.tableNextRow();
+					// index
+					ImGui.tableSetColumnIndex(0);
+					ImGui.text(Integer.toString(i+1));
+					// name
+					ImGui.tableSetColumnIndex(1);
+					ImGui.text(card.name);
+					// upgrade
+					ImGui.tableSetColumnIndex(2);
+					ImGui.beginDisabled(!card.canUpgrade());
+					if (ImGui.button("Upgrade##upgrade" + i)) {
+						card.upgrade();
+						card.superFlash();
+						card.applyPowers();
+					}
+					ImGui.endDisabled();
+					// discard
+					ImGui.tableSetColumnIndex(3);
+					if (ImGui.button("Discard##discard" + i)) {
+						addToTop(new DiscardSpecificCardAction(card));
+					}
+				}
+				ImGui.endTable();
+			}
+			ImGui.treePop();
+		}
+	}
+
 	private void monsterInfo(int i, AbstractMonster c, Boolean openAction) {
 		if (c == null || c.isDeadOrEscaped()) return;
 		if (openAction != null) {
 			ImGui.setNextItemOpen(openAction);
 		}
 		if (ImGui.treeNode(i, c.name)) {
-			creatureInfo(c, m -> {
-				ImGui.sameLine();
-				if (ImGui.button("Kill")) {
-					addToTop(new InstantKillAction(m));
-				}
-			});
+			creatureHP(c);
+			creatureBlock(c);
+			creaturePowers(c);
 			ImGui.treePop();
 		}
 	}
 
-	private void creatureInfo(AbstractCreature c, Consumer<AbstractCreature> callback) {
-		if (c == null) return;
-
-		// block
-		ImInt data = new ImInt(c.currentBlock);
-		ImGui.dragScalar("Block", ImGuiDataType.S32, data, 0.25f, 0, 999, "%d", ImGuiSliderFlags.AlwaysClamp);
-		if (data.get() != c.currentBlock) {
-			if (c.currentBlock <= 0) {
-				ReflectionHacks.privateMethod(AbstractCreature.class, "gainBlockAnimation").invoke(c);
-			}
-			c.currentBlock = data.get();
-		}
-		// current hp
-		data.set(c.currentHealth);
-		ImGui.sliderInt("HP", data.getData(), 1, c.maxHealth);
-		if (data.get() != c.currentHealth) {
-			c.currentHealth = data.get();
+	private void creatureHP(AbstractCreature c) {
+		iData.set(c.currentHealth);
+		ImGui.sliderInt("HP", iData.getData(), 1, c.maxHealth);
+		if (iData.get() != c.currentHealth) {
+			c.currentHealth = iData.get();
 			c.healthBarUpdatedEvent();
 			ReflectionHacks.setPrivate(c, AbstractCreature.class, "healthBarAnimTimer", 0.2f);
 		}
-		if (callback != null) {
-			callback.accept(c);
+		if (c instanceof AbstractMonster) {
+			ImGui.sameLine();
+			if (ImGui.button("Kill")) {
+				addToTop(new InstantKillAction(c));
+			}
 		}
+	}
 
-		// powers
+	private void creatureBlock(AbstractCreature c) {
+		iData.set(c.currentBlock);
+		ImGui.dragScalar("Block", ImGuiDataType.S32, iData, 0.25f, 0, 999, "%d", ImGuiSliderFlags.AlwaysClamp);
+		if (iData.get() != c.currentBlock) {
+			if (c.currentBlock <= 0) {
+				ReflectionHacks.privateMethod(AbstractCreature.class, "gainBlockAnimation").invoke(c);
+			}
+			c.currentBlock = iData.get();
+		}
+	}
+
+	private void creaturePowers(AbstractCreature c) {
 		if (!c.powers.isEmpty() && ImGui.treeNode("Powers")) {
 			int i = 0;
 			for (AbstractPower p : c.powers) {
