@@ -25,7 +25,7 @@ import com.megacrit.cardcrawl.vfx.cardManip.ShowCardAndObtainEffect;
 import imgui.ImGui;
 import imgui.ImGuiTextFilter;
 import imgui.ImVec2;
-import imgui.flag.ImGuiTreeNodeFlags;
+import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 
 import java.util.ArrayList;
@@ -149,84 +149,104 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 		BaseMod.initializeEncounters();
 	}
 
+	private boolean firstTime = true;
+	private final ImBoolean SHOW_DEMO_WINDOW = new ImBoolean(false);
+
 	@Override
 	public void receiveImGui() {
-		if (ImGui.collapsingHeader("Combat")) {
-			if (AbstractDungeon.player != null) {
-				if (ImGui.treeNodeEx("Player", ImGuiTreeNodeFlags.DefaultOpen)) {
-					creatureInfo(AbstractDungeon.player, p -> {
-						// max hp
-						ImInt data = new ImInt(p.maxHealth);
-						ImGui.inputInt("Max HP", data, 1, 10);
-						if (data.get() < 1) {
-							data.set(1);
-						}
-						if (data.get() != p.maxHealth) {
-							p.maxHealth = data.get();
-							p.currentHealth = Integer.min(p.currentHealth, p.maxHealth);
-							p.healthBarUpdatedEvent();
-							ReflectionHacks.setPrivate(p, AbstractCreature.class, "healthBarAnimTimer", 0.2f);
-						}
-						//gold
-						data.set(p.gold);
-						ImGui.inputInt("Gold", data, 1, 100);
-						if (data.get() < 0) {
-							data.set(0);
-						}
-						if (data.get() != p.gold) {
-							p.gold = data.get();
-							p.displayGold = p.gold;
-						}
-						// hand
-						ArrayList<AbstractCard> cards = AbstractDungeon.player.hand.group;
-						if (ImGui.treeNode(String.format("Hand (%d)###hand", cards.size()))) {
-							if (ImGui.button("Draw Card")) {
-								addToTop(new DrawCardAction(1));
-							}
-							ImGui.sameLine();
-							if (ImGui.button("Discard All")) {
-								addToTop(new DiscardAction(p, p, cards.size(), false));
-							}
-							for (int i=0; i<cards.size(); ++i) {
-								ImGui.bulletText(cards.get(i).name);
-								ImGui.sameLine();
-								if (ImGui.button("Discard##discard" + i)) {
-									addToTop(new DiscardSpecificCardAction(cards.get(i)));
-								}
-							}
-							ImGui.treePop();
-						}
-					});
-					ImGui.treePop();
-				}
-			}
+		if (ImGui.begin("BaseMod")) {
+			ImGui.checkbox("Show Demo Window", SHOW_DEMO_WINDOW);
+			combatPanel();
+		}
+		ImGui.end();
 
-			if (inCombat()) {
-				if (ImGui.treeNodeEx("Monsters", ImGuiTreeNodeFlags.DefaultOpen)) {
-					Boolean openAction = null;
-					if (ImGui.button("Open All")) {
-						openAction = true;
-					}
-					ImGui.sameLine();
-					if (ImGui.button("Close All")) {
-						openAction = false;
-					}
+		cardSearchWindow();
 
-					int i = 0;
-					for (AbstractMonster m : AbstractDungeon.getCurrRoom().monsters.monsters) {
-						monsterInfo(i, m, openAction);
-						++i;
-					}
-					ImGui.treePop();
-				}
-			}
+		actionQueueWindow();
+
+		if (firstTime) {
+			firstTime = false;
+			ImGui.setWindowFocus("BaseMod");
 		}
 
-		cardSearch();
+		if (SHOW_DEMO_WINDOW.get()) {
+			ImGui.showDemoWindow(SHOW_DEMO_WINDOW);
+		}
+	}
+
+	private void combatPanel() {
+		ImGui.beginDisabled(AbstractDungeon.player == null);
+		if (AbstractDungeon.player == null) ImGui.setNextItemOpen(false);
+		if (ImGui.collapsingHeader("Player")) {
+			creatureInfo(AbstractDungeon.player, p -> {
+				// max hp
+				ImInt data = new ImInt(p.maxHealth);
+				ImGui.inputInt("Max HP", data, 1, 10);
+				if (data.get() < 1) {
+					data.set(1);
+				}
+				if (data.get() != p.maxHealth) {
+					p.maxHealth = data.get();
+					p.currentHealth = Integer.min(p.currentHealth, p.maxHealth);
+					p.healthBarUpdatedEvent();
+					ReflectionHacks.setPrivate(p, AbstractCreature.class, "healthBarAnimTimer", 0.2f);
+				}
+				//gold
+				data.set(p.gold);
+				ImGui.inputInt("Gold", data, 1, 100);
+				if (data.get() < 0) {
+					data.set(0);
+				}
+				if (data.get() != p.gold) {
+					p.gold = data.get();
+					p.displayGold = p.gold;
+				}
+				// hand
+				ArrayList<AbstractCard> cards = AbstractDungeon.player.hand.group;
+				if (ImGui.treeNode(String.format("Hand (%d)###hand", cards.size()))) {
+					if (ImGui.button("Draw Card")) {
+						addToTop(new DrawCardAction(1));
+					}
+					ImGui.sameLine();
+					if (ImGui.button("Discard All")) {
+						addToTop(new DiscardAction(p, p, cards.size(), false));
+					}
+					for (int i=0; i<cards.size(); ++i) {
+						ImGui.bulletText(cards.get(i).name);
+						ImGui.sameLine();
+						if (ImGui.button("Discard##discard" + i)) {
+							addToTop(new DiscardSpecificCardAction(cards.get(i)));
+						}
+					}
+					ImGui.treePop();
+				}
+			});
+		}
+		ImGui.endDisabled();
+
+		ImGui.beginDisabled(!inCombat());
+		if (!inCombat()) ImGui.setNextItemOpen(false);
+		if (ImGui.collapsingHeader("Monsters")) {
+			Boolean openAction = null;
+			if (ImGui.button("Open All")) {
+				openAction = true;
+			}
+			ImGui.sameLine();
+			if (ImGui.button("Close All")) {
+				openAction = false;
+			}
+
+			int i = 0;
+			for (AbstractMonster m : AbstractDungeon.getCurrRoom().monsters.monsters) {
+				monsterInfo(i, m, openAction);
+				++i;
+			}
+		}
+		ImGui.endDisabled();
 	}
 
 	private void monsterInfo(int i, AbstractMonster c, Boolean openAction) {
-		if (c.isDeadOrEscaped()) return;
+		if (c == null || c.isDeadOrEscaped()) return;
 		if (openAction != null) {
 			ImGui.setNextItemOpen(openAction);
 		}
@@ -242,6 +262,8 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 	}
 
 	private void creatureInfo(AbstractCreature c, Consumer<AbstractCreature> callback) {
+		if (c == null) return;
+
 		// current hp
 		ImInt hp = new ImInt(c.currentHealth);
 		ImGui.sliderInt("HP", hp.getData(), 1, c.maxHealth);
@@ -267,14 +289,49 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 		}
 	}
 
+	private void actionQueueWindow() {
+		if (ImGui.begin("Action Queue")) {
+			if (AbstractDungeon.actionManager.actions.isEmpty()) {
+				ImGui.text("Empty");
+			}
+
+			if (ImGui.beginTable("action queue", 3)) {
+				if (AbstractDungeon.actionManager.currentAction != null) {
+					actionRow(AbstractDungeon.actionManager.currentAction);
+				}
+				for (AbstractGameAction action : AbstractDungeon.actionManager.actions) {
+					actionRow(action);
+				}
+				ImGui.endTable();
+			}
+		}
+		ImGui.end();
+	}
+
+	private void actionRow(AbstractGameAction action) {
+		ImGui.tableNextRow();
+		// name
+		ImGui.tableSetColumnIndex(0);
+		ImGui.text(action.getClass().getSimpleName());
+		// duration
+		ImGui.tableSetColumnIndex(1);
+		float duration = ReflectionHacks.getPrivate(action, AbstractGameAction.class, "duration");
+		ImGui.text(Float.toString(duration));
+		// stop
+		ImGui.tableSetColumnIndex(2);
+		if (ImGui.button("Stop")) {
+			action.isDone = true;
+		}
+	}
+
 	private String cardModIDFilter = "##ALL";
 	private final ImGuiTextFilter cardFilter = new ImGuiTextFilter();
 	private String selectedCardId = null;
 	private final ImInt cardCount = new ImInt(1);
 	private final ImInt cardUpgrades = new ImInt(0);
 
-	private void cardSearch() {
-		if (ImGui.collapsingHeader("Card Search")) {
+	private void cardSearchWindow() {
+		if (ImGui.begin("Card Search")) {
 			ArrayList<AbstractCard> allCards = CardLibrary.getAllCards();
 			List<String> modIDs = allCards.stream()
 					.map(c -> getModID(c.cardID))
@@ -299,7 +356,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			ImGui.popItemWidth();
 			ImGui.sameLine();
 			// filter
-			cardFilter.draw("");
+			cardFilter.draw("##");
 			// card search
 			if (ImGui.beginListBox("##all cards", -Float.MIN_VALUE, 7 * ImGui.getTextLineHeightWithSpacing())) {
 				ImVec2 textSize = new ImVec2();
@@ -355,6 +412,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			}
 			ImGui.endDisabled();
 		}
+		ImGui.end();
 	}
 
 	private String getModID(String cardID) {

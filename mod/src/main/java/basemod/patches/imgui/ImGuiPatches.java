@@ -17,7 +17,6 @@ import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiMouseCursor;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
-import imgui.type.ImBoolean;
 import javassist.CtBehavior;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
@@ -45,7 +44,8 @@ public class ImGuiPatches
 			}
 			ImGui.createContext();
 			ImGuiIO io = ImGui.getIO();
-			io.setIniFilename(null);
+			io.setIniFilename("imgui.ini");
+			ImGui.getIO().setConfigWindowsMoveFromTitleBarOnly(true);
 			ImGui.getIO().addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
 			ImGui.getIO().addConfigFlags(ImGuiConfigFlags.DockingEnable);
 
@@ -66,7 +66,6 @@ public class ImGuiPatches
 	public static class Render
 	{
 		private static boolean enabled = false;
-		private static final ImBoolean SHOW_DEMO_WINDOW = new ImBoolean(false);
 
 		public static void Prefix()
 		{
@@ -86,15 +85,8 @@ public class ImGuiPatches
 
 			if (enabled) {
 				GameCursor.hidden = true;
-				
-				// the GUI
-				ImGui.checkbox("Show Demo Window", SHOW_DEMO_WINDOW);
 
 				BaseMod.publishImGui();
-
-				if (SHOW_DEMO_WINDOW.get()) {
-					ImGui.showDemoWindow(SHOW_DEMO_WINDOW);
-				}
 			} else {
 				ImGui.setMouseCursor(ImGuiMouseCursor.None);
 			}
