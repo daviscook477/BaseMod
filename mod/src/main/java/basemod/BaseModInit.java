@@ -350,12 +350,14 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 
 		// powers
 		if (!c.powers.isEmpty() && ImGui.treeNode("Powers")) {
+			int i = 0;
 			for (AbstractPower p : c.powers) {
 				ImGui.bulletText(p.name);
 				ImGui.sameLine();
-				if (ImGui.button("Remove")) {
+				if (ImGui.button("Remove##remove" + i)) {
 					addToTop(new RemoveSpecificPowerAction(c, c, p));
 				}
+				++i;
 			}
 			ImGui.treePop();
 		}
@@ -369,10 +371,12 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 
 			if (ImGui.beginTable("action queue", 3)) {
 				if (AbstractDungeon.actionManager.currentAction != null) {
-					actionRow(AbstractDungeon.actionManager.currentAction);
+					actionRow(-1, AbstractDungeon.actionManager.currentAction);
 				}
+				int i = 0;
 				for (AbstractGameAction action : AbstractDungeon.actionManager.actions) {
-					actionRow(action);
+					actionRow(i, action);
+					++i;
 				}
 				ImGui.endTable();
 			}
@@ -380,7 +384,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 		ImGui.end();
 	}
 
-	private void actionRow(AbstractGameAction action) {
+	private void actionRow(int i, AbstractGameAction action) {
 		ImGui.tableNextRow();
 		// name
 		ImGui.tableSetColumnIndex(0);
@@ -391,7 +395,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 		ImGui.text(Float.toString(duration));
 		// stop
 		ImGui.tableSetColumnIndex(2);
-		if (ImGui.button("Stop")) {
+		if (ImGui.button("Stop##stop" + i)) {
 			action.isDone = true;
 		}
 	}
