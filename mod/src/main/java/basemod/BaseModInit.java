@@ -202,8 +202,43 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 					p.gold = data.get();
 					p.displayGold = p.gold;
 				}
+				//deck
+				ArrayList<AbstractCard> cards = AbstractDungeon.player.masterDeck.group;
+				if (ImGui.treeNode(String.format("Deck (%d)###deck", cards.size()))) {
+					if (ImGui.beginTable("deck cards", 4)) {
+						ImGui.tableSetupColumn("index", ImGuiTableColumnFlags.WidthFixed);
+						ImGui.tableSetupColumn("card name");
+						ImGui.tableSetupColumn("upgrade", ImGuiTableColumnFlags.WidthFixed);
+						ImGui.tableSetupColumn("discard", ImGuiTableColumnFlags.WidthFixed);
+
+						for (int i=0; i<cards.size(); ++i) {
+							AbstractCard card = cards.get(i);
+							ImGui.tableNextRow();
+							// index
+							ImGui.tableSetColumnIndex(0);
+							ImGui.text(Integer.toString(i+1));
+							// name
+							ImGui.tableSetColumnIndex(1);
+							ImGui.text(card.name);
+							// upgrade
+							ImGui.tableSetColumnIndex(2);
+							ImGui.beginDisabled(!card.canUpgrade());
+							if (ImGui.button("Upgrade##upgrade" + i)) {
+								card.upgrade();
+							}
+							ImGui.endDisabled();
+							// remove
+							ImGui.tableSetColumnIndex(3);
+							if (ImGui.button("Remove##remove" + i)) {
+								AbstractDungeon.player.masterDeck.removeCard(card);
+							}
+						}
+						ImGui.endTable();
+					}
+					ImGui.treePop();
+				}
 				// hand
-				ArrayList<AbstractCard> cards = AbstractDungeon.player.hand.group;
+				cards = AbstractDungeon.player.hand.group;
 				if (ImGui.treeNode(String.format("Hand (%d)###hand", cards.size()))) {
 					if (ImGui.button("Draw Card")) {
 						addToTop(new DrawCardAction(1));
