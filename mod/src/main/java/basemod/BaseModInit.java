@@ -25,6 +25,8 @@ import com.megacrit.cardcrawl.vfx.cardManip.ShowCardAndObtainEffect;
 import imgui.ImGui;
 import imgui.ImGuiTextFilter;
 import imgui.ImVec2;
+import imgui.flag.ImGuiDataType;
+import imgui.flag.ImGuiSliderFlags;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
@@ -325,11 +327,20 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 	private void creatureInfo(AbstractCreature c, Consumer<AbstractCreature> callback) {
 		if (c == null) return;
 
+		// block
+		ImInt data = new ImInt(c.currentBlock);
+		ImGui.dragScalar("Block", ImGuiDataType.S32, data, 1, 0, 999, "%d", ImGuiSliderFlags.AlwaysClamp);
+		if (data.get() != c.currentBlock) {
+			if (c.currentBlock <= 0) {
+				ReflectionHacks.privateMethod(AbstractCreature.class, "gainBlockAnimation").invoke(c);
+			}
+			c.currentBlock = data.get();
+		}
 		// current hp
-		ImInt hp = new ImInt(c.currentHealth);
-		ImGui.sliderInt("HP", hp.getData(), 1, c.maxHealth);
-		if (hp.get() != c.currentHealth) {
-			c.currentHealth = hp.get();
+		data.set(c.currentHealth);
+		ImGui.sliderInt("HP", data.getData(), 1, c.maxHealth);
+		if (data.get() != c.currentHealth) {
+			c.currentHealth = data.get();
 			c.healthBarUpdatedEvent();
 			ReflectionHacks.setPrivate(c, AbstractCreature.class, "healthBarAnimTimer", 0.2f);
 		}
