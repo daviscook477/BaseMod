@@ -208,6 +208,18 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 	}
 
 	private void playerInfo(AbstractPlayer p) {
+		// act 4 keys
+		if (ImGui.checkbox("emerald", Settings.hasEmeraldKey)) {
+			Settings.hasEmeraldKey = !Settings.hasEmeraldKey;
+		}
+		ImGui.sameLine();
+		if (ImGui.checkbox("ruby", Settings.hasRubyKey)) {
+			Settings.hasRubyKey = !Settings.hasRubyKey;
+		}
+		ImGui.sameLine();
+		if (ImGui.checkbox("sapphire", Settings.hasSapphireKey)) {
+			Settings.hasSapphireKey = !Settings.hasSapphireKey;
+		}
 		// gold
 		iData.set(p.gold);
 		ImGui.inputInt("Gold", iData, 1, 100);
