@@ -371,20 +371,26 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 
 			if (ImGui.beginTable("action queue", 3)) {
 				if (AbstractDungeon.actionManager.currentAction != null) {
-					actionRow(-1, AbstractDungeon.actionManager.currentAction);
+					if (actionRow(-1, AbstractDungeon.actionManager.currentAction)) {
+						AbstractDungeon.actionManager.currentAction.isDone = true;
+					}
 				}
+				List<AbstractGameAction> remove = new ArrayList<>();
 				int i = 0;
 				for (AbstractGameAction action : AbstractDungeon.actionManager.actions) {
-					actionRow(i, action);
+					if (actionRow(i, action)) {
+						remove.add(action);
+					}
 					++i;
 				}
+				AbstractDungeon.actionManager.actions.removeAll(remove);
 				ImGui.endTable();
 			}
 		}
 		ImGui.end();
 	}
 
-	private void actionRow(int i, AbstractGameAction action) {
+	private boolean actionRow(int i, AbstractGameAction action) {
 		ImGui.tableNextRow();
 		// name
 		ImGui.tableSetColumnIndex(0);
@@ -395,9 +401,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 		ImGui.text(Float.toString(duration));
 		// stop
 		ImGui.tableSetColumnIndex(2);
-		if (ImGui.button("Stop##stop" + i)) {
-			action.isDone = true;
-		}
+		return ImGui.button("Remove##remove" + i);
 	}
 
 	private String cardModIDFilter = "##ALL";
