@@ -371,14 +371,28 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 
 	private void creaturePowers(AbstractCreature c) {
 		if (!c.powers.isEmpty() && ImGui.treeNode("Powers")) {
-			int i = 0;
-			for (AbstractPower p : c.powers) {
-				ImGui.bulletText(p.name);
-				ImGui.sameLine();
-				if (ImGui.button("Remove##remove" + i)) {
-					addToTop(new RemoveSpecificPowerAction(c, c, p));
+			if (ImGui.beginTable("powers", 3)) {
+				ImGui.tableSetupColumn("amount", ImGuiTableColumnFlags.WidthFixed);
+				ImGui.tableSetupColumn("power name");
+				ImGui.tableSetupColumn("remove", ImGuiTableColumnFlags.WidthFixed);
+
+				int i = 0;
+				for (AbstractPower p : c.powers) {
+					ImGui.tableNextRow();
+					// amount
+					ImGui.tableSetColumnIndex(0);
+					ImGui.text(Integer.toString(p.amount));
+					// name
+					ImGui.tableSetColumnIndex(1);
+					ImGui.text(p.name);
+					// remove
+					ImGui.tableSetColumnIndex(2);
+					if (ImGui.button("Remove##remove" + i)) {
+						addToTop(new RemoveSpecificPowerAction(c, c, p));
+					}
+					++i;
 				}
-				++i;
+				ImGui.endTable();
 			}
 			ImGui.treePop();
 		}
