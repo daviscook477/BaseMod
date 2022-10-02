@@ -15,11 +15,9 @@ import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
-import com.megacrit.cardcrawl.helpers.CardLibrary;
-import com.megacrit.cardcrawl.helpers.FontHelper;
-import com.megacrit.cardcrawl.helpers.ImageMaster;
-import com.megacrit.cardcrawl.helpers.RelicLibrary;
+import com.megacrit.cardcrawl.helpers.*;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
+import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.powers.AbstractPower;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
@@ -456,6 +454,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			if (ImGui.beginTabBar("SearchTabBar")) {
 				cardSearchTab();
 				relicSearchTab();
+				potionSearchTab();
 				ImGui.endTabBar();
 			}
 		}
@@ -469,7 +468,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 	private final ImInt cardUpgrades = new ImInt(0);
 
 	private void cardSearchTab() {
-		if (ImGui.beginTabItem("Card Search")) {
+		if (ImGui.beginTabItem("Cards")) {
 			ArrayList<AbstractCard> allCards = CardLibrary.getAllCards();
 			List<String> modIDs = allCards.stream()
 					.map(c -> getModID(c.cardID))
@@ -494,6 +493,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			ImGui.popItemWidth();
 			ImGui.sameLine();
 			// filter
+			ImGui.pushItemWidth(-1);
 			cardFilter.draw("##");
 			// card search
 			if (ImGui.beginListBox("##all cards", -Float.MIN_VALUE, 7 * ImGui.getTextLineHeightWithSpacing())) {
@@ -557,7 +557,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 	private String selectedRelicId = null;
 
 	private void relicSearchTab() {
-		if (ImGui.beginTabItem("Relic Search")) {
+		if (ImGui.beginTabItem("Relics")) {
 			List<String> allRelicIDs = BaseMod.listAllRelicIDs();
 			List<String> modIDs = allRelicIDs.stream()
 					.map(this::getModID)
@@ -582,6 +582,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			ImGui.popItemWidth();
 			ImGui.sameLine();
 			// filter
+			ImGui.pushItemWidth(-1);
 			relicFilter.draw("##");
 			// relic search
 			if (ImGui.beginListBox("##all relics", -Float.MIN_VALUE, 7 * ImGui.getTextLineHeightWithSpacing())) {
@@ -618,6 +619,75 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 						Settings.WIDTH / 2f, Settings.HEIGHT / 2f,
 						relic
 				);
+			}
+			ImGui.endDisabled();
+			ImGui.endTabItem();
+		}
+	}
+
+	private final ImGuiTextFilter potionFilter = new ImGuiTextFilter();
+	private String selectedPotionId = null;
+	private List<AbstractPotion> allPotions = null;
+
+	private void potionSearchTab() {
+		if (ImGui.beginTabItem("Potions")) {
+			List<String> allPotionIDs = PotionHelper.getPotions(AbstractPlayer.PlayerClass.IRONCLAD, true);
+			if (allPotions == null) {
+				allPotions = allPotionIDs.stream().map(PotionHelper::getPotion).collect(Collectors.toList());
+			}
+			List<String> modIDs = allPotionIDs.stream()
+					.map(this::getModID)
+					.distinct()
+					.collect(Collectors.toList());
+			modIDs.add(0, "##ALL");
+			// modid
+			ImGui.pushItemWidth(90);
+			if (ImGui.beginCombo("##modid", modIDFilter)) {
+				for (String modID : modIDs) {
+					boolean isSelected = modIDFilter.equals(modID);
+					if (ImGui.selectable(modID, isSelected)) {
+						modIDFilter = modID;
+					}
+
+					if (isSelected) {
+						ImGui.setItemDefaultFocus();
+					}
+				}
+				ImGui.endCombo();
+			}
+			ImGui.popItemWidth();
+			ImGui.sameLine();
+			// filter
+			ImGui.pushItemWidth(-1);
+			potionFilter.draw("##");
+			// relic search
+			if (ImGui.beginListBox("##all potions", -Float.MIN_VALUE, 7 * ImGui.getTextLineHeightWithSpacing())) {
+				ImVec2 textSize = new ImVec2();
+				for (AbstractPotion potion : allPotions) {
+					if ((potionFilter.passFilter(potion.name) || potionFilter.passFilter(potion.ID)) && ("##ALL".equals(modIDFilter) || getModID(potion.ID).equals(modIDFilter))) {
+						boolean isSelected = selectedPotionId != null && selectedPotionId.equals(potion.ID);
+						if (ImGui.selectable(String.format("%s###%s", potion.name, potion.ID), isSelected)) {
+							selectedPotionId = potion.ID;
+						}
+						if (!Objects.equals(potion.name, potion.ID)) {
+							String text = String.format("id: %s", potion.ID);
+							ImGui.calcTextSize(textSize, text);
+							ImGui.sameLine(ImGui.getWindowContentRegionMaxX() - textSize.x);
+							ImGui.text(text);
+						}
+
+						if (isSelected) {
+							ImGui.setItemDefaultFocus();
+						}
+					}
+				}
+				ImGui.endListBox();
+			}
+			// add button
+			ImGui.beginDisabled(selectedPotionId == null || AbstractDungeon.player == null);
+			if (ImGui.button("Obtain")) {
+				AbstractPotion potion = PotionHelper.getPotion(selectedPotionId);
+				AbstractDungeon.player.obtainPotion(potion);
 			}
 			ImGui.endDisabled();
 			ImGui.endTabItem();
