@@ -26,10 +26,7 @@ import com.megacrit.cardcrawl.vfx.cardManip.ShowCardAndObtainEffect;
 import imgui.ImGui;
 import imgui.ImGuiTextFilter;
 import imgui.ImVec2;
-import imgui.flag.ImGuiCond;
-import imgui.flag.ImGuiDataType;
-import imgui.flag.ImGuiSliderFlags;
-import imgui.flag.ImGuiTableColumnFlags;
+import imgui.flag.*;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 
@@ -255,7 +252,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 		//deck
 		ArrayList<AbstractCard> cards = AbstractDungeon.player.masterDeck.group;
 		if (ImGui.treeNode(String.format("Deck (%d)###deck", cards.size()))) {
-			if (ImGui.beginTable("deck cards", 4)) {
+			if (ImGui.beginTable("deck cards", 4, ImGuiTableFlags.BordersInnerH)) {
 				ImGui.tableSetupColumn("index", ImGuiTableColumnFlags.WidthFixed);
 				ImGui.tableSetupColumn("card name");
 				ImGui.tableSetupColumn("upgrade", ImGuiTableColumnFlags.WidthFixed);
@@ -297,7 +294,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			if (ImGui.button("Discard All")) {
 				addToTop(new DiscardAction(p, p, cards.size(), false));
 			}
-			if (ImGui.beginTable("hand cards", 4)) {
+			if (ImGui.beginTable("hand cards", 4, ImGuiTableFlags.BordersInnerH)) {
 				ImGui.tableSetupColumn("index", ImGuiTableColumnFlags.WidthFixed);
 				ImGui.tableSetupColumn("card name");
 				ImGui.tableSetupColumn("upgrade", ImGuiTableColumnFlags.WidthFixed);
@@ -375,7 +372,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 
 	private void creaturePowers(AbstractCreature c) {
 		if (!c.powers.isEmpty() && ImGui.treeNode("Powers")) {
-			if (ImGui.beginTable("powers", 3)) {
+			if (ImGui.beginTable("powers", 3, ImGuiTableFlags.BordersInnerH)) {
 				ImGui.tableSetupColumn("amount", ImGuiTableColumnFlags.WidthFixed);
 				ImGui.tableSetupColumn("power name");
 				ImGui.tableSetupColumn("remove", ImGuiTableColumnFlags.WidthFixed);
@@ -411,7 +408,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 				ImGui.text("Empty");
 			}
 
-			if (ImGui.beginTable("action queue", 3)) {
+			if (ImGui.beginTable("action queue", 3, ImGuiTableFlags.BordersInnerH)) {
 				if (AbstractDungeon.actionManager.currentAction != null) {
 					if (actionRow(-1, AbstractDungeon.actionManager.currentAction)) {
 						AbstractDungeon.actionManager.currentAction.isDone = true;
