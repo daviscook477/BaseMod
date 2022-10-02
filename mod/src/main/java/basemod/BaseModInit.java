@@ -493,7 +493,11 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			ImGui.pushItemWidth(-1);
 			cardFilter.draw("##");
 			// card search
-			if (ImGui.beginListBox("##all cards", -Float.MIN_VALUE, 7 * ImGui.getTextLineHeightWithSpacing())) {
+			float y = ImGui.getCursorPosY();
+			float h = ImGui.getWindowHeight();
+			float py = ImGui.getStyle().getWindowPaddingY();
+			float lh = ImGui.getFrameHeightWithSpacing();
+			if (ImGui.beginListBox("##all cards", -Float.MIN_VALUE, h - y - py - lh*2)) {
 				ImVec2 textSize = new ImVec2();
 				for (AbstractCard card : allCards) {
 					if ((cardFilter.passFilter(card.name) || cardFilter.passFilter(card.cardID)) && ("##ALL".equals(modIDFilter) || getModID(card.cardID).equals(modIDFilter))) {
@@ -582,7 +586,11 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			ImGui.pushItemWidth(-1);
 			relicFilter.draw("##");
 			// relic search
-			if (ImGui.beginListBox("##all relics", -Float.MIN_VALUE, 7 * ImGui.getTextLineHeightWithSpacing())) {
+			float y = ImGui.getCursorPosY();
+			float h = ImGui.getWindowHeight();
+			float py = ImGui.getStyle().getWindowPaddingY();
+			float lh = ImGui.getFrameHeightWithSpacing();
+			if (ImGui.beginListBox("##all relics", -Float.MIN_VALUE, h - y - py - lh)) {
 				ImVec2 textSize = new ImVec2();
 				for (String relicID : allRelicIDs) {
 					AbstractRelic relic = RelicLibrary.getRelic(relicID);
@@ -658,7 +666,11 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			ImGui.pushItemWidth(-1);
 			potionFilter.draw("##");
 			// relic search
-			if (ImGui.beginListBox("##all potions", -Float.MIN_VALUE, 7 * ImGui.getTextLineHeightWithSpacing())) {
+			float y = ImGui.getCursorPosY();
+			float h = ImGui.getWindowHeight();
+			float py = ImGui.getStyle().getWindowPaddingY();
+			float lh = ImGui.getFrameHeightWithSpacing();
+			if (ImGui.beginListBox("##all potions", -Float.MIN_VALUE, h - y - py - lh)) {
 				ImVec2 textSize = new ImVec2();
 				for (AbstractPotion potion : allPotions) {
 					if ((potionFilter.passFilter(potion.name) || potionFilter.passFilter(potion.ID)) && ("##ALL".equals(modIDFilter) || getModID(potion.ID).equals(modIDFilter))) {
