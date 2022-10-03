@@ -17,7 +17,10 @@ import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiMouseCursor;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import javassist.CannotCompileException;
 import javassist.CtBehavior;
+import javassist.expr.ExprEditor;
+import javassist.expr.FieldAccess;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
 import java.util.ArrayList;
@@ -29,6 +32,26 @@ public class ImGuiPatches
 {
 	private static ImGuiImplGlfw imGuiGlfw;
 	private static ImGuiImplGl3 imGuiGl3;
+
+	@SpirePatch2(
+			clz = ImGui.class,
+			method = SpirePatch.STATICINITIALIZER
+	)
+	public static class FixTmpDir
+	{
+		public static ExprEditor Instrument()
+		{
+			return new ExprEditor() {
+				@Override
+				public void edit(FieldAccess f) throws CannotCompileException
+				{
+					if (f.isWriter() && f.getFieldName().equals("LIB_TMP_DIR_PREFIX")) {
+						f.replace("$proceed(\"ModTheSpire/imgui-java-natives\");");
+					}
+				}
+			};
+		}
+	}
 
 	@SpirePatch2(
 			clz = CardCrawlGame.class,
