@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
+import com.evacipated.cardcrawl.modthespire.Loader;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.GameCursor;
@@ -21,12 +22,10 @@ import javassist.CannotCompileException;
 import javassist.CtBehavior;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
-import org.lwjgl.glfw.GLFWErrorCallback;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.glfw.GLFW.glfwInit;
 
 public class ImGuiPatches
 {
@@ -46,7 +45,7 @@ public class ImGuiPatches
 				public void edit(FieldAccess f) throws CannotCompileException
 				{
 					if (f.isWriter() && f.getFieldName().equals("LIB_TMP_DIR_PREFIX")) {
-						f.replace("$proceed(\"ModTheSpire/imgui-java-natives\");");
+						f.replace("$proceed(\"ModTheSpire/basemod/imgui-java-natives\");");
 					}
 				}
 			};
@@ -61,10 +60,10 @@ public class ImGuiPatches
 	{
 		public static void Prefix()
 		{
-			GLFWErrorCallback.createPrint(System.err).set();
-			if (!glfwInit()) {
-				throw new IllegalStateException("Unable to init GLFW");
+			if (!Loader.LWJGL3_ENABLED) {
+				return;
 			}
+
 			ImGui.createContext();
 			ImGuiIO io = ImGui.getIO();
 			io.setIniFilename("imgui.ini");
@@ -92,6 +91,10 @@ public class ImGuiPatches
 
 		public static void Prefix()
 		{
+			if (!Loader.LWJGL3_ENABLED) {
+				return;
+			}
+
 			SuppressHotkey.suppressedKeys.clear();
 
 			if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) && Gdx.input.isKeyJustPressed(Input.Keys.E)) {
@@ -103,6 +106,10 @@ public class ImGuiPatches
 
 		public static void Postfix()
 		{
+			if (!Loader.LWJGL3_ENABLED) {
+				return;
+			}
+
 			imGuiGlfw.newFrame();
 			ImGui.newFrame();
 
@@ -132,6 +139,10 @@ public class ImGuiPatches
 	{
 		public static void Postfix()
 		{
+			if (!Loader.LWJGL3_ENABLED) {
+				return;
+			}
+
 			imGuiGl3.dispose();
 			imGuiGlfw.dispose();
 			ImGui.destroyContext();
@@ -151,6 +162,10 @@ public class ImGuiPatches
 		)
 		public static SpireReturn<Void> Insert()
 		{
+			if (!Loader.LWJGL3_ENABLED) {
+				return SpireReturn.Continue();
+			}
+
 			ImGuiIO io = ImGui.getIO();
 			if (io.getWantCaptureMouse()) {
 				wasImGuiCaptured = true;
@@ -188,6 +203,10 @@ public class ImGuiPatches
 
 		public static SpireReturn<Boolean> Prefix(int ___keycode)
 		{
+			if (!Loader.LWJGL3_ENABLED) {
+				return SpireReturn.Continue();
+			}
+
 			if (ImGui.getIO().getWantCaptureKeyboard() || suppressedKeys.contains(___keycode)) {
 				return SpireReturn.Return(false);
 			}
