@@ -21,6 +21,7 @@ import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.powers.AbstractPower;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
+import com.megacrit.cardcrawl.ui.panels.EnergyPanel;
 import com.megacrit.cardcrawl.unlock.UnlockTracker;
 import com.megacrit.cardcrawl.vfx.cardManip.ShowCardAndObtainEffect;
 import imgui.ImGui;
@@ -249,6 +250,23 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 		creatureBlock(p);
 		// powers
 		creaturePowers(p);
+		// energy
+		iData.set(EnergyPanel.totalCount);
+		ImGui.inputInt("Energy", iData, 1, 10);
+		if (iData.get() < 0) {
+			iData.set(0);
+		}
+		if (iData.get() != EnergyPanel.totalCount) {
+			EnergyPanel.totalCount = iData.get();
+			p.hand.glowCheck();
+		}
+		ImGui.sameLine();
+		if (ImGui.checkbox("Infinite", DevConsole.infiniteEnergy)) {
+			DevConsole.infiniteEnergy = !DevConsole.infiniteEnergy;
+			if (DevConsole.infiniteEnergy) {
+				EnergyPanel.setEnergy(9999);
+			}
+		}
 		//deck
 		ArrayList<AbstractCard> cards = AbstractDungeon.player.masterDeck.group;
 		if (ImGui.treeNode(String.format("Deck (%d)###deck", cards.size()))) {
