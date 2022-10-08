@@ -940,3 +940,4 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 
 #### dev ####
 * Fix black screen when using post-processing effects and cursor is hidden (kiooeht)
+* Don't use energy when infinite energy is enabled (kiooeht)
