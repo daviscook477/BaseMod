@@ -248,8 +248,6 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 		creatureHP(p);
 		// block
 		creatureBlock(p);
-		// powers
-		creaturePowers(p);
 		// energy
 		iData.set(EnergyPanel.totalCount);
 		ImGui.inputInt("Energy", iData, 1, 10);
@@ -267,6 +265,8 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 				EnergyPanel.setEnergy(9999);
 			}
 		}
+		// powers
+		creaturePowers(p);
 		//deck
 		ArrayList<AbstractCard> cards = AbstractDungeon.player.masterDeck.group;
 		if (ImGui.treeNode(String.format("Deck (%d)###deck", cards.size()))) {
