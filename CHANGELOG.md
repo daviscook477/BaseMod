@@ -946,4 +946,7 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 * Fix beta art defaulting to on (Alchyr)
 * Remove unnecessary log in memory churn patch (kiooeht)
 
+#### v5.46.1 ####
+* Fix crash when running multiple instances of the game (kiooeht)
+
 #### dev ####

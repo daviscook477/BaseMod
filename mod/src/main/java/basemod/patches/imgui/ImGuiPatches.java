@@ -22,7 +22,10 @@ import javassist.CannotCompileException;
 import javassist.CtBehavior;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
+import javassist.expr.MethodCall;
 
+import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -211,6 +214,31 @@ public class ImGuiPatches
 				return SpireReturn.Return(false);
 			}
 			return SpireReturn.Continue();
+		}
+	}
+
+	@SpirePatch2(
+			clz = ImGui.class,
+			method = "tryLoadFromClasspath"
+	)
+	public static class FixAccessDenied
+	{
+		// Fixes AccessDenied crash when running multiple instances of the game
+		public static ExprEditor Instrument()
+		{
+			return new ExprEditor() {
+				@Override
+				public void edit(MethodCall m) throws CannotCompileException
+				{
+					if (m.getClassName().equals(Files.class.getName()) && m.getMethodName().equals("copy")) {
+						m.replace(
+								"try {" +
+										"$_ = $proceed($$);" +
+										"} catch (" + AccessDeniedException.class.getName() + " e2) {}"
+						);
+					}
+				}
+			};
 		}
 	}
 }
