@@ -73,6 +73,7 @@ import com.megacrit.cardcrawl.shop.StorePotion;
 import com.megacrit.cardcrawl.shop.StoreRelic;
 import com.megacrit.cardcrawl.unlock.AbstractUnlock;
 import com.megacrit.cardcrawl.unlock.UnlockTracker;
+import imgui.ImGui;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.NotFoundException;
@@ -160,6 +161,7 @@ public class BaseMod {
 	private static ArrayList<OnCreateDescriptionSubscriber> onCreateDescriptionSubscribers;
 	private static ArrayList<OnPlayerTurnStartSubscriber> onPlayerTurnStartSubscribers;
 	private static ArrayList<OnPlayerTurnStartPostDrawSubscriber> onPlayerTurnStartPostDrawSubscribers;
+	private static ArrayList<ImGuiSubscriber> imGuiSubscribers;
 
 	private static ArrayList<AbstractCard> redToAdd;
 	private static ArrayList<String> redToRemove;
@@ -246,6 +248,7 @@ public class BaseMod {
 	private static HashMap<AbstractPlayer.PlayerClass, Integer> maxUnlockLevel;
 
 	private static HashMap<String, CustomSavableRaw> customSaveFields = new HashMap<>();
+	private static HashMap<AbstractDungeon.CurrentScreen, CustomScreen> customScreens = new HashMap<>();
 
 	private static OrthographicCamera animationCamera;
 	private static ModelBatch batch;
@@ -280,6 +283,8 @@ public class BaseMod {
 		defaultProperties.setProperty("autocomplete-enabled", Boolean.toString(true));
 		defaultProperties.setProperty("whatmod-enabled", Boolean.toString(true));
 		defaultProperties.setProperty("basemod-fixes", Boolean.toString(true));
+		defaultProperties.setProperty("imgui-search", Boolean.toString(true));
+		defaultProperties.setProperty("imgui-actionqueue", Boolean.toString(true));
 
 		try {
 			SpireConfig retConfig = new SpireConfig(BaseModInit.MODNAME, CONFIG_FILE, defaultProperties);
@@ -302,7 +307,7 @@ public class BaseMod {
 		}
 	}
 
-	private static Boolean getBoolean(String key) {
+	static Boolean getBoolean(String key) {
 		return config.getBool(key);
 	}
 
@@ -492,6 +497,7 @@ public class BaseMod {
 		onCreateDescriptionSubscribers = new ArrayList<>();
 		onPlayerTurnStartSubscribers = new ArrayList<>();
 		onPlayerTurnStartPostDrawSubscribers = new ArrayList<>();
+		imGuiSubscribers = new ArrayList<>();
 	}
 
 	// initializeCardLists -
@@ -2181,6 +2187,27 @@ public class BaseMod {
 	}
 
 	//
+	// Screens
+	//
+
+	public static void addCustomScreen(CustomScreen screen) {
+		customScreens.put(screen.curScreen(), screen);
+	}
+
+	public static CustomScreen getCustomScreen(AbstractDungeon.CurrentScreen screen) {
+		return customScreens.get(screen);
+	}
+
+	public static boolean openCustomScreen(AbstractDungeon.CurrentScreen screen, Object... args) {
+		CustomScreen customScreen = getCustomScreen(screen);
+		if (customScreen != null) {
+			customScreen.open(args);
+			return true;
+		}
+		return false;
+	}
+
+	//
 	// Publishers
 	//
 
@@ -2776,6 +2803,16 @@ public class BaseMod {
 		unsubscribeLaterHelper(OnPlayerTurnStartPostDrawSubscriber.class);
 	}
 
+	public static void publishImGui() {
+		for (ImGuiSubscriber sub : imGuiSubscribers) {
+			ImGui.pushID(sub.getClass().getName());
+			sub.receiveImGui();
+			ImGui.popID();
+		}
+
+		unsubscribeLaterHelper(ImGuiSubscriber.class);
+	}
+
 	//
 	// Subscription handlers
 	//
@@ -2853,6 +2890,7 @@ public class BaseMod {
 		subscribeIfInstance(onCreateDescriptionSubscribers, sub, OnCreateDescriptionSubscriber.class);
 		subscribeIfInstance(onPlayerTurnStartSubscribers, sub, OnPlayerTurnStartSubscriber.class);
 		subscribeIfInstance(onPlayerTurnStartPostDrawSubscribers, sub, OnPlayerTurnStartPostDrawSubscriber.class);
+		subscribeIfInstance(imGuiSubscribers, sub, ImGuiSubscriber.class);
 	}
 
 	// subscribe -
@@ -2954,6 +2992,8 @@ public class BaseMod {
 			onPlayerTurnStartSubscribers.add((OnPlayerTurnStartSubscriber) sub);
 		} else if (additionClass.equals(OnPlayerTurnStartPostDrawSubscriber.class)) {
 			onPlayerTurnStartPostDrawSubscribers.add((OnPlayerTurnStartPostDrawSubscriber) sub);
+		} else if (additionClass.equals(ImGuiSubscriber.class)) {
+			imGuiSubscribers.add((ImGuiSubscriber) sub);
 		}
 	}
 
@@ -3008,6 +3048,7 @@ public class BaseMod {
 		unsubscribeIfInstance(onCreateDescriptionSubscribers, sub, OnCreateDescriptionSubscriber.class);
 		unsubscribeIfInstance(onPlayerTurnStartSubscribers, sub, OnPlayerTurnStartSubscriber.class);
 		unsubscribeIfInstance(onPlayerTurnStartPostDrawSubscribers, sub, OnPlayerTurnStartPostDrawSubscriber.class);
+		unsubscribeIfInstance(imGuiSubscribers, sub, ImGuiSubscriber.class);
 	}
 
 	// unsubscribe -
@@ -3111,6 +3152,8 @@ public class BaseMod {
 			onPlayerTurnStartSubscribers.remove(sub);
 		} else if (removalClass.equals(OnPlayerTurnStartPostDrawSubscriber.class)) {
 			onPlayerTurnStartPostDrawSubscribers.remove(sub);
+		} else if (removalClass.equals(ImGuiSubscriber.class)) {
+			imGuiSubscribers.remove(sub);
 		}
 	}
 

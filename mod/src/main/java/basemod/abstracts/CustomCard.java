@@ -525,7 +525,7 @@ public abstract class CustomCard extends AbstractCard {
 		}
 
 		String newPath;
-		if ((Settings.PLAYTESTER_ART_MODE || UnlockTracker.betaCardPref.getBoolean(this.cardID, true)) &&
+		if ((Settings.PLAYTESTER_ART_MODE || UnlockTracker.betaCardPref.getBoolean(this.cardID, false)) &&
 				betaImgMap.get(textureImg) != null) {
 			int endingIndex = textureImg.lastIndexOf(".");
 			newPath = textureImg.substring(0, endingIndex) +

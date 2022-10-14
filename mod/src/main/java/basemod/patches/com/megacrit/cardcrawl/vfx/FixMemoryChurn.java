@@ -281,7 +281,6 @@ public class FixMemoryChurn
 		if (vfx.isDone) {
 			Pool pool = poolMap.get(vfx.getClass());
 			if (pool == null) {
-				System.out.println("Unknown vfx type: " + vfx.getClass());
 				return;
 			}
 			pool.free(vfx);

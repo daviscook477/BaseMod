@@ -938,4 +938,12 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 * Fix memory churn caused by the constant in-combat particle effects (kiooeht)
 * Allow CustomCard to have different card art in SCV on upgrade (kiooeht/Vex)
 
+#### v5.46.0 ####
+* Dear ImGui (kiooeht)
+* CustomScreen (kiooeht)
+* Fix black screen when using post-processing effects and cursor is hidden (kiooeht)
+* Don't use energy when infinite energy is enabled (kiooeht)
+* Fix beta art defaulting to on (Alchyr)
+* Remove unnecessary log in memory churn patch (kiooeht)
+
 #### dev ####
