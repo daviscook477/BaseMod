@@ -19,6 +19,7 @@ import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.helpers.CardHelper;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
@@ -37,6 +38,49 @@ import java.util.HashMap;
 
 public class CardModifierPatches
 {
+
+    @SpirePatch2(clz = AbstractCard.class, method = "upgradeDamage")
+    @SpirePatch2(clz = AbstractCard.class, method = "upgradeBlock")
+    @SpirePatch2(clz = AbstractCard.class, method = "upgradeMagicNumber")
+    public static class RecalculateOnStatChange {
+        @SpirePrefixPatch
+        public static void recalculate(AbstractCard __instance, @ByRef int[] amount) {
+            CardModifierManager.testBaseValues(__instance);
+            CardModifierFields.needsRecalculation.set(__instance, true);
+        }
+    }
+
+    @SpirePatch2(clz = CardHelper.class, method = "hasCardWithXDamage")
+    public static class FixDamageRequirement {
+        @SpireInstrumentPatch
+        public static ExprEditor plz() {
+            return new ExprEditor() {
+                @Override
+                public void edit(FieldAccess f) throws CannotCompileException {
+                    if (f.getClassName().equals(AbstractCard.class.getName()) && f.getFieldName().equals("baseDamage")) {
+                        f.replace("$_ = basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.CardModifierPatches.FixDamageRequirement.effectiveBase($0);");
+                    }
+                }
+            };
+        }
+
+        public static int effectiveBase(AbstractCard card) {
+            if (CardModifierFields.cardModHasBaseDamage.get(card)) {
+                return CardModifierFields.cardModBaseDamage.get(card);
+            }
+            return card.baseDamage;
+        }
+    }
+
+    @SpirePatch2(clz = AbstractCard.class, method = "displayUpgrades")
+    public static class UpdateUpgradePreview {
+        @SpirePostfixPatch
+        public static void plz(AbstractCard __instance) {
+            CardModifierManager.testBaseValues(__instance);
+            CardModifierFields.previewingUpgrade.set(__instance, true);
+        }
+    }
+
     @SpirePatch(
             clz = AbstractCard.class,
             method = "calculateCardDamage"
@@ -54,8 +98,9 @@ public class CardModifierPatches
                 localvars = {"tmp"}
         )
         public static void baseDamageInsert(AbstractCard __instance, AbstractMonster m, @ByRef float[] tmp) {
+            float base = tmp[0];
             tmp[0] = CardModifierManager.onModifyBaseDamage(tmp[0], __instance, m);
-            if (tmp[0] != __instance.baseDamage) {
+            if (tmp[0] != base) {
                 CardModifierFields.cardModBaseDamage.set(__instance, (int)tmp[0]);
                 CardModifierFields.cardModHasBaseDamage.set(__instance, true);
             } else {
@@ -68,7 +113,7 @@ public class CardModifierPatches
             @Override
             public int[] Locate(CtBehavior ctMethodToPatch) throws Exception
             {
-                Matcher finalMatcher = new Matcher.FieldAccessMatcher(AbstractPlayer.class, "powers");
+                Matcher finalMatcher = new Matcher.FieldAccessMatcher(AbstractPlayer.class, "relics");
                 int[] tmp = LineFinder.findAllInOrder(ctMethodToPatch, finalMatcher);
                 return new int[] {tmp[0]};
             }
@@ -79,8 +124,9 @@ public class CardModifierPatches
                 localvars = {"tmp", "i", "m"}
         )
         public static void multiBaseDamageInsert(AbstractCard __instance, AbstractMonster mo, float[] tmp, int i, ArrayList<AbstractMonster> m) {
+            float base = tmp[i];
             tmp[i] = CardModifierManager.onModifyBaseDamage(tmp[i], __instance, m.get(i));
-            if (tmp[i] != __instance.baseDamage) {
+            if (tmp[i] != base) {
                 CardModifierFields.cardModBaseDamage.set(__instance, (int)tmp[i]);
                 CardModifierFields.cardModHasBaseDamage.set(__instance, true);
             } else {
@@ -190,8 +236,9 @@ public class CardModifierPatches
                 localvars = {"tmp"}
         )
         public static void blockInsert(AbstractCard __instance, @ByRef float[] tmp) {
+            float base = tmp[0];
             tmp[0] = CardModifierManager.onModifyBaseBlock(tmp[0], __instance);
-            if (tmp[0] != __instance.baseBlock) {
+            if (tmp[0] != base) {
                 CardModifierFields.cardModBaseBlock.set(__instance, (int)tmp[0]);
                 CardModifierFields.cardModHasBaseBlock.set(__instance, true);
             } else {
@@ -236,9 +283,19 @@ public class CardModifierPatches
     )
     public static class CardModifierOnApplyPowers
     {
+        //modifyBaseMagic
+        public static void Prefix(AbstractCard __instance) {
+            if (CardModifierFields.cardModHasBaseMagic.get(__instance)) {
+                __instance.magicNumber = (int) CardModifierManager.onModifyBaseMagic(__instance.baseMagicNumber, __instance);
+                __instance.isMagicNumberModified = __instance.magicNumber != __instance.baseMagicNumber;
+            }
+        }
+
         //onApplyPowers
         public static void Postfix(AbstractCard __instance) {
             CardModifierManager.onApplyPowers(__instance);
+            CardModifierFields.previewingUpgrade.set(__instance, false);
+            CardModifierFields.preCalculated.set(__instance, true);
         }
 
         //modifyBaseDamage
@@ -247,8 +304,9 @@ public class CardModifierPatches
                 localvars = {"tmp"}
         )
         public static void baseDamageInsert(AbstractCard __instance, @ByRef float[] tmp) {
+            float base = tmp[0];
             tmp[0] = CardModifierManager.onModifyBaseDamage(tmp[0], __instance, null);
-            if (tmp[0] != __instance.baseDamage) {
+            if (tmp[0] != base) {
                 CardModifierFields.cardModBaseDamage.set(__instance, (int)tmp[0]);
                 CardModifierFields.cardModHasBaseDamage.set(__instance, true);
             } else {
@@ -272,8 +330,9 @@ public class CardModifierPatches
                 localvars = {"tmp", "i"}
         )
         public static void multiBaseDamageInsert(AbstractCard __instance, float[] tmp, int i) {
+            float base = tmp[i];
             tmp[i] = CardModifierManager.onModifyBaseDamage(tmp[i], __instance, null);
-            if (tmp[i] != __instance.baseDamage) {
+            if (tmp[i] != base) {
                 CardModifierFields.cardModBaseDamage.set(__instance, (int)tmp[i]);
                 CardModifierFields.cardModHasBaseDamage.set(__instance, true);
             } else {
@@ -550,6 +609,7 @@ public class CardModifierPatches
     {
         public static void Prefix(AbstractCard __instance) {
             CardModifierManager.removeEndOfTurnModifiers(__instance);
+            CardModifierFields.preCalculated.set(__instance, false);
         }
     }
 
@@ -564,6 +624,11 @@ public class CardModifierPatches
         public static SpireField<Boolean> cardModHasBaseDamage = new SpireField<>(() -> false);
         public static SpireField<Integer> cardModBaseBlock = new SpireField<>(() -> 0);
         public static SpireField<Boolean> cardModHasBaseBlock = new SpireField<>(() -> false);
+        public static SpireField<Integer> cardModBaseMagic = new SpireField<>(() -> 0);
+        public static SpireField<Boolean> cardModHasBaseMagic = new SpireField<>(() -> false);
+        public static SpireField<Boolean> previewingUpgrade = new SpireField<>(() -> false);
+        public static SpireField<Boolean> preCalculated = new SpireField<>(() -> false);
+        public static SpireField<Boolean> needsRecalculation = new SpireField<>(() -> true);
     }
 
     @SpirePatch(

@@ -2,8 +2,10 @@ package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
 import basemod.BaseMod;
 import basemod.abstracts.DynamicVariable;
+import basemod.helpers.CardModifierManager;
 import basemod.helpers.dynamicvariables.BlockVariable;
 import basemod.helpers.dynamicvariables.DamageVariable;
+import basemod.helpers.dynamicvariables.MagicNumberVariable;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -97,23 +99,45 @@ public class RenderCustomDynamicVariable
                     c = dv.getNormalColor();
                     num = dv.baseValue(__instance);
                 }
+                //cardmods affect base variables
+                int base = -1;
+                boolean modified = false;
+                if (CardModifierPatches.CardModifierFields.needsRecalculation.get(__instance)) {
+                    CardModifierManager.testBaseValues(__instance);
+                    CardModifierPatches.CardModifierFields.needsRecalculation.set(__instance, false);
+                }
+                if (dv instanceof BlockVariable && CardModifierPatches.CardModifierFields.cardModHasBaseBlock.get(__instance)) {
+                    base = CardModifierPatches.CardModifierFields.cardModBaseBlock.get(__instance);
+                    modified = true;
+                } else if (dv instanceof DamageVariable && CardModifierPatches.CardModifierFields.cardModHasBaseDamage.get(__instance)) {
+                    base = CardModifierPatches.CardModifierFields.cardModBaseDamage.get(__instance);
+                    modified = true;
+                } else if (dv instanceof MagicNumberVariable && CardModifierPatches.CardModifierFields.cardModHasBaseMagic.get(__instance)) {
+                    base = CardModifierPatches.CardModifierFields.cardModBaseMagic.get(__instance);
+                    modified = true;
+                }
+                if (modified) {
+                    if (!CardModifierPatches.CardModifierFields.preCalculated.get(__instance)) {
+                        num = base;
+                    }
+                    if (CardModifierPatches.CardModifierFields.previewingUpgrade.get(__instance)) {
+                        c = dv.getIncreasedValueColor();
+                    } else {
+                        if (num == base) {
+                            c = dv.getNormalColor();
+                        } else if (num > base) {
+                            c = dv.getIncreasedValueColor();
+                        } else {
+                            c = dv.getDecreasedValueColor();
+                        }
+                    }
+                }
             } else {
                 logger.error("No dynamic card variable found for key \"" + key + "\"!");
                 c = textColor;
             }
             c = c.cpy();
             c.a = textColor.a;
-
-            //cardmods affect base variables
-            if (dv instanceof BlockVariable) {
-                if (!__instance.isBlockModified && CardModifierPatches.CardModifierFields.cardModHasBaseBlock.get(__instance)) {
-                    num = CardModifierPatches.CardModifierFields.cardModBaseBlock.get(__instance);
-                }
-            } else if (dv instanceof DamageVariable) {
-                if (!__instance.isDamageModified && CardModifierPatches.CardModifierFields.cardModHasBaseDamage.get(__instance)) {
-                    num = CardModifierPatches.CardModifierFields.cardModBaseDamage.get(__instance);
-                }
-            }
 
             stringBuilder.append(num);
             gl.setText(font, stringBuilder.toString());

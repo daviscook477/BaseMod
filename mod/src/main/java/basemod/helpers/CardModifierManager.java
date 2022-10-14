@@ -133,26 +133,38 @@ public class CardModifierManager
         newCard.initializeDescription();
     }
 
-    private static void testBaseValues(AbstractCard card) {
+    public static void testBaseValues(AbstractCard card) {
         float damage = card.baseDamage;
         float block = card.baseBlock;
+        float magic = card.baseMagicNumber;
         for (AbstractCardModifier modifier : modifiers(card)) {
             damage = modifier.modifyBaseDamage(damage, card.damageTypeForTurn, card, null);
             block = modifier.modifyBaseBlock(block, card);
+            magic = modifier.modifyBaseMagic(magic, card);
         }
         damage = (int)damage;
         block = (int)block;
+        magic = (int)magic;
         if (damage != card.baseDamage) {
+            card.damage = (int)damage; //We have to set these values directly for dynamic text to work in master deck. They get overwritten in combat
             CardModifierPatches.CardModifierFields.cardModBaseDamage.set(card, (int)damage);
             CardModifierPatches.CardModifierFields.cardModHasBaseDamage.set(card, true);
         } else {
             CardModifierPatches.CardModifierFields.cardModHasBaseDamage.set(card, false);
         }
         if (block != card.baseBlock) {
+            card.block = (int)block;
             CardModifierPatches.CardModifierFields.cardModBaseBlock.set(card, (int)block);
             CardModifierPatches.CardModifierFields.cardModHasBaseBlock.set(card, true);
         } else {
             CardModifierPatches.CardModifierFields.cardModHasBaseBlock.set(card, false);
+        }
+        if (magic != card.baseMagicNumber) {
+            card.magicNumber = (int)magic;
+            CardModifierPatches.CardModifierFields.cardModBaseMagic.set(card, (int)magic);
+            CardModifierPatches.CardModifierFields.cardModHasBaseMagic.set(card, true);
+        } else {
+            CardModifierPatches.CardModifierFields.cardModHasBaseMagic.set(card, false);
         }
     }
 
@@ -280,6 +292,13 @@ public class CardModifierManager
             block = mod.modifyBlockFinal(block, card);
         }
         return block;
+    }
+
+    public static float onModifyBaseMagic(float magic, AbstractCard card) {
+        for (AbstractCardModifier mod : modifiers(card)) {
+            magic = mod.modifyBaseMagic(magic, card);
+        }
+        return magic;
     }
 
     public static void onUpdate(AbstractCard card) {

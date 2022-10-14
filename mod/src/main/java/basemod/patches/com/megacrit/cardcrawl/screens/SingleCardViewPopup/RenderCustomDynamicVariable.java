@@ -4,6 +4,7 @@ import basemod.BaseMod;
 import basemod.abstracts.DynamicVariable;
 import basemod.helpers.dynamicvariables.BlockVariable;
 import basemod.helpers.dynamicvariables.DamageVariable;
+import basemod.helpers.dynamicvariables.MagicNumberVariable;
 import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.CardModifierPatches;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -112,12 +113,16 @@ public class RenderCustomDynamicVariable
 
             //cardmods affect base variables
             if (dv instanceof BlockVariable) {
-                if ((!card.isBlockModified || card.upgradedBlock) && CardModifierPatches.CardModifierFields.cardModHasBaseBlock.get(card)) {
+                if (CardModifierPatches.CardModifierFields.cardModHasBaseBlock.get(card)) {
                     num = CardModifierPatches.CardModifierFields.cardModBaseBlock.get(card);
                 }
             } else if (dv instanceof DamageVariable) {
-                if ((!card.isDamageModified || card.upgradedDamage) && CardModifierPatches.CardModifierFields.cardModHasBaseDamage.get(card)) {
+                if (CardModifierPatches.CardModifierFields.cardModHasBaseDamage.get(card)) {
                     num = CardModifierPatches.CardModifierFields.cardModBaseDamage.get(card);
+                }
+            } else if (dv instanceof MagicNumberVariable) {
+                if (CardModifierPatches.CardModifierFields.cardModHasBaseMagic.get(card)) {
+                    num = CardModifierPatches.CardModifierFields.cardModBaseMagic.get(card);
                 }
             }
 

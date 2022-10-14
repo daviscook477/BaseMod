@@ -76,6 +76,11 @@ public abstract class AbstractCardModifier implements Comparable<AbstractCardMod
         return block;
     }
 
+    //called before any magic number increases, will also render outside the hand
+    public float modifyBaseMagic(float magic, AbstractCard card) {
+        return magic;
+    }
+
     /**
      * Intercepts the creation of a card's description at the time that initializeDescription is called.
      * rawDescription can be manipulated freely at this point, and then the game will parse it as normal.
