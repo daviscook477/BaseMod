@@ -49,7 +49,6 @@ public class CustomEnergyOrb implements EnergyOrbInterface
 			assert orbTexturePaths.length % 2 == 1;
 
 			int middleIdx = orbTexturePaths.length / 2;
-			System.out.println(middleIdx);
 
 			energyLayers = new Texture[middleIdx];
 			noEnergyLayers = new Texture[middleIdx];
