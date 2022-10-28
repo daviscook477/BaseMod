@@ -138,9 +138,9 @@ public class FixChineseColoredTextMess {
 					}
 				});
 			}
-			enwwt.insertAt(fixMethodLine, "{" + fixClass + ".DoFix(sb, font, x, y, c, widthMax, lineSpacing,"
-					+ curWidthArray + ", " + curLineArray + ", word);curWidth=" + curWidthArray + "[0];currentLine="
-					+ curLineArray + "[0];}");
+			enwwt.insertAt(fixMethodLine, "{if(" + usingFixMethodParam + "){" + fixClass + ".DoFix(sb, font, x, y, c, widthMax, " +
+					"lineSpacing," + curWidthArray + ", " + curLineArray + ", word);curWidth=" + curWidthArray + "[0];currentLine="
+					+ curLineArray + "[0];}}");
 		}
 		
 		public static void DoFix(SpriteBatch sb, BitmapFont font, float x, float y, Color c, float widthMax, float lineSpacing,
