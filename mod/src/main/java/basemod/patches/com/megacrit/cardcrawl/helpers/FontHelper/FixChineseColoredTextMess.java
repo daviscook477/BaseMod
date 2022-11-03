@@ -274,7 +274,11 @@ public class FixChineseColoredTextMess {
 	}
 
 	private static boolean usingHexColor(String word) {
-		return word.length() > 1 && word.charAt(1) == '#' && word.charAt(8) == ']' && word.endsWith("[]");
+		// Hex colors have optional alpha bytes
+		// [#RRGGBB]
+		// [#RRGGBBAA]
+		int endOfColor = word.indexOf(']');
+		return word.length() > 1 && word.charAt(1) == '#' && (endOfColor == 8 || endOfColor == 10) && word.endsWith("[]");
 	}
 
 	private static boolean usingEnergyIcon(String word) {
