@@ -1,5 +1,6 @@
 package basemod.patches.com.megacrit.cardcrawl.helpers.FontHelper;
 
+import basemod.ReflectionHacks;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -54,9 +55,7 @@ public class FixChineseColoredTextMess {
 				font.setColor(oldColor);
 			}
 		}
-		private static boolean usingHexColor(String word) {
-			return word.length() > 1 && word.charAt(1) == '#' && word.charAt(8) == ']' && word.endsWith("[]");
-		}
+
 		private static class Locator extends SpireInsertLocator {
 			@Override
 			public int[] Locate(CtBehavior ctMethodToPatch) throws Exception {
@@ -85,8 +84,9 @@ public class FixChineseColoredTextMess {
 			int[] allLines = LineFinder.findAllInOrder(enwwt, setColorMatcher);
 			int fontLine = allLines[allLines.length - 1];
 			int fixMethodLine = LineFinder.findAllInOrder(enwwt, widthMatcher)[1];
-			String fixClass = FixChineseVanillaColoredTextAlwaysNewLinePatch.class.getName();
-			
+			String fixClass = FixChineseColoredTextMess.class.getName();
+			String newLineFixClass = FixChineseVanillaColoredTextAlwaysNewLinePatch.class.getName();
+
 			// add localvars to store values
 			CtClass boolType = pool.get(boolean.class.getName());
 			String usingFixMethodParam = getParamName(table, "usingFixMethod");
@@ -102,7 +102,7 @@ public class FixChineseColoredTextMess {
 			
 			enwwt.insertBefore(usingFixMethodParam + "=false;" + curWidthArray + "=new float[1];"
 					+ curLineArray + "=new int[1];");
-			enwwt.insertAt(boolLine, "{" + usingFixMethodParam + "=" + fixClass + ".UsingVanillaColor(word);"
+			enwwt.insertAt(boolLine, "{" + usingFixMethodParam + "=" + fixClass + ".usingVanillaColorCode(word);"
 					+ curWidthArray + "[0]=curWidth;" + curLineArray + "[0]=currentLine;}");
 			// skip all vanilla things
 			{
@@ -138,7 +138,7 @@ public class FixChineseColoredTextMess {
 					}
 				});
 			}
-			enwwt.insertAt(fixMethodLine, "{if(" + usingFixMethodParam + "){" + fixClass + ".DoFix(sb, font, x, y, c, widthMax, " +
+			enwwt.insertAt(fixMethodLine, "{if(" + usingFixMethodParam + "){" + newLineFixClass + ".DoFix(sb, font, x, y, c, widthMax, " +
 					"lineSpacing," + curWidthArray + ", " + curLineArray + ", word);curWidth=" + curWidthArray + "[0];currentLine="
 					+ curLineArray + "[0];}}");
 		}
@@ -188,19 +188,12 @@ public class FixChineseColoredTextMess {
 			paramIndex++;
 			return "_param_" + index + "_" + key;
 		}
-		
-		public static boolean UsingVanillaColor(String word) {
-			return word.length() > 1 && VanillaColorCode(word.charAt(1));
-		}
-		
-		public static boolean VanillaColorCode(char s) {
-			return s == 'r' || s == 'g' || s == 'b' || s == 'y' || s == 'p';
-		}
 	}
 	
 	@SpirePatch2(clz = FontHelper.class, method = "getHeightForCharLineBreak")
 	public static class FixGetHeightForChineseText {
 		private static final float CARD_ENERGY_IMG_WIDTH = 26F * Settings.scale;
+
 		@SpirePrefixPatch
 		public static SpireReturn<Float> PrefixChangeHeight(BitmapFont font, String msg, float lineWidth, float lineSpacing) {
 			GlyphLayout layout = FontHelper.layout;
@@ -225,7 +218,7 @@ public class FixChineseColoredTextMess {
 							for (int i = 0; i < word.length(); i++) {
 								String j = Character.toString(word.charAt(i));
 								layout.setText(font, j);
-								curWidth +=layout.width;
+								curWidth += layout.width;
 								if (curWidth > lineWidth) {
 									curWidth = layout.width;
 									currentLine++;
@@ -246,7 +239,7 @@ public class FixChineseColoredTextMess {
 						for (int i = 0; i < word.length(); i++) {
 							String j = Character.toString(word.charAt(i));
 							layout.setText(font, j);
-							curWidth +=layout.width;
+							curWidth += layout.width;
 							if (curWidth > lineWidth) {
 								curWidth = layout.width;
 								currentLine++;
@@ -256,7 +249,7 @@ public class FixChineseColoredTextMess {
 						for (int i = 0; i < word.length(); i++) {
 							String j = Character.toString(word.charAt(i));
 							layout.setText(font, j);
-							curWidth +=layout.width;
+							curWidth += layout.width;
 							if (curWidth > lineWidth) {
 								curWidth = layout.width;
 								currentLine++;
@@ -270,37 +263,27 @@ public class FixChineseColoredTextMess {
 			}
 			return SpireReturn.Return(totalHeight);
 		}
-		
-		private static boolean usingVanillaColorCode(String word) {
-			return word.length() > 1 && vanillaColorCode(word.charAt(1));
-		}
-		
-		private static boolean vanillaColorCode(char s) {
-			return s == 'r' || s == 'g' || s == 'b' || s == 'y' || s == 'p';
-		}
-		
-		private static boolean usingHexColor(String word) {
-			return word.length() > 1 && word.charAt(1) == '#' && word.charAt(8) == ']' && word.endsWith("[]");
-		}
-		
-		private static boolean usingEnergyIcon(String word) {
-			return word.length() > 1 && word.charAt(1) == 'E' && word.endsWith("]");
-		}
-		
-		private static boolean identifyOrb(String word) {
-			switch (word) {
-				case "[E]":
-				case "[R]":
-				case "[G]":
-				case "[B]":
-				case "[W]":
-				case "[C]":
-				case "[P]":
-				case "[T]":
-				case "[S]":
-					return true;
-			}
-			return false;
-		}
+	}
+
+	public static boolean usingVanillaColorCode(String word) {
+		return word.length() > 1 && vanillaColorCode(word.charAt(1));
+	}
+
+	private static boolean vanillaColorCode(char s) {
+		return s == 'r' || s == 'g' || s == 'b' || s == 'y' || s == 'p';
+	}
+
+	private static boolean usingHexColor(String word) {
+		return word.length() > 1 && word.charAt(1) == '#' && word.charAt(8) == ']' && word.endsWith("[]");
+	}
+
+	private static boolean usingEnergyIcon(String word) {
+		return word.length() > 1 && word.charAt(1) == 'E' && word.endsWith("]");
+	}
+
+	private static boolean identifyOrb(String word) {
+		Object orbTex = ReflectionHacks.privateStaticMethod(FontHelper.class, "identifyOrb", String.class)
+				.invoke(new Object[]{ word });
+		return orbTex != null;
 	}
 }
