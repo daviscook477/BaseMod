@@ -252,7 +252,9 @@ public class FixChineseColoredTextMess {
 							curWidth += layout.width;
 							if (curWidth > lineWidth) {
 								curWidth = layout.width;
-								currentLine++;
+								// when reaching the end of the text, don't increase currentLine
+								boolean reachEnd = isProbableEndOfMsg(j, word, strings);
+								if (!reachEnd) currentLine++;
 							}
 						}
 					}
@@ -262,6 +264,13 @@ public class FixChineseColoredTextMess {
 				totalHeight = currentLine * lineSpacing;
 			}
 			return SpireReturn.Return(totalHeight);
+		}
+		
+		private static boolean isProbableEndOfMsg(String singleChar, String word, String[] srcMsg) {
+			// check if singleChar is the last char of the word
+			// and the word is the last element of the srcMsg
+			return Character.toString(word.charAt(word.length() - 1)).equals(singleChar)
+					&& srcMsg[srcMsg.length - 1].equals(word);
 		}
 	}
 
