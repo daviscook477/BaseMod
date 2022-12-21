@@ -70,6 +70,10 @@ public class EventUtils {
     }
 
     public static <T extends AbstractEvent> void registerEvent(String ID, Class<T> eventClass, AbstractPlayer.PlayerClass playerClass, String[] actIDs, Condition spawnCondition, String overrideEvent, Condition bonusCondition, EventType type, AddEventParams additionalParams) {
+        registerEvent(ID, eventClass, new AbstractPlayer.PlayerClass[] { playerClass }, actIDs, spawnCondition, overrideEvent, bonusCondition, type, additionalParams);
+    }
+
+    public static <T extends AbstractEvent> void registerEvent(String ID, Class<T> eventClass, AbstractPlayer.PlayerClass[] playerClasses, String[] actIDs, Condition spawnCondition, String overrideEvent, Condition bonusCondition, EventType type, AddEventParams additionalParams) {
         /*if (!(overrideEvent != null || spawnCondition != null || actIDs != null || playerClass != null || bonusCondition != null)) {
             eventLogger.info("Event " + eventClass.getName() + " has no special conditions, and should be registered through BaseMod instead.");
             return;
@@ -78,7 +82,7 @@ public class EventUtils {
         if (additionalParams == null) {
             additionalParams = new AddEventParams.Builder(ID, eventClass)
                     .eventType(type)
-                    .playerClass(playerClass)
+                    .playerClasses(playerClasses)
                     .dungeonIDs(actIDs)
                     .spawnCondition(spawnCondition)
                     .bonusCondition(bonusCondition)
@@ -94,7 +98,7 @@ public class EventUtils {
         eventIDs.add(ID);
 
         ConditionalEvent<T> c = new ConditionalEvent<T>(eventClass,
-                playerClass,
+                playerClasses,
                 spawnCondition,
                 actIDs == null ? new String[]{} : actIDs,
                 additionalParams);
@@ -154,7 +158,6 @@ public class EventUtils {
                 eventLogger.info("  This event has a bonus condition.");
             }
         }
-
     }
 
     private static String generateEventKey(String ID) {

@@ -15,6 +15,7 @@ import static basemod.eventUtil.EventUtils.eventLogger;
 public class ConditionalEvent<T extends AbstractEvent> {
     public Class<T> eventClass;
     public AbstractPlayer.PlayerClass playerClass;
+    public AbstractPlayer.PlayerClass[] playerClasses;
     public Condition spawnCondition;
     public List<String> actIDs;
 
@@ -23,8 +24,12 @@ public class ConditionalEvent<T extends AbstractEvent> {
     private final AddEventParams additionalParams;
 
     public ConditionalEvent(Class<T> eventClass, AbstractPlayer.PlayerClass playerClass, Condition spawnCondition, String[] actIDs, AddEventParams additionalParams) {
+        this(eventClass, new AbstractPlayer.PlayerClass[] { playerClass }, spawnCondition, actIDs, additionalParams);
+    }
+    public ConditionalEvent(Class<T> eventClass, AbstractPlayer.PlayerClass[] playerClasses, Condition spawnCondition, String[] actIDs, AddEventParams additionalParams) {
         this.eventClass = eventClass;
-        this.playerClass = playerClass;
+        this.playerClass = playerClasses.length == 0 ? null : playerClasses[0];
+        this.playerClasses = playerClasses;
         this.spawnCondition = spawnCondition;
         this.additionalParams = additionalParams;
 
@@ -48,8 +53,18 @@ public class ConditionalEvent<T extends AbstractEvent> {
 
     public boolean isValid() {
         return (actIDs.isEmpty() || actIDs.contains(AbstractDungeon.id)) &&
-                (spawnCondition.test()) &&
-                (playerClass == null || AbstractDungeon.player.chosenClass == playerClass);
+                spawnCondition.test() &&
+                playerMatch();
+    }
+    public boolean playerMatch() {
+        if (playerClass == null)
+            return true;
+
+        for (AbstractPlayer.PlayerClass pClass : playerClasses)
+            if (AbstractDungeon.player.chosenClass == pClass)
+                return true;
+
+        return false;
     }
 
     @Override

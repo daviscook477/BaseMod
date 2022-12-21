@@ -116,12 +116,10 @@ public class AddEvents {
             eventLogger.info("Adding conditional SpecialOneTimeEvents.");
 
             for (Map.Entry<String, ConditionalEvent<? extends AbstractEvent>> e : EventUtils.oneTimeEvents.entrySet()) {
-                if (!e.getValue().spawnCondition.test()) //not an evil event, or evil event + evil mode
+                if (e.getValue().spawnCondition.test() && e.getValue().playerMatch())
                 {
-                    if (e.getValue().playerClass == null || AbstractDungeon.player.getClass().equals(e.getValue().playerClass)) {
-                        eventLogger.info("Added " + e.getValue() + " to the specialOneTimeEventList.");
-                        AbstractDungeon.specialOneTimeEventList.add(e.getKey());
-                    }
+                    eventLogger.info("Added " + e.getValue() + " to the specialOneTimeEventList.");
+                    AbstractDungeon.specialOneTimeEventList.add(e.getKey());
                 }
             }
 

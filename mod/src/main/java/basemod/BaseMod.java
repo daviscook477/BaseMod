@@ -1308,12 +1308,19 @@ public class BaseMod {
 						.create()
 		);
 	}
+	public static void addEvent(String eventID, Class<? extends AbstractEvent> eventClass, String... dungeonIDs) {
+		addEvent(
+				new AddEventParams.Builder(eventID, eventClass)
+						.dungeonIDs(dungeonIDs)
+						.create()
+		);
+	}
 
 	public static void addEvent(AddEventParams params) {
 		EventUtils.registerEvent(
 				params.eventID,
 				params.eventClass,
-				params.playerClass,
+				params.playerClasses.toArray(new AbstractPlayer.PlayerClass[0]),
 				params.dungeonIDs.toArray(new String[0]),
 				params.spawnCondition,
 				params.overrideEventID,
