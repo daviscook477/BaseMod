@@ -246,14 +246,17 @@ public class FixChineseColoredTextMess {
 							}
 						}
 					} else {
-						for (int i = 0; i < word.length(); i++) {
+						int wordLength = word.length();
+						for (int i = 0; i < wordLength; i++) {
 							String j = Character.toString(word.charAt(i));
 							layout.setText(font, j);
 							curWidth += layout.width;
 							if (curWidth > lineWidth) {
 								curWidth = layout.width;
 								// when reaching the end of the text, don't increase currentLine
-								boolean reachEnd = isProbableEndOfMsg(j, word, strings);
+								//23-1-5 FIX NOTE: some Chinese text has no blank spaces and in such cases strings has only one element
+								// so it's necessary to check if the element of i is the end of word in advance
+								boolean reachEnd = i == wordLength - 1 && isProbableEndOfMsg(j, word, strings);
 								if (!reachEnd) currentLine++;
 							}
 						}
