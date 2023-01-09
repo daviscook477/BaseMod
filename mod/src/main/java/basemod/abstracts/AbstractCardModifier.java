@@ -154,6 +154,10 @@ public abstract class AbstractCardModifier implements Comparable<AbstractCardMod
 
     }
 
+    public void onSingleCardViewRender(AbstractCard card, SpriteBatch sb) {
+
+    }
+
     /**
      * triggers at the end of the player's turn. The group passed is the current location of the card at the
      * time that this method is called.

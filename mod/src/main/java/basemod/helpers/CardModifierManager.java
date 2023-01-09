@@ -1,5 +1,6 @@
 package basemod.helpers;
 
+import basemod.ReflectionHacks;
 import basemod.abstracts.AbstractCardModifier;
 import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.CardModifierPatches;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -11,6 +12,7 @@ import com.megacrit.cardcrawl.cards.CardGroup;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
+import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -310,6 +312,13 @@ public class CardModifierManager
     public static void onRender(AbstractCard card, SpriteBatch sb) {
         for (AbstractCardModifier mod : modifiers(card)) {
             mod.onRender(card, sb);
+        }
+    }
+
+    public static void onSingleCardViewRender(SingleCardViewPopup screen, SpriteBatch sb) {
+        AbstractCard card = ReflectionHacks.getPrivate(screen, SingleCardViewPopup.class, "card");
+        for (AbstractCardModifier mod : modifiers(card)) {
+            mod.onSingleCardViewRender(card, sb);
         }
     }
 
