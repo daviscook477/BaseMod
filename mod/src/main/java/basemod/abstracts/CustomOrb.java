@@ -11,8 +11,8 @@ import java.util.Map;
 public abstract class CustomOrb extends AbstractOrb {
     private static final Map<String, Texture> orbTextures = new HashMap<>();
 
-    private String passiveDescription;
-    private String evokeDescription;
+    protected String passiveDescription;
+    protected String evokeDescription;
 
     public CustomOrb(String ID, String NAME, int basePassiveAmount, int baseEvokeAmount, String passiveDescription,
                      String evokeDescription, String imgPath) {
