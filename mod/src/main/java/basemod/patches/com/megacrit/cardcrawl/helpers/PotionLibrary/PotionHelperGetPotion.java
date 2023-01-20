@@ -1,33 +1,44 @@
 package basemod.patches.com.megacrit.cardcrawl.helpers.PotionLibrary;
 
 import basemod.BaseMod;
-import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
+import com.evacipated.cardcrawl.modthespire.lib.*;
+import com.megacrit.cardcrawl.helpers.PotionHelper;
+import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.potions.FirePotion;
+import com.megacrit.cardcrawl.rooms.AbstractRoom;
+import javassist.CtBehavior;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@SpirePatch(
-		cls="com.megacrit.cardcrawl.helpers.PotionHelper",
-		method="getPotion"
+@SpirePatch2(
+        clz = PotionHelper.class,
+        method = "getPotion"
 )
 public class PotionHelperGetPotion {
-	private static final Logger logger = LogManager.getLogger(PotionHelperGetPotion.class.getName());
+    private static final Logger logger = LogManager.getLogger(PotionHelperGetPotion.class.getName());
 
-	public static Object Postfix(Object __result, String potionID) {
-		if (__result == null) {
-			return null;
-		}
-		if (__result instanceof FirePotion && !potionID.equals(FirePotion.POTION_ID)) {
-			logger.info("Getting custom potion: " + potionID);
+    @SpireInsertPatch(locator = Locator.class)
+    public static SpireReturn<?> patch(String name) {
+        //If this gets called, no potion has been returned yet
+		Class possiblePotion = BaseMod.getPotionClass(name);
+		if(possiblePotion != null) {
+			logger.info("Getting custom potion: " + name);
 			try {
-				Class potionClass = BaseMod.getPotionClass(potionID);
-				return potionClass.newInstance();
+				return SpireReturn.Return(possiblePotion.newInstance());
 			} catch (Exception e) {
 				logger.warn(e.getMessage());
-				return new FirePotion();
 			}
-		} else {
-			return __result;
+		}
+
+        return SpireReturn.Continue();
+    }
+
+	//Inserts before the basegame missing potion key logging
+	public static class Locator extends SpireInsertLocator {
+		@Override
+		public int[] Locate(CtBehavior ctBehavior) throws Exception {
+			Matcher matcher = new Matcher.MethodCallMatcher(Logger.class, "info");
+			return LineFinder.findInOrder(ctBehavior, matcher);
 		}
 	}
 }
