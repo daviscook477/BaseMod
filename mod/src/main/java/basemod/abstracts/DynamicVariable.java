@@ -33,7 +33,7 @@ public abstract class DynamicVariable
 
     public Color getUpgradedColor(AbstractCard card)
     {
-        return null;
+        return getUpgradedColor();
     }
 
     public Color getIncreasedValueColor()

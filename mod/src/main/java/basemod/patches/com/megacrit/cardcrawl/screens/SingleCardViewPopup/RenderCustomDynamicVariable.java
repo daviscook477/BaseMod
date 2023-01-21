@@ -103,8 +103,7 @@ public class RenderCustomDynamicVariable
             if (dv != null) {
                 num = dv.baseValue(card);
                 if (dv.upgraded(card)) {
-                    Color instanceColor = dv.getUpgradedColor(card);
-                    c = instanceColor == null ? dv.getUpgradedColor() : instanceColor;
+                    c = dv.getUpgradedColor(card);
                 } else {
                     c = dv.getNormalColor();
                 }
