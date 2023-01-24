@@ -1,6 +1,7 @@
 package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
 import basemod.abstracts.CustomCard;
+import basemod.helpers.CardModifierManager;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -30,13 +31,11 @@ public class RenderCardDescriptors
 		)
 		public static void Insert(AbstractCard __instance, SpriteBatch sb, @ByRef String[] text)
 		{
-			if (__instance instanceof CustomCard) {
-				List<String> descriptors = new ArrayList<>();
-				descriptors.add(text[0]);
-				descriptors.addAll(((CustomCard) __instance).getCardDescriptors());
-				if (descriptors.size() > 1) {
-					text[0] = String.join(SEPARATOR, descriptors);
-				}
+			List<String> descriptors = new ArrayList<>();
+			descriptors.add(text[0]);
+			descriptors.addAll(getAllDescriptors(__instance));
+			if (descriptors.size() > 1) {
+				text[0] = String.join(SEPARATOR, descriptors);
 			}
 		}
 
@@ -63,39 +62,37 @@ public class RenderCardDescriptors
 		)
 		public static void Insert(AbstractCard __instance, SpriteBatch sb, float x, float y, @ByRef float[] tOffset, @ByRef float[] tWidth)
 		{
-			if (__instance instanceof CustomCard) {
-				String typeText;
-				switch (__instance.type) {
-					case ATTACK:
-						typeText = AbstractCard.TEXT[0];
-						break;
-					case SKILL:
-						typeText = AbstractCard.TEXT[1];
-						break;
-					case POWER:
-						typeText = AbstractCard.TEXT[2];
-						break;
-					case STATUS:
-						typeText = AbstractCard.TEXT[7];
-						break;
-					case CURSE:
-						typeText = AbstractCard.TEXT[3];
-						break;
-					default:
-						typeText = AbstractCard.TEXT[5];
-						break;
-				}
-				List<String> descriptors = new ArrayList<>();
-				descriptors.add(typeText);
-				descriptors.addAll(((CustomCard) __instance).getCardDescriptors());
-				if (descriptors.size() > 1) {
-					String text = String.join(SEPARATOR, descriptors);
-					GlyphLayout gl = new GlyphLayout();
-					FontHelper.cardTypeFont.getData().setScale(1f);
-					gl.setText(FontHelper.cardTypeFont, text);
-					tOffset[0] = (gl.width - 38 * Settings.scale) / 2f;
-					tWidth[0] = (gl.width - 0f) / (32 * Settings.scale);
-				}
+			String typeText;
+			switch (__instance.type) {
+				case ATTACK:
+					typeText = AbstractCard.TEXT[0];
+					break;
+				case SKILL:
+					typeText = AbstractCard.TEXT[1];
+					break;
+				case POWER:
+					typeText = AbstractCard.TEXT[2];
+					break;
+				case STATUS:
+					typeText = AbstractCard.TEXT[7];
+					break;
+				case CURSE:
+					typeText = AbstractCard.TEXT[3];
+					break;
+				default:
+					typeText = AbstractCard.TEXT[5];
+					break;
+			}
+			List<String> descriptors = new ArrayList<>();
+			descriptors.add(typeText);
+			descriptors.addAll(getAllDescriptors(__instance));
+			if (descriptors.size() > 1) {
+				String text = String.join(SEPARATOR, descriptors);
+				GlyphLayout gl = new GlyphLayout();
+				FontHelper.cardTypeFont.getData().setScale(1f);
+				gl.setText(FontHelper.cardTypeFont, text);
+				tOffset[0] = (gl.width - 38 * Settings.scale) / 2f;
+				tWidth[0] = (gl.width - 0f) / (32 * Settings.scale);
 			}
 		}
 
@@ -148,5 +145,15 @@ public class RenderCardDescriptors
 			}
 			return SpireReturn.Continue();
 		}
+	}
+
+	private static List<String> getAllDescriptors(AbstractCard card) {
+		List<String> list = new ArrayList<>();
+		if (card instanceof CustomCard) {
+			list.addAll(((CustomCard) card).getCardDescriptors());
+		}
+		list.addAll(CardDescriptors.getDescriptors(card));
+		list.addAll(CardModifierManager.getExtraDescriptors(card));
+		return list;
 	}
 }

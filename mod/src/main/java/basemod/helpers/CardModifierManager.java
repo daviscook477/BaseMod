@@ -17,6 +17,7 @@ import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 public class CardModifierManager
 {
@@ -341,6 +342,12 @@ public class CardModifierManager
             }
         }
         return true;
+    }
+
+    public static List<String> getExtraDescriptors(AbstractCard card) {
+        List<String> list = new ArrayList<>();
+        modifiers(card).forEach(mod -> list.addAll(mod.extraDescriptors(card)));
+        return list;
     }
 
     private static void addToBot(AbstractGameAction action) {
