@@ -33,22 +33,12 @@ public class FixDescriptionWidthCustomDynamicVariable
         if (prefix.length() > base.length())
             return base;
 
-        //lazy method option - just assume getKeywordPrefix returns a prefix of the correct length that matches, and just remove that number of characters.
-
         for (int i = 0; i < prefix.length(); ++i) {
-            if (quickToLower(base.charAt(i)) != quickToLower(prefix.charAt(i))) {
+            if (Character.toLowerCase(base.charAt(i)) != Character.toLowerCase(prefix.charAt(i))) {
                 return base;
             }
         }
         return base.substring(prefix.length());
-    }
-
-    private static final int gap = 'a' - 'A';
-    private static char quickToLower(char c) {
-        //the Character.toLowerCase method is a lot more complicated and does likely unnecessary stuff
-        if (c >= 'A' && c <= 'Z')
-            return (char) (c + gap);
-        return c;
     }
 
     private static class Locator extends SpireInsertLocator
