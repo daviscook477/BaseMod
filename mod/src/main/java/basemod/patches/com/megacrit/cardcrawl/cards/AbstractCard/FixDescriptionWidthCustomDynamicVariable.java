@@ -21,7 +21,7 @@ public class FixDescriptionWidthCustomDynamicVariable
     {
         if (BaseMod.keywordIsUnique(word[0].toLowerCase())) {
             String prefix = BaseMod.getKeywordPrefix(word[0].toLowerCase());
-            word[0] = removeLowercase(word[0], prefix);
+            word[0] = removeLowercasePrefix(word[0], prefix);
             gl[0].width -= (new GlyphLayout(FontHelper.cardDescFont_N, prefix)).width;
         }
         else if (word[0].startsWith("!")) {
@@ -29,7 +29,7 @@ public class FixDescriptionWidthCustomDynamicVariable
         }
     }
 
-    public static String removeLowercase(String base, String prefix) {
+    public static String removeLowercasePrefix(String base, String prefix) {
         if (prefix.length() > base.length())
             return base;
 

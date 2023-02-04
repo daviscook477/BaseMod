@@ -1,6 +1,7 @@
 package basemod.patches.com.megacrit.cardcrawl.relics.AbstractRelic;
 
 import basemod.BaseMod;
+import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.FixDescriptionWidthCustomDynamicVariable;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.GameDictionary;
@@ -32,7 +33,7 @@ public class MultiwordKeywords
 			String trimmedKeyword = keyword.replace(',', ' ').replace('.', ' ').trim().toLowerCase();
 			if (GameDictionary.keywords.containsKey(trimmedKeyword)) {
 				if (BaseMod.keywordIsUnique(trimmedKeyword)) {
-					keyword = keyword.replaceFirst(BaseMod.getKeywordPrefix(trimmedKeyword), "");
+					keyword = FixDescriptionWidthCustomDynamicVariable.removeLowercasePrefix(keyword, BaseMod.getKeywordPrefix(trimmedKeyword));
 				}
 				if (color != null) {
 					builder.append(' ').append(FontHelper.colorString(keyword.replace('_', ' '), color));
@@ -42,6 +43,6 @@ public class MultiwordKeywords
 			builder.append(' ').append(word);
 		}
 		// Remove leading space
-		return builder.toString().substring(1);
+		return builder.substring(1);
 	}
 }
