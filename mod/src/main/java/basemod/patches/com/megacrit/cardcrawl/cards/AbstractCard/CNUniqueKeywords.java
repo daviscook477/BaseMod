@@ -22,7 +22,7 @@ public class CNUniqueKeywords {
     )
     public static void Insert(AbstractCard __instance, @ByRef String[] word) {
         if (BaseMod.keywordIsUnique(word[0])) {
-            word[0] = word[0].replaceFirst(BaseMod.getKeywordPrefix(word[0]), "");
+            word[0] = FixDescriptionWidthCustomDynamicVariable.removeLowercase(word[0], BaseMod.getKeywordPrefix(word[0]));
         }
     }
 
