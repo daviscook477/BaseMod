@@ -544,6 +544,13 @@ public class CardModifierPatches
     )
     public static class CardModifierStatEquivalentCopyModifiers
     {
+
+        @SpirePostfixPatch
+        public static AbstractCard fixBaseDamage(AbstractCard __result, AbstractCard __instance) {
+            CardModifierFields.needsRecalculation.set(__result, true);
+            return __result;
+        }
+
         @SpireInsertPatch(
                 locator = Locator.class,
                 localvars = {"card"}
