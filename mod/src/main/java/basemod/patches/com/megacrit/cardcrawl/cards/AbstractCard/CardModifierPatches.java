@@ -87,6 +87,14 @@ public class CardModifierPatches
     )
     public static class CardModifierCalculateCardDamage
     {
+        //modifyBaseMagic
+        public static void Prefix(AbstractCard __instance) {
+            if (CardModifierFields.cardModHasBaseMagic.get(__instance)) {
+                __instance.magicNumber = (int) CardModifierManager.onModifyBaseMagic(__instance.baseMagicNumber, __instance);
+                __instance.isMagicNumberModified = __instance.magicNumber != __instance.baseMagicNumber;
+            }
+        }
+
         //onCalculateCardDamage
         public static void Postfix(AbstractCard __instance, AbstractMonster mo) {
             CardModifierManager.onCalculateCardDamage(__instance, mo);
