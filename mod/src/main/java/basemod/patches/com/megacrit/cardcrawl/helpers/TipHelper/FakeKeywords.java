@@ -1,6 +1,8 @@
 package basemod.patches.com.megacrit.cardcrawl.helpers.TipHelper;
 
+import basemod.abstracts.AbstractCardModifier;
 import basemod.abstracts.CustomCard;
+import basemod.helpers.CardModifierManager;
 import basemod.helpers.TooltipInfo;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.ByRef;
@@ -54,6 +56,7 @@ public class FakeKeywords
         }
 
         // Calculate height of custom tooltips
+
         if (___card instanceof CustomCard) {
             CustomCard card = (CustomCard) ___card;
             List<TooltipInfo> tooltips = card.getCustomTooltips();
@@ -77,6 +80,26 @@ public class FakeKeywords
 	                        TIP_DESC_LINE_SPACING) - 7.0f * Settings.scale;
                      textHeight -= 
                     sumTooltipHeight -= textHeight + BOX_EDGE_H * 3.15f;
+                }
+            }
+        }
+        //Also add cardmod tip heights
+        for (AbstractCardModifier modifier : CardModifierManager.modifiers(___card)) {
+            List<TooltipInfo> tooltips = modifier.additionalTooltips(___card);
+            if (tooltips != null) {
+                for (TooltipInfo tooltip : tooltips) {
+                    float textHeight = -FontHelper.getSmartHeight(
+                            FontHelper.tipHeaderFont,
+                            TipHelper.capitalize(tooltip.title),
+                            BODY_TEXT_WIDTH,
+                            TIP_DESC_LINE_SPACING) -
+                            FontHelper.getSmartHeight(
+                                    FontHelper.tipBodyFont,
+                                    tooltip.description,
+                                    BODY_TEXT_WIDTH,
+                                    TIP_DESC_LINE_SPACING) - 7.0f * Settings.scale;
+                    textHeight -=
+                            sumTooltipHeight -= textHeight + BOX_EDGE_H * 3.15f;
                 }
             }
         }
@@ -151,7 +174,32 @@ public class FakeKeywords
                                 FontHelper.tipBodyFont,
                                 tooltip.description,
                                 BODY_TEXT_WIDTH,
-                                TIP_DESC_LINE_SPACING) - 7.0f * Settings.scale;;
+                                TIP_DESC_LINE_SPACING) - 7.0f * Settings.scale;
+                        textHeight.set(null, h);
+
+                        Method renderTipBox = TipHelper.class.getDeclaredMethod("renderTipBox", float.class, float.class, SpriteBatch.class, String.class, String.class);
+                        renderTipBox.setAccessible(true);
+                        renderTipBox.invoke(null, x, y, sb, tooltip.title, tooltip.description);
+                        y -= h + BOX_EDGE_H * 3.15f;
+                    }
+                }
+            }
+            for (AbstractCardModifier modifier : CardModifierManager.modifiers(acard)) {
+                List<TooltipInfo> tooltips = modifier.additionalTooltips(acard);
+                if (tooltips != null) {
+                    for (TooltipInfo tooltip : tooltips) {
+                        Field textHeight = TipHelper.class.getDeclaredField("textHeight");
+                        textHeight.setAccessible(true);
+                        float h = -FontHelper.getSmartHeight(
+                                FontHelper.tipHeaderFont,
+                                TipHelper.capitalize(tooltip.title),
+                                BODY_TEXT_WIDTH,
+                                TIP_DESC_LINE_SPACING) -
+                                FontHelper.getSmartHeight(
+                                        FontHelper.tipBodyFont,
+                                        tooltip.description,
+                                        BODY_TEXT_WIDTH,
+                                        TIP_DESC_LINE_SPACING) - 7.0f * Settings.scale;
                         textHeight.set(null, h);
 
                         Method renderTipBox = TipHelper.class.getDeclaredMethod("renderTipBox", float.class, float.class, SpriteBatch.class, String.class, String.class);

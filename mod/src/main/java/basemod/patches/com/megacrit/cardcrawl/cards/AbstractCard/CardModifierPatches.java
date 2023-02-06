@@ -574,15 +574,31 @@ public class CardModifierPatches
         }
     }
 
-    @SpirePatch(
+    @SpirePatch2(
             clz = AbstractCard.class,
             method = "render",
-            paramtypez = {SpriteBatch.class}
+            paramtypez = {SpriteBatch.class, boolean.class}
+    )
+    @SpirePatch2(
+            clz = AbstractCard.class,
+            method = "renderInLibrary"
     )
     public static class CardModifierRender
     {
+        @SpirePostfixPatch
         public static void Postfix(AbstractCard __instance, SpriteBatch sb) {
             CardModifierManager.onRender(__instance, sb);
+        }
+    }
+    @SpirePatch(
+            clz = SingleCardViewPopup.class,
+            method = "render"
+    )
+    public static class CardModifierSingleCardViewRender
+    {
+        @SpirePostfixPatch
+        public static void Postfix(SingleCardViewPopup __instance, SpriteBatch sb) {
+            CardModifierManager.onSingleCardViewRender(__instance, sb);
         }
     }
 

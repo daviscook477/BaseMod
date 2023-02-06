@@ -108,7 +108,7 @@ public class CardBorderGlowManager {
     }
 
     public static abstract class GlowInfo implements Comparable<GlowInfo>{
-        int priority = 0;
+        public int priority = 0;
         public abstract boolean test(AbstractCard card);
         public abstract Color getColor(AbstractCard card);
         public abstract String glowID();

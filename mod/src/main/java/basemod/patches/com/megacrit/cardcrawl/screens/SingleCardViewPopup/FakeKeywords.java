@@ -1,6 +1,8 @@
 package basemod.patches.com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 
+import basemod.abstracts.AbstractCardModifier;
 import basemod.abstracts.CustomCard;
+import basemod.helpers.CardModifierManager;
 import basemod.helpers.TooltipInfo;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.*;
@@ -45,6 +47,12 @@ public class FakeKeywords
 		if (acard instanceof CustomCard) {
 			CustomCard card = (CustomCard) acard;
 			List<TooltipInfo> tooltips = card.getCustomTooltips();
+			if (tooltips != null) {
+				t[0].addAll(tooltips.stream().map(TooltipInfo::toPowerTip).collect(Collectors.toList()));
+			}
+		}
+		for (AbstractCardModifier modifier : CardModifierManager.modifiers(acard)) {
+			List<TooltipInfo> tooltips = modifier.additionalTooltips(acard);
 			if (tooltips != null) {
 				t[0].addAll(tooltips.stream().map(TooltipInfo::toPowerTip).collect(Collectors.toList()));
 			}

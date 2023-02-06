@@ -1,5 +1,6 @@
 package basemod.abstracts;
 
+import basemod.helpers.TooltipInfo;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.megacrit.cardcrawl.actions.utility.UseCardAction;
@@ -13,6 +14,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractCardModifier implements Comparable<AbstractCardModifier> {
     public int priority = 0;
@@ -98,6 +101,14 @@ public abstract class AbstractCardModifier implements Comparable<AbstractCardMod
     }
 
     /**
+     * Called just before Basemod renders the other additional tooltips the card may have,
+     * at the end of the card's renderKeywords method.
+     */
+    public List<TooltipInfo> additionalTooltips(AbstractCard card) {
+        return null;
+    }
+
+    /**
      * Called when the card is used, same timing as onUseCard hooks in powers and relics.
      * If the card has no target, target will be null.
      */
@@ -151,6 +162,10 @@ public abstract class AbstractCardModifier implements Comparable<AbstractCardMod
     }
 
     public void onRender(AbstractCard card, SpriteBatch sb) {
+
+    }
+
+    public void onSingleCardViewRender(AbstractCard card, SpriteBatch sb) {
 
     }
 

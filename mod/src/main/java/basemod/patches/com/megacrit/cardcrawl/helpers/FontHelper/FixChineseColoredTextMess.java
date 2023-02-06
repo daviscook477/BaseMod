@@ -39,6 +39,7 @@ public class FixChineseColoredTextMess {
 				}
 				fontColor.a = c.a;
 				int dropEnd = word.lastIndexOf("[");
+				String originalWord = word;
 				word = word.substring(dropStart, dropEnd);
 				Color oldColor = font.getColor().cpy();
 				font.setColor(fontColor);
@@ -47,8 +48,11 @@ public class FixChineseColoredTextMess {
 					FontHelper.layout.setText(font, j);
 					___curWidth[0] += FontHelper.layout.width;
 					if (___curWidth[0] > widthMax) {
-						___curWidth[0] = FontHelper.layout.width;
-						___currentLine[0]++;
+						boolean newLine = MakeNewLineForColoredText(i, word, originalWord, msg);
+						if (newLine) {
+							___curWidth[0] = FontHelper.layout.width;
+							___currentLine[0]++;
+						}
 					}
 					font.draw(sb, j, x + ___curWidth[0] - FontHelper.layout.width, y - lineSpacing * ___currentLine[0]);
 				}
@@ -66,10 +70,10 @@ public class FixChineseColoredTextMess {
 	}
 	
 	@SpirePatch2(clz = FontHelper.class, method = "exampleNonWordWrappedText")
-	public static class FixChineseVanillaColoredTextAlwaysNewLinePatch {
+	public static class FixChineseVanillaTextNewLinePatch {
 		private static int paramIndex = 0;
 		@SpireRawPatch
-		public static void Raw(CtBehavior ctBehavior) throws Exception {
+		public static void FixColoredTextAlwaysNewLine(CtBehavior ctBehavior) throws Exception {
 			ClassPool pool = ctBehavior.getDeclaringClass().getClassPool();
 			CtClass fontHelper = pool.get(FontHelper.class.getName());
 			CtMethod enwwt = fontHelper.getDeclaredMethod("exampleNonWordWrappedText");
@@ -85,9 +89,9 @@ public class FixChineseColoredTextMess {
 			int fontLine = allLines[allLines.length - 1];
 			int fixMethodLine = LineFinder.findAllInOrder(enwwt, widthMatcher)[1];
 			String fixClass = FixChineseColoredTextMess.class.getName();
-			String newLineFixClass = FixChineseVanillaColoredTextAlwaysNewLinePatch.class.getName();
+			String newLineFixClass = FixChineseVanillaTextNewLinePatch.class.getName();
 
-			// add localvars to store values
+			// add local vars to store values
 			CtClass boolType = pool.get(boolean.class.getName());
 			String usingFixMethodParam = getParamName(table, "usingFixMethod");
 			enwwt.addLocalVariable(usingFixMethodParam, boolType);
@@ -138,12 +142,12 @@ public class FixChineseColoredTextMess {
 					}
 				});
 			}
-			enwwt.insertAt(fixMethodLine, "{if(" + usingFixMethodParam + "){" + newLineFixClass + ".DoFix(sb, font, x, y, c, widthMax, " +
+			enwwt.insertAt(fixMethodLine, "{if(" + usingFixMethodParam + "){" + newLineFixClass + ".DoFix(sb, font, msg, x, y, c, widthMax, " +
 					"lineSpacing," + curWidthArray + ", " + curLineArray + ", word);curWidth=" + curWidthArray + "[0];currentLine="
 					+ curLineArray + "[0];}}");
 		}
 		
-		public static void DoFix(SpriteBatch sb, BitmapFont font, float x, float y, Color c, float widthMax, float lineSpacing,
+		public static void DoFix(SpriteBatch sb, BitmapFont font, String msg, float x, float y, Color c, float widthMax, float lineSpacing,
 								 float[] ___curWidth, int[] ___currentLine, String word) {
 			int colorStart = 1;
 			int dropStart = word.indexOf("]") + 1;
@@ -156,6 +160,7 @@ public class FixChineseColoredTextMess {
 				COLOR_MAP.put(colorHex, fontColor);
 			}
 			int dropEnd = word.lastIndexOf("[");
+			String originalWord = word;
 			word = word.substring(dropStart, dropEnd);
 			fontColor.a = c.a;
 			Color oldColor = font.getColor().cpy();
@@ -165,12 +170,46 @@ public class FixChineseColoredTextMess {
 				FontHelper.layout.setText(font, j);
 				___curWidth[0] += FontHelper.layout.width;
 				if (___curWidth[0] > widthMax) {
-					___curWidth[0] = FontHelper.layout.width;
-					___currentLine[0]++;
+					boolean newLine = MakeNewLineForColoredText(i, word, originalWord, msg);
+					if (newLine) {
+						___curWidth[0] = FontHelper.layout.width;
+						___currentLine[0]++;
+					}
 				}
 				font.draw(sb, j, x + ___curWidth[0] - FontHelper.layout.width, y - lineSpacing * ___currentLine[0]);
 			}
 			font.setColor(oldColor);
+		}
+		
+		@SpireRawPatch
+		public static void FixRenderingNotColoredTextNewLineAtEndOfText(CtBehavior ctBehavior) throws Exception {
+			ClassPool pool = ctBehavior.getDeclaringClass().getClassPool();
+			CtClass fontHelper = pool.get(FontHelper.class.getName());
+			CtMethod enwwt = fontHelper.getDeclaredMethod("exampleNonWordWrappedText");
+			MethodInfo methodInfo = enwwt.getMethodInfo();
+			
+			// find the line of increment of currentLine in vanilla code
+			// and the line of changing curWidth
+			Matcher.FieldAccessMatcher currentLineMatcher = new Matcher.FieldAccessMatcher(FontHelper.class, "currentLine");
+			int[] lines = LineFinder.findAllInOrder(enwwt, currentLineMatcher);
+			int currentLineLine = lines[lines.length - 2];
+			Matcher.FieldAccessMatcher curWidthMatcher = new Matcher.FieldAccessMatcher(FontHelper.class, "curWidth");
+			lines = LineFinder.findAllInOrder(enwwt, curWidthMatcher);
+			int curWidthLine = lines[lines.length - 2];
+			
+			enwwt.instrument(new ExprEditor(){
+				@Override
+				public void edit(FieldAccess f) throws CannotCompileException {
+					if ("currentLine".equals(f.getFieldName()) && f.getLineNumber() == currentLineLine) {
+						f.replace("{if(" + FixChineseColoredTextMess.class.getName()
+								+ ".MakeNewLine(i,word,msg))$_=$proceed($$);}");
+					}
+					if ("curWidth".equals(f.getFieldName()) && f.getLineNumber() == curWidthLine) {
+						f.replace("{if(" + FixChineseColoredTextMess.class.getName()
+								+ ".MakeNewLine(i,word,msg))$_=$proceed($$);}");
+					}
+				}
+			});
 		}
 		
 		private static void setInstruments(CtMethod method, ExprEditor... exprs) throws CannotCompileException {
@@ -190,6 +229,31 @@ public class FixChineseColoredTextMess {
 		}
 	}
 	
+	public static boolean MakeNewLine(int indexOfChar, String word, String msg) {
+		// when the current char is a punctuation and is at the end
+		// prevent currentLine auto increasing
+		String[] strings = msg.split(" ");
+		char currentChar = word.charAt(indexOfChar);
+		boolean punctuation = isChinesePunctuation(currentChar);
+		return !punctuation;
+	}
+	
+	public static boolean MakeNewLineForColoredText(int indexOfChar, String modifiedWord, String originalWord, String msg) {
+		String[] strings = msg.split(" ");
+		char currentChar = modifiedWord.charAt(indexOfChar);
+		boolean punctuation = isChinesePunctuation(currentChar);
+		return !punctuation;
+	}
+	
+	private static boolean isChinesePunctuation(char c) {
+		Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
+		return ub == Character.UnicodeBlock.GENERAL_PUNCTUATION
+				|| ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+				|| ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
+				|| ub == Character.UnicodeBlock.CJK_COMPATIBILITY_FORMS
+				|| ub == Character.UnicodeBlock.VERTICAL_FORMS;
+	}
+	
 	@SpirePatch2(clz = FontHelper.class, method = "getHeightForCharLineBreak")
 	public static class FixGetHeightForChineseText {
 		private static final float CARD_ENERGY_IMG_WIDTH = 26F * Settings.scale;
@@ -203,6 +267,7 @@ public class FixChineseColoredTextMess {
 			float totalHeight = 0F;
 			String[] strings = msg.split(" ");
 			for (String word : strings) {
+				String originalWord = word;
 				if (word != null && !word.isEmpty()) {
 					if (word.equals("NL")) {
 						curWidth = 0F;
@@ -221,7 +286,8 @@ public class FixChineseColoredTextMess {
 								curWidth += layout.width;
 								if (curWidth > lineWidth) {
 									curWidth = layout.width;
-									currentLine++;
+									boolean reachEnd = isProbableEndOfColoredMsg(i, j, word, originalWord, strings);
+									if (!reachEnd) currentLine++;
 								}
 							}
 						} else if (usingEnergyIcon(word)) {
@@ -242,7 +308,8 @@ public class FixChineseColoredTextMess {
 							curWidth += layout.width;
 							if (curWidth > lineWidth) {
 								curWidth = layout.width;
-								currentLine++;
+								boolean reachEnd = isProbableEndOfColoredMsg(i, j, word, originalWord, strings);
+								if (!reachEnd) currentLine++;
 							}
 						}
 					} else {
@@ -252,8 +319,8 @@ public class FixChineseColoredTextMess {
 							curWidth += layout.width;
 							if (curWidth > lineWidth) {
 								curWidth = layout.width;
-								// when reaching the end of the text, don't increase currentLine
-								boolean reachEnd = isProbableEndOfMsg(j, word, strings);
+								// when current word reaches the end of the text, don't increase currentLine
+								boolean reachEnd = isProbableEndOfMsg(i, j, word, strings);
 								if (!reachEnd) currentLine++;
 							}
 						}
@@ -265,13 +332,26 @@ public class FixChineseColoredTextMess {
 			}
 			return SpireReturn.Return(totalHeight);
 		}
-		
-		private static boolean isProbableEndOfMsg(String singleChar, String word, String[] srcMsg) {
-			// check if singleChar is the last char of the word
-			// and the word is the last element of the srcMsg
-			return Character.toString(word.charAt(word.length() - 1)).equals(singleChar)
-					&& srcMsg[srcMsg.length - 1].equals(word);
-		}
+	}
+	
+	private static boolean isProbableEndOfColoredMsg(int indexOfChar, String singleChar, String modifiedWord, String originalWord,
+													 String[] srcMsg) {
+		// check if the index of singleChar is the end of the modified word
+		// check if singleChar is the same as the last char of the modified word
+		// colored text is modified so check if the original word is the last element of the srcMsg
+		// instead of the modified word
+		return indexOfChar == modifiedWord.length() - 1
+				&& Character.toString(modifiedWord.charAt(modifiedWord.length() - 1)).equals(singleChar)
+				&& srcMsg[srcMsg.length - 1].equals(originalWord);
+	}
+	
+	private static boolean isProbableEndOfMsg(int indexOfChar, String singleChar, String word, String[] srcMsg) {
+		// check if the index of singleChar is the end of the word
+		// check if singleChar is the same as the last char of the word
+		// check if the word is the last element of the srcMsg
+		return indexOfChar == word.length() - 1
+				&& Character.toString(word.charAt(word.length() - 1)).equals(singleChar)
+				&& srcMsg[srcMsg.length - 1].equals(word);
 	}
 
 	public static boolean usingVanillaColorCode(String word) {

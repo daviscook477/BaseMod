@@ -31,6 +31,11 @@ public abstract class DynamicVariable
         return Settings.GREEN_TEXT_COLOR;
     }
 
+    public Color getUpgradedColor(AbstractCard card)
+    {
+        return getUpgradedColor();
+    }
+
     public Color getIncreasedValueColor()
     {
         return Settings.GREEN_TEXT_COLOR;
