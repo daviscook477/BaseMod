@@ -1,6 +1,8 @@
 package basemod.abstracts;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 
 public abstract class CustomRelic extends AbstractRelic
@@ -35,6 +37,15 @@ public abstract class CustomRelic extends AbstractRelic
 	{
 		img = t;
 		outlineImg = o;
+	}
+
+	@Override
+	public void loadLargeImg() {
+		if (this.largeImg == null) {
+			String path = "images/largeRelics/" + this.imgUrl;
+			if (Gdx.files.internal(path).exists())
+				this.largeImg = ImageMaster.loadImage(path);
+		}
 	}
 
 	@Override

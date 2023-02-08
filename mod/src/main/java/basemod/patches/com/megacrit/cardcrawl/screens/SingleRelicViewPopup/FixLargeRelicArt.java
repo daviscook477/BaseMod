@@ -1,5 +1,6 @@
 package basemod.patches.com.megacrit.cardcrawl.screens.SingleRelicViewPopup;
 
+import basemod.abstracts.CustomRelic;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.TextureData;
 import com.badlogic.gdx.graphics.glutils.FileTextureData;
@@ -24,7 +25,7 @@ public class FixLargeRelicArt
 					___largeImg[0] = ImageMaster.loadImage(((FileTextureData) textureData).getFileHandle().path());
 				}
 			}
-			else {
+			else if (___relic instanceof CustomRelic) {
 				___relic.loadLargeImg();
 				if (___relic.largeImg != null) {
 					___largeImg[0] = ___relic.largeImg;
