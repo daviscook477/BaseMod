@@ -62,7 +62,7 @@ public class LoadPlayerSaves
                             }.getType());
                         } catch (Exception e) {
                             System.out.println("Unable to load cardmod: " + element);
-                            cardModifiers.add(new MadnessMod());
+                            cardModifiers.add(getErrorMod());
                         }
                         if (cardModifier != null) {
                             cardModifiers.add(cardModifier);
@@ -109,8 +109,14 @@ public class LoadPlayerSaves
         }
     }
 
+    public static AbstractCardModifier getErrorMod() {
+        return new MadnessMod();
+    }
+
     @AbstractCardModifier.SaveIgnore
-    public static class MadnessMod extends AbstractCardModifier {
+    private static class MadnessMod extends AbstractCardModifier {
+
+        private MadnessMod() {}
 
         @Override
         public String modifyName(String cardName, AbstractCard card) {
