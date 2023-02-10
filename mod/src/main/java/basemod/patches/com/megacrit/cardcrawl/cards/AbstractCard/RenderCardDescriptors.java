@@ -152,7 +152,6 @@ public class RenderCardDescriptors
 		if (card instanceof CustomCard) {
 			list.addAll(((CustomCard) card).getCardDescriptors());
 		}
-		list.addAll(CardDescriptors.getDescriptors(card));
 		list.addAll(CardModifierManager.getExtraDescriptors(card));
 		return list;
 	}
