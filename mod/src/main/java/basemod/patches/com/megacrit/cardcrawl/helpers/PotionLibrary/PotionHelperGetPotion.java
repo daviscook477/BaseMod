@@ -24,7 +24,7 @@ public class PotionHelperGetPotion {
 			try {
 				return SpireReturn.Return(possiblePotion.newInstance());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.catching(e);
 			}
 		}
 
