@@ -25,6 +25,7 @@ public class InteractionPhase extends EventPhase {
     }
     public InteractionPhase(InteractionHandler handler) {
         this.handler = handler;
+        setUpdateHandler((eventPhase -> handler.update()));
     }
 
     @Override
@@ -33,11 +34,6 @@ public class InteractionPhase extends EventPhase {
         AbstractDungeon.rs = AbstractDungeon.RenderScene.EVENT;
         event.resetCardRarity();
         handler.begin(event);
-    }
-
-    @Override
-    public void update() {
-        handler.update();
     }
 
     @Override
