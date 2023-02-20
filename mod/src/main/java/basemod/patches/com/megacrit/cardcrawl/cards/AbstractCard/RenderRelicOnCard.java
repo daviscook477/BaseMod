@@ -35,7 +35,7 @@ public class RenderRelicOnCard
 			for (Pair<Predicate<AbstractCard>, AbstractRelic> info : BaseMod.getBottledRelicList()) {
 				if (info.getKey().test(__instance)) {
 					AbstractRelic r = info.getValue();
-					r.scale = __instance.drawScale * 0.8f;
+					r.scale = __instance.drawScale * Settings.scale;
 					try {
 						relicRotation.set(r, __instance.angle);
 					} catch (IllegalAccessException e) {

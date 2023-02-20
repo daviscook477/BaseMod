@@ -1,7 +1,6 @@
 package basemod.abstracts;
 
 import basemod.helpers.TooltipInfo;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.megacrit.cardcrawl.actions.utility.UseCardAction;
 import com.megacrit.cardcrawl.cards.AbstractCard;
@@ -14,7 +13,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class AbstractCardModifier implements Comparable<AbstractCardModifier> {
@@ -219,6 +218,13 @@ public abstract class AbstractCardModifier implements Comparable<AbstractCardMod
      */
     public boolean shouldApply(AbstractCard card) {
         return true;
+    }
+
+    /**
+     * return a list of words to be rendered with the card's card type
+     */
+    public List<String> extraDescriptors(AbstractCard card) {
+        return Collections.emptyList();
     }
 
     /**

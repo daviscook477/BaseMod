@@ -11,10 +11,10 @@ import basemod.abstracts.CustomSavableRaw;
 import basemod.patches.com.megacrit.cardcrawl.characters.AbstractPlayer.SeenEvents;
 import basemod.patches.com.megacrit.cardcrawl.saveAndContinue.SaveFile.ModSaves;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.cards.colorless.Madness;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -47,15 +47,34 @@ public class LoadPlayerSaves
         Gson gson = builder.create();
         ModSaves.ArrayListOfJsonElement cardModifierSaves = ModSaves.cardModifierSaves.get(CardCrawlGame.saveFile);
         i = 0;
-        for (AbstractCard card : AbstractDungeon.player.masterDeck.group) {
-            ArrayList<AbstractCardModifier> cardModifiersList = gson.fromJson(cardModifierSaves == null || i >= cardModifierSaves.size() ? null : cardModifierSaves.get(i), new TypeToken<ArrayList<AbstractCardModifier>>(){}.getType());
-            if (cardModifiersList != null) {
+        if (cardModifierSaves != null) {
+            for (AbstractCard card : AbstractDungeon.player.masterDeck.group) {
+                ArrayList<AbstractCardModifier> cardModifiers = new ArrayList<>();
+
+                JsonElement loaded = i >= cardModifierSaves.size() ? null : cardModifierSaves.get(i);
+                if (loaded != null && loaded.isJsonArray()) {
+                    JsonArray array = loaded.getAsJsonArray();
+
+                    for (JsonElement element : array) {
+                        AbstractCardModifier cardModifier = null;
+                        try {
+                            cardModifier = gson.fromJson(element, new TypeToken<AbstractCardModifier>() {
+                            }.getType());
+                        } catch (Exception e) {
+                            System.out.println("Unable to load cardmod: " + element);
+                            cardModifiers.add(getErrorMod());
+                        }
+                        if (cardModifier != null) {
+                            cardModifiers.add(cardModifier);
+                        }
+                    }
+                }
                 CardModifierManager.removeAllModifiers(card, true);
-                for (AbstractCardModifier mod : cardModifiersList) {
+                for (AbstractCardModifier mod : cardModifiers) {
                     CardModifierManager.addModifier(card, mod.makeCopy());
                 }
+                i++;
             }
-            i++;
         }
 
         // Relics
@@ -87,6 +106,31 @@ public class LoadPlayerSaves
         ModSaves.HashMapOfJsonElement modSaves = ModSaves.modSaves.get(CardCrawlGame.saveFile);
         for (Map.Entry<String, CustomSavableRaw> field : BaseMod.getSaveFields().entrySet()) {
             field.getValue().onLoadRaw(modSaves == null ? null : modSaves.get(field.getKey()));
+        }
+    }
+
+    public static AbstractCardModifier getErrorMod() {
+        return new MadnessMod();
+    }
+
+    @AbstractCardModifier.SaveIgnore
+    private static class MadnessMod extends AbstractCardModifier {
+
+        private MadnessMod() {}
+
+        @Override
+        public String modifyName(String cardName, AbstractCard card) {
+            return "Madness " + cardName;
+        }
+
+        @Override
+        public String modifyDescription(String rawDescription, AbstractCard card) {
+            return rawDescription + " NL " + "This card was saved with a modifier that could not be loaded.";
+        }
+
+        @Override
+        public AbstractCardModifier makeCopy() {
+            return new MadnessMod();
         }
     }
 }

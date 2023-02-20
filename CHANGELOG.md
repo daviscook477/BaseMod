@@ -974,4 +974,22 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 * Allow dynamic variables to check card during upgrade coloring (Nyoxide)
 * Fix GlowInfo priority not being accessible (kiooeht)
 
+#### v5.50.0 ####
+* Add additionalTooltips method to CardMods (Pandemonium)
+
+#### v5.51.0 ####
+* Fix CustomBottleRelic rendering on cards not scaling with resolution (kiooeht)
+* Don't require modid prefixes to be all lowercase (Alchyr)
+* Fix modifed base damage multi-upgrade cards showing inflated values in SCV (NellyDevo)
+* Fix modifyBaseMagic (Mistress Alison)
+* Add CardMods to Run History (Mistress Alison)
+* Fix CardMods crashing on load when they no longer exist (NellyDevo)
+* Add card descriptors to CardMods (NellyDevo)
+* Output stacktrace instead of silently accepting potion initialization errors (Alchyr)
+* Make ethereal exhaust order seeded (Alchyr)
+
+#### v5.51.1 ####
+* Fix card descriptor frame not accounting for CardMods in SCV (kiooeht)
+* Fix card descriptor dynamic frame for all cards, not just CustomCard (kiooeht)
+
 #### dev ####

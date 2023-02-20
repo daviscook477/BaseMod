@@ -8,8 +8,6 @@ import com.megacrit.cardcrawl.cards.AbstractCard;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
 
-import java.util.ArrayList;
-
 @SpirePatch(
         clz=AbstractCard.class,
         method="initializeDescriptionCN"
@@ -22,7 +20,7 @@ public class CNUniqueKeywords {
     )
     public static void Insert(AbstractCard __instance, @ByRef String[] word) {
         if (BaseMod.keywordIsUnique(word[0])) {
-            word[0] = word[0].replaceFirst(BaseMod.getKeywordPrefix(word[0]), "");
+            word[0] = FixDescriptionWidthCustomDynamicVariable.removeLowercasePrefix(word[0], BaseMod.getKeywordPrefix(word[0]));
         }
     }
 

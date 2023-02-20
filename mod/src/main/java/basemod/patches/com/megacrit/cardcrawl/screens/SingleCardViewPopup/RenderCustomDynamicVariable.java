@@ -2,6 +2,7 @@ package basemod.patches.com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 
 import basemod.BaseMod;
 import basemod.abstracts.DynamicVariable;
+import basemod.helpers.CardModifierManager;
 import basemod.helpers.dynamicvariables.BlockVariable;
 import basemod.helpers.dynamicvariables.DamageVariable;
 import basemod.helpers.dynamicvariables.MagicNumberVariable;
@@ -112,17 +113,36 @@ public class RenderCustomDynamicVariable
             }
 
             //cardmods affect base variables
-            if (dv instanceof BlockVariable) {
-                if (CardModifierPatches.CardModifierFields.cardModHasBaseBlock.get(card)) {
-                    num = CardModifierPatches.CardModifierFields.cardModBaseBlock.get(card);
+            int base = -1;
+            boolean modified = false;
+            if (CardModifierPatches.CardModifierFields.needsRecalculation.get(card)) {
+                CardModifierManager.testBaseValues(card);
+                CardModifierPatches.CardModifierFields.needsRecalculation.set(card, false);
+            }
+            if (dv instanceof BlockVariable && CardModifierPatches.CardModifierFields.cardModHasBaseBlock.get(card)) {
+                base = CardModifierPatches.CardModifierFields.cardModBaseBlock.get(card);
+                modified = true;
+            } else if (dv instanceof DamageVariable && CardModifierPatches.CardModifierFields.cardModHasBaseDamage.get(card)) {
+                base = CardModifierPatches.CardModifierFields.cardModBaseDamage.get(card);
+                modified = true;
+            } else if (dv instanceof MagicNumberVariable && CardModifierPatches.CardModifierFields.cardModHasBaseMagic.get(card)) {
+                base = CardModifierPatches.CardModifierFields.cardModBaseMagic.get(card);
+                modified = true;
+            }
+            if (modified) {
+                if (!CardModifierPatches.CardModifierFields.preCalculated.get(card)) {
+                    num = base;
                 }
-            } else if (dv instanceof DamageVariable) {
-                if (CardModifierPatches.CardModifierFields.cardModHasBaseDamage.get(card)) {
-                    num = CardModifierPatches.CardModifierFields.cardModBaseDamage.get(card);
-                }
-            } else if (dv instanceof MagicNumberVariable) {
-                if (CardModifierPatches.CardModifierFields.cardModHasBaseMagic.get(card)) {
-                    num = CardModifierPatches.CardModifierFields.cardModBaseMagic.get(card);
+                if (CardModifierPatches.CardModifierFields.previewingUpgrade.get(card)) {
+                    c = dv.getIncreasedValueColor();
+                } else {
+                    if (num == base) {
+                        c = dv.getNormalColor();
+                    } else if (num > base) {
+                        c = dv.getIncreasedValueColor();
+                    } else {
+                        c = dv.getDecreasedValueColor();
+                    }
                 }
             }
 

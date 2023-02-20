@@ -56,39 +56,37 @@ public class RenderCardDescriptorsSCV
 		public static void Insert(SingleCardViewPopup __instance, SpriteBatch sb, AbstractCard ___card, @ByRef float[] tOffset, @ByRef float[] tWidth)
 		{
 			//RenderCardDescriptors.Frame.Insert(___card, sb, 0, 0, tOffset, tWidth);
-			if (___card instanceof CustomCard) {
-				String typeText;
-				switch (___card.type) {
-					case ATTACK:
-						typeText = AbstractCard.TEXT[0];
-						break;
-					case SKILL:
-						typeText = AbstractCard.TEXT[1];
-						break;
-					case POWER:
-						typeText = AbstractCard.TEXT[2];
-						break;
-					case STATUS:
-						typeText = AbstractCard.TEXT[7];
-						break;
-					case CURSE:
-						typeText = AbstractCard.TEXT[3];
-						break;
-					default:
-						typeText = AbstractCard.TEXT[5];
-						break;
-				}
-				List<String> descriptors = new ArrayList<>();
-				descriptors.add(typeText);
-				descriptors.addAll(((CustomCard) ___card).getCardDescriptors());
-				if (descriptors.size() > 1) {
-					String text = String.join(RenderCardDescriptors.SEPARATOR, descriptors);
-					GlyphLayout gl = new GlyphLayout();
-					FontHelper.panelNameFont.getData().setScale(1f);
-					gl.setText(FontHelper.panelNameFont, text);
-					tOffset[0] = (gl.width - 70 * Settings.scale) / 2f;
-					tWidth[0] = (gl.width - 0f) / (62 * Settings.scale);
-				}
+			String typeText;
+			switch (___card.type) {
+				case ATTACK:
+					typeText = AbstractCard.TEXT[0];
+					break;
+				case SKILL:
+					typeText = AbstractCard.TEXT[1];
+					break;
+				case POWER:
+					typeText = AbstractCard.TEXT[2];
+					break;
+				case STATUS:
+					typeText = AbstractCard.TEXT[7];
+					break;
+				case CURSE:
+					typeText = AbstractCard.TEXT[3];
+					break;
+				default:
+					typeText = AbstractCard.TEXT[5];
+					break;
+			}
+			List<String> descriptors = new ArrayList<>();
+			descriptors.add(typeText);
+			descriptors.addAll(RenderCardDescriptors.getAllDescriptors(___card));
+			if (descriptors.size() > 1) {
+				String text = String.join(RenderCardDescriptors.SEPARATOR, descriptors);
+				GlyphLayout gl = new GlyphLayout();
+				FontHelper.panelNameFont.getData().setScale(1f);
+				gl.setText(FontHelper.panelNameFont, text);
+				tOffset[0] = (gl.width - 70 * Settings.scale) / 2f;
+				tWidth[0] = (gl.width - 0f) / (62 * Settings.scale);
 			}
 		}
 
@@ -119,23 +117,20 @@ public class RenderCardDescriptorsSCV
 
 		public static SpireReturn<Void> Prefix(SingleCardViewPopup __instance, SpriteBatch sb, TextureAtlas.AtlasRegion img, float xOffset, float xScale, AbstractCard ___card)
 		{
-			if (___card instanceof CustomCard) {
-				tmp.set(xOffset, 0);
-				sb.draw(
-						img,
-						Settings.WIDTH / 2f + img.offsetX - (img.originalWidth / 2f + 2) + tmp.x,
-						Settings.HEIGHT / 2f + img.offsetY - img.originalHeight / 2f + tmp.y,
-						img.originalWidth / 2f - img.offsetX + 2,
-						img.originalHeight / 2f - img.offsetY,
-						img.packedWidth,
-						img.packedHeight,
-						Settings.scale * xScale,
-						Settings.scale,
-						0f
-				);
-				return SpireReturn.Return(null);
-			}
-			return SpireReturn.Continue();
+			tmp.set(xOffset, 0);
+			sb.draw(
+					img,
+					Settings.WIDTH / 2f + img.offsetX - (img.originalWidth / 2f + 2) + tmp.x,
+					Settings.HEIGHT / 2f + img.offsetY - img.originalHeight / 2f + tmp.y,
+					img.originalWidth / 2f - img.offsetX + 2,
+					img.originalHeight / 2f - img.offsetY,
+					img.packedWidth,
+					img.packedHeight,
+					Settings.scale * xScale,
+					Settings.scale,
+					0f
+			);
+			return SpireReturn.Return(null);
 		}
 	}
 }
