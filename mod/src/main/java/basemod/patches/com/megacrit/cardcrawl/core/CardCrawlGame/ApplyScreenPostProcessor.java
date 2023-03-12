@@ -134,11 +134,11 @@ public class ApplyScreenPostProcessor {
             int width = Gdx.graphics.getWidth();
             int height = Gdx.graphics.getHeight();
 
-            primaryFrameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false, false);
+            primaryFrameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, true, false);
             primaryFboRegion = new TextureRegion(primaryFrameBuffer.getColorBufferTexture());
             primaryFboRegion.flip(false, true);
 
-            secondaryFrameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false, false);
+            secondaryFrameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, true, false);
             secondaryFboRegion = new TextureRegion(secondaryFrameBuffer.getColorBufferTexture());
             secondaryFboRegion.flip(false, true);
         } catch (Exception e) {
