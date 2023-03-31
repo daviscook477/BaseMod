@@ -995,7 +995,7 @@ public class CardModifierPatches
 
         @SpireInsertPatch(locator = LocatorApply.class, localvars = {"cardID","card"})
         public static void applyMods(RunData runData, @ByRef String[] cardID, AbstractCard card) {
-            if (cardmodData != null) {
+            if (cardmodData != null && card != null) {
                 CardModifierManager.removeAllModifiers(card, true);
                 for (AbstractCardModifier mod : loadedMods) {
                     CardModifierManager.addModifier(card, mod.makeCopy());
