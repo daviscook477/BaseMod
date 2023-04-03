@@ -3,6 +3,7 @@ package basemod.helpers;
 import basemod.ReflectionHacks;
 import basemod.abstracts.AbstractCardModifier;
 import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.CardModifierPatches;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.actions.utility.UseCardAction;
@@ -385,6 +386,33 @@ public class CardModifierManager
         for (AbstractCardModifier mod : modifiers(card)) {
             mod.onCardModified(card);
         }
+    }
+
+    public static List<CardBorderGlowManager.GlowInfo> getGlows(AbstractCard card) {
+        List<CardBorderGlowManager.GlowInfo> glows = new ArrayList<>();
+        modifiers(card).forEach(mod -> {
+            Color color = mod.getGlow(card);
+            if (color != null) {
+                glows.add(new CardBorderGlowManager.GlowInfo() {
+                    @Override
+                    public boolean test(AbstractCard card) {
+                        return true;
+                    }
+
+                    @Override
+                    public Color getColor(AbstractCard card) {
+                        return color;
+                    }
+
+                    @Override
+                    public String glowID() {
+                        //unneeded since this glow info is never entering the manager"
+                        return "irrelephant";
+                    }
+                });
+            }
+        });
+        return glows;
     }
 
     private static void addToBot(AbstractGameAction action) {
