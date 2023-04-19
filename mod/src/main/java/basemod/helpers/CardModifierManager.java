@@ -121,13 +121,15 @@ public class CardModifierManager
         modifiers(oldCard).removeIf(mod -> {
             if (!mod.isInherent(oldCard) || includeInherent) {
                 removed.add(mod);
-                return true;
+                return removeOld;
             }
             return false;
         });
         ArrayList<AbstractCardModifier> applied = new ArrayList<>();
         removed.forEach(mod -> {
-            mod.onRemove(oldCard);
+            if (removeOld) {
+                mod.onRemove(oldCard);
+            }
             AbstractCardModifier newMod = mod.makeCopy();
             if (newMod.shouldApply(newCard)) {
                 modifiers(newCard).add(newMod);
