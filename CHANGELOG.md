@@ -1013,4 +1013,8 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 * Add hotkey config ui for opening ImGui (kiooeht/Piña Colada)
 * Stop ImGui hotkey activating while console is open (kiooeht)
 
+#### v5.52.1 ####
+* Fix CardMods getting removed when they shouldn't be (Mistress Alison/NellyDevo)
+* Fix base value modifier upgrade preview (Alchyr)
+
 #### dev ####

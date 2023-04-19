@@ -20,6 +20,17 @@ public class SmithPreview
 	{
 		ForEachDynamicVariable(__instance, (card, dv) -> {
 			if (dv.upgraded(card)) {
+				switch (dv.key()) {
+					case "D":
+						card.damage = dv.modifiedBaseValue(card);
+						break;
+					case "B":
+						card.block = dv.modifiedBaseValue(card);
+						break;
+					case "M":
+						card.magicNumber = dv.modifiedBaseValue(card);
+						break;
+				}
 				dv.setIsModified(card, true);
 			}
 		});
@@ -28,10 +39,13 @@ public class SmithPreview
 	public static void ForEachDynamicVariable(AbstractCard card, BiConsumer<AbstractCard, DynamicVariable> callback)
 	{
 		Pattern pattern;
+		int keyIndex;
 		if (Settings.lineBreakViaCharacter) {
 			pattern = Pattern.compile("\\$(.+)\\$\\$");
+			keyIndex = 1;
 		} else {
-			pattern = Pattern.compile("!(.+)!.*");
+			pattern = DynamicVariable.variablePattern;
+			keyIndex = 2;
 		}
 
 		for (DescriptionLine line : card.description) {
@@ -44,7 +58,7 @@ public class SmithPreview
 			for (String word : tokenized) {
 				java.util.regex.Matcher matcher = pattern.matcher(word);
 				if (matcher.find()) {
-					word = matcher.group(1);
+					word = matcher.group(keyIndex);
 
 					DynamicVariable dv = BaseMod.cardDynamicVariableMap.get(word);
 					if (dv != null) {

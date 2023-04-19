@@ -15,6 +15,7 @@ import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class CardModifierManager
 {
@@ -146,58 +147,34 @@ public class CardModifierManager
     }
 
     public static void removeEndOfTurnModifiers(AbstractCard card) {
-        ArrayList<AbstractCardModifier> modifiers = modifiers(card);
-        for (AbstractCardModifier mod : modifiers) {
-            boolean modified = false;
-            if (mod.removeAtEndOfTurn(card)) {
-                modified = true;
-                addToBot(new AbstractGameAction() {
-                    @Override
-                    public void update() {
-                        modifiers.remove(mod);
-                        mod.onRemove(card);
-                        card.initializeDescription();
-                        isDone = true;
-                    }
-                });
-            }
-            if (modified) {
-                addToBot(new AbstractGameAction() {
-                    @Override
-                    public void update() {
-                        onCardModified(card);
-                        isDone = true;
-                    }
-                });
-            }
-        }
+        deferredConditionalRemoval(card, mod -> mod.removeAtEndOfTurn(card));
     }
 
     public static void removeWhenPlayedModifiers(AbstractCard card) {
+        deferredConditionalRemoval(card, mod -> mod.removeOnCardPlayed(card));
+    }
+
+    private static void deferredConditionalRemoval(AbstractCard card, Predicate<AbstractCardModifier> condition) {
         ArrayList<AbstractCardModifier> modifiers = modifiers(card);
+        ArrayList<AbstractCardModifier> toRemove = new ArrayList<>();
         for (AbstractCardModifier mod : modifiers) {
-            boolean modified = false;
-            if (mod.removeOnCardPlayed(card)) {
-                modified = true;
-                addToBot(new AbstractGameAction() {
-                    @Override
-                    public void update() {
+            if (condition.test(mod)) {
+                toRemove.add(mod);
+            }
+        }
+        if (!toRemove.isEmpty()) {
+            addToBot(new AbstractGameAction() {
+                @Override
+                public void update() {
+                    toRemove.forEach(mod -> {
                         modifiers.remove(mod);
                         mod.onRemove(card);
-                        card.initializeDescription();
-                        isDone = true;
-                    }
-                });
-            }
-            if (modified) {
-                addToBot(new AbstractGameAction() {
-                    @Override
-                    public void update() {
-                        onCardModified(card);
-                        isDone = true;
-                    }
-                });
-            }
+                    });
+                    onCardModified(card);
+                    card.initializeDescription();
+                    isDone = true;
+                }
+            });
         }
     }
 
