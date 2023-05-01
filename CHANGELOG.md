@@ -1017,4 +1017,7 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 * Fix CardMods getting removed when they shouldn't be (Mistress Alison/NellyDevo)
 * Fix base value modifier upgrade preview (Alchyr)
 
+#### v5.52.2 ####
+* Allow Ctrl, Shift, and Alt to be used on their own again for opening the console (kiooeht)
+
 #### dev ####

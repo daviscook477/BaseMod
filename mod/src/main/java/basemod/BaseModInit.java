@@ -206,14 +206,23 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			switch (keycode) {
 				case Keys.CONTROL_LEFT:
 				case Keys.CONTROL_RIGHT:
+					if (!shift && !alt) {
+						return false;
+					}
 					ctrl = false;
 					break;
 				case Keys.SHIFT_LEFT:
 				case Keys.SHIFT_RIGHT:
+					if (!ctrl && !alt) {
+						return false;
+					}
 					shift = false;
 					break;
 				case Keys.ALT_LEFT:
 				case Keys.ALT_RIGHT:
+					if (!ctrl && !shift) {
+						return false;
+					}
 					alt = false;
 					break;
 				default:

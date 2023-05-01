@@ -332,13 +332,13 @@ implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSub
 		public String toString()
 		{
 			StringBuilder sb = new StringBuilder(Keys.toString(keycode));
-			if (alt) {
+			if (alt && (keycode != Keys.ALT_LEFT && keycode != Keys.ALT_RIGHT)) {
 				sb.insert(0, "Alt+");
 			}
-			if (shift) {
+			if (shift && (keycode != Keys.SHIFT_LEFT && keycode != Keys.SHIFT_RIGHT)) {
 				sb.insert(0, "Shift+");
 			}
-			if (ctrl) {
+			if (ctrl && (keycode != Keys.CONTROL_LEFT  && keycode != Keys.CONTROL_RIGHT)) {
 				sb.insert(0, "Ctrl+");
 			}
 			return sb.toString();
@@ -362,6 +362,13 @@ implements PostEnergyRechargeSubscriber, PostInitializeSubscriber, PostRenderSub
 					ret.ctrl = Boolean.parseBoolean(split[1]);
 					ret.shift = Boolean.parseBoolean(split[2]);
 					ret.alt = Boolean.parseBoolean(split[3]);
+				}
+				if (ret.keycode == Keys.CONTROL_LEFT || ret.keycode == Keys.CONTROL_RIGHT) {
+					ret.ctrl = true;
+				} else if (ret.keycode == Keys.SHIFT_LEFT || ret.keycode == Keys.SHIFT_RIGHT) {
+					ret.shift = true;
+				} else if (ret.keycode == Keys.ALT_LEFT || ret.keycode == Keys.ALT_RIGHT) {
+					ret.alt = true;
 				}
 			}
 			return ret;
