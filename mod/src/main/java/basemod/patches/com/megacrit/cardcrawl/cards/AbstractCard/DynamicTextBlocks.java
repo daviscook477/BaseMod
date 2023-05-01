@@ -1,6 +1,7 @@
 package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
 import basemod.BaseMod;
+import basemod.helpers.CardModifierManager;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.cards.AbstractCard;
@@ -149,11 +150,11 @@ public class DynamicTextBlocks {
         Integer var = null;
         if (dynvarKey.equals("!D!")) {
             //Uses !D! for damage, just like normal dynvars, same applies to !B! and !M!
-            var = c.damage;
+            var = c.isDamageModified ? c.damage : CardModifierManager.modifiedBaseValue(c, c.baseDamage, "D");
         } else if (dynvarKey.equals("!B!")) {
-            var = c.block;
+            var = c.isBlockModified ? c.block : CardModifierManager.modifiedBaseValue(c, c.baseBlock, "B");
         } else if (dynvarKey.equals("!M!")) {
-            var = c.magicNumber;
+            var = c.isMagicNumberModified ? c.magicNumber : CardModifierManager.modifiedBaseValue(c, c.baseMagicNumber, "M");
         } else if (dynvarKey.equals("!Location!")) {
             //Used to grab the location of the card. Isn't a real dynvar, but we can pretend
             var = -2; //Compendium or otherwise not in a run
