@@ -57,8 +57,10 @@ public class SmithPreview
 			}
 			for (String word : tokenized) {
 				java.util.regex.Matcher matcher = pattern.matcher(word);
-				if (matcher.find()) {
-					word = matcher.group(keyIndex);
+				if (matcher.find() || (Settings.lineBreakViaCharacter && word.equals("D"))) {
+					if (!word.equals("D")) {
+						word = matcher.group(keyIndex);
+					}
 
 					DynamicVariable dv = BaseMod.cardDynamicVariableMap.get(word);
 					if (dv != null) {

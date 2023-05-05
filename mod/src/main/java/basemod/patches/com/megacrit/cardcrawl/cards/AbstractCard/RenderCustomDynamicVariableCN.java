@@ -2,8 +2,6 @@ package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
 import basemod.BaseMod;
 import basemod.abstracts.DynamicVariable;
-import basemod.helpers.dynamicvariables.BlockVariable;
-import basemod.helpers.dynamicvariables.DamageVariable;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
@@ -25,7 +23,7 @@ public class RenderCustomDynamicVariableCN
 	)
 	public static void Insert(AbstractCard __instance, SpriteBatch sb, @ByRef String[] tmp)
 	{
-		if (tmp[0].startsWith("$")) {
+		if (tmp[0].startsWith("$") || tmp[0].equals("D")) {
 			String key = tmp[0];
 
 			Pattern pattern = Pattern.compile("\\$(.+)\\$\\$");
