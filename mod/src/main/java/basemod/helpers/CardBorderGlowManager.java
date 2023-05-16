@@ -72,7 +72,7 @@ public class CardBorderGlowManager {
                 return true;
             }
         }
-        return false;
+        return CardModifierManager.hasCustomGlows(card);
     }
 
     public static ArrayList<GlowInfo> getCustomGlowColors(AbstractCard card) {

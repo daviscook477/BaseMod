@@ -370,6 +370,15 @@ public class CardModifierManager
         return glows;
     }
 
+    public static boolean hasCustomGlows(AbstractCard card) {
+        for (AbstractCardModifier mod : modifiers(card)) {
+            if (mod.getGlow(card) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static void addToBot(AbstractGameAction action) {
         AbstractDungeon.actionManager.addToBottom(action);
     }
