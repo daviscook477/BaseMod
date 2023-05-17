@@ -34,6 +34,7 @@ public class SmithPreview
 				dv.setIsModified(card, true);
 			}
 		});
+		DynamicTextBlocks.DisplayingUpgradesField.displayingUpgrades.set(__instance, true);
 	}
 
 	public static void ForEachDynamicVariable(AbstractCard card, BiConsumer<AbstractCard, DynamicVariable> callback)

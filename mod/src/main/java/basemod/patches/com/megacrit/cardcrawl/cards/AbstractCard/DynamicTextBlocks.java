@@ -47,6 +47,12 @@ public class DynamicTextBlocks {
         public static final SpireField<String> varData = new SpireField<>(() -> "");
     }
 
+    //Spire Field for if displayUpgrades was called
+    @SpirePatch(clz= AbstractCard.class, method=SpirePatch.CLASS)
+    public static class DisplayingUpgradesField {
+        public static final SpireField<Boolean> displayingUpgrades = new SpireField<>(() -> Boolean.FALSE);
+    }
+
     //When we render said card copy, set its field and initialize description
     @SpirePatch(clz = ExhaustPileViewScreen.class, method = "open")
     public static class FixExhaustText {
@@ -150,11 +156,11 @@ public class DynamicTextBlocks {
         Integer var = null;
         if (dynvarKey.equals("!D!")) {
             //Uses !D! for damage, just like normal dynvars, same applies to !B! and !M!
-            var = c.isDamageModified ? c.damage : CardModifierManager.modifiedBaseValue(c, c.baseDamage, "D");
+            var = c.isDamageModified && !DisplayingUpgradesField.displayingUpgrades.get(c) ? c.damage : CardModifierManager.modifiedBaseValue(c, c.baseDamage, "D");
         } else if (dynvarKey.equals("!B!")) {
-            var = c.isBlockModified ? c.block : CardModifierManager.modifiedBaseValue(c, c.baseBlock, "B");
+            var = c.isBlockModified && !DisplayingUpgradesField.displayingUpgrades.get(c) ? c.block : CardModifierManager.modifiedBaseValue(c, c.baseBlock, "B");
         } else if (dynvarKey.equals("!M!")) {
-            var = c.isMagicNumberModified ? c.magicNumber : CardModifierManager.modifiedBaseValue(c, c.baseMagicNumber, "M");
+            var = c.isMagicNumberModified && !DisplayingUpgradesField.displayingUpgrades.get(c) ? c.magicNumber : CardModifierManager.modifiedBaseValue(c, c.baseMagicNumber, "M");
         } else if (dynvarKey.equals("!Location!")) {
             //Used to grab the location of the card. Isn't a real dynvar, but we can pretend
             var = -2; //Compendium or otherwise not in a run
