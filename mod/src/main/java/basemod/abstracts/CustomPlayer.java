@@ -25,6 +25,7 @@ import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.helpers.Prefs;
 import com.megacrit.cardcrawl.helpers.SaveHelper;
 import com.megacrit.cardcrawl.localization.CharacterStrings;
+import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.saveAndContinue.SaveAndContinue;
 import com.megacrit.cardcrawl.screens.CharSelectInfo;
 import com.megacrit.cardcrawl.screens.stats.CharStat;
@@ -345,5 +346,9 @@ public abstract class CustomPlayer extends AbstractPlayer implements ModelRender
 	public String getPortraitImageName()
 	{
 		return BaseMod.getPlayerPortrait(chosenClass);
+	}
+
+	public boolean onEnemyApplyNegativeBuff(AbstractMonster source, String powerId, int amount) {
+		return false;
 	}
 }
