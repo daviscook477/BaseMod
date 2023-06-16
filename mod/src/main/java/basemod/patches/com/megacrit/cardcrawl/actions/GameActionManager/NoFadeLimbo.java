@@ -1,5 +1,6 @@
 package basemod.patches.com.megacrit.cardcrawl.actions.GameActionManager;
 
+import basemod.BaseMod;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
 import com.megacrit.cardcrawl.actions.GameActionManager;
@@ -16,7 +17,9 @@ public class NoFadeLimbo {
             locator = Locator.class
     )
     public static SpireReturn<Void> youCanStillRemoveTheCardsInHandThough(GameActionManager __instance) {
-        return SpireReturn.Return();
+        if (BaseMod.fixesEnabled)
+            return SpireReturn.Return();
+        return SpireReturn.Continue();
     }
 
     private static class Locator extends SpireInsertLocator
