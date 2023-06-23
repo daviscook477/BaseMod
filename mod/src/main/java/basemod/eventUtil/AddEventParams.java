@@ -66,13 +66,25 @@ public class AddEventParams
 
 		public Builder spawnCondition(Condition spawnCondition)
 		{
-			params.spawnCondition = spawnCondition;
+			if (params.spawnCondition == null) {
+				params.spawnCondition = spawnCondition;
+			}
+			else {
+				Condition old = params.spawnCondition;
+				params.spawnCondition = () -> old.test() && spawnCondition.test();
+			}
 			return this;
 		}
 
 		public Builder bonusCondition(Condition bonusCondition)
 		{
-			params.bonusCondition = bonusCondition;
+			if (params.bonusCondition == null) {
+				params.bonusCondition = bonusCondition;
+			}
+			else {
+				Condition old = params.bonusCondition;
+				params.bonusCondition = () -> old.test() && bonusCondition.test();
+			}
 			return this;
 		}
 
