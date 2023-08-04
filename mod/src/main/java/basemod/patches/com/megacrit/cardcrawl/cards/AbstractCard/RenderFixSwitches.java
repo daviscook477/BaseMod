@@ -2,7 +2,6 @@ package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
 import basemod.BaseMod;
 import basemod.abstracts.CustomCard;
-import basemod.helpers.SuperclassFinder;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -23,9 +22,10 @@ import javassist.expr.MethodCall;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import static basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.RenderCardDescriptors.getAllDescriptors;
 
 public class RenderFixSwitches
 {
@@ -64,6 +64,11 @@ public class RenderFixSwitches
 		{
 			//If it's not a CustomCard, no custom rendering
 			if (!(__instance instanceof CustomCard)) {
+				return SpireReturn.Continue();
+			}
+
+			// If the card has card descriptors, don't render here because the descriptor rendering will break
+			if (!getAllDescriptors(__instance).isEmpty()) {
 				return SpireReturn.Continue();
 			}
 
