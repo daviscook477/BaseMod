@@ -104,8 +104,7 @@ public class RenderCardDescriptors
 
 				if (card.frameSmallRegion != null) // Does it have a custom frame?
 				{
-					Color renderColor = ReflectionHacks.getPrivate(__instance, AbstractCard.class, "renderColor");
-					// I have to do it like this otherwise the game literally won't start
+					Color renderColor = ReflectionHacks.getPrivate(__instance, AbstractCard.class, "renderColor"); // I have to do it like this otherwise the game literally won't start
 					renderHelper(card, sb, renderColor, card.frameSmallRegion, x, y);
 
 					if (((CustomCard) __instance).frameMiddleRegion != null) { // Does it have custom dynamic frame parts?
@@ -201,9 +200,14 @@ public class RenderCardDescriptors
 	}
 
 	private static void dynamicFrameRenderHelper(SpriteBatch sb, TextureAtlas.AtlasRegion img, float x, float y, float xOffset, float drawScale, float angle, float xScale) {
-		sb.draw(img,
-				x + img.offsetX - (img.originalWidth / 2f) + xOffset * drawScale,
-				y + img.offsetY - img.originalHeight / 2f,
+		Vector2 tmp = new Vector2(0,0);
+		tmp.set(xOffset, 0);
+		tmp.scl(drawScale);
+		tmp.rotate(angle);
+		sb.draw(
+				img,
+				x + img.offsetX - (img.originalWidth / 2f + 1) + tmp.x,
+				y + img.offsetY - img.originalHeight / 2f + tmp.y,
 				img.originalWidth / 2f - img.offsetX + 1,
 				img.originalHeight / 2f - img.offsetY,
 				img.packedWidth,
