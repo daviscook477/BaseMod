@@ -6,6 +6,7 @@ import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.CardGroup;
+import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.screens.ExhaustPileViewScreen;
@@ -167,7 +168,7 @@ public class DynamicTextBlocks {
             if (CardCrawlGame.dungeon != null && AbstractDungeon.player != null) {
                 if (AbstractDungeon.player.masterDeck.contains(c)) {
                     var = -1;
-                } else if (AbstractDungeon.player.hand.contains(c) || AbstractDungeon.player.limbo.contains(c)) {
+                } else if (AbstractDungeon.player.hand.contains(c) || AbstractDungeon.player.limbo.contains(c) || AbstractDungeon.player.cardInUse == c) {
                     var = 0;
                 } else if (AbstractDungeon.player.drawPile.contains(c)) {
                     var = 1;
