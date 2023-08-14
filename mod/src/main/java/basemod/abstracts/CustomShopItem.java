@@ -56,14 +56,20 @@ public class CustomShopItem {
     public CustomShopItem(ShopScreen screenRef, Texture img, int price) {
         this.screenRef = screenRef;
         this.img = img;
-        this.price = price;
         this.hb = new Hitbox(img.getWidth() * Settings.scale, img.getHeight() * Settings.scale);
+        applyDiscounts(price);
     }
 
     public CustomShopItem(ShopScreen screenRef, Texture img, int price, String tipTitle, String tipBody) {
         this(screenRef, img, price);
         this.tipTitle = tipTitle;
         this.tipBody = tipBody;
+    }
+
+    public void applyDiscounts(int price) {
+        this.price = (int)(price
+            * (AbstractDungeon.player.hasRelic("The Courier") ? 0.8F : 1.0F)
+            * (AbstractDungeon.player.hasRelic("Membership Card") ? 0.5F : 1.0F));
     }
 
     public void update(float rugY) {
@@ -87,7 +93,6 @@ public class CustomShopItem {
             if (this.hb.clicked || (this.hb.hovered && CInputActionSet.select.isJustPressed())) {
                 if (AbstractDungeon.player.gold >= this.price) {
                     makePurchase();
-                    this.isPurchased = true;
                     this.hb.clicked = false;
                 } else {
                     this.screenRef.playCantBuySfx();
@@ -143,9 +148,10 @@ public class CustomShopItem {
         } else {
             purchase();
         }
-        this.isPurchased = true;
         ShopItemGrid.removeEmptyPages();
     }
 
-    public void purchase() {}
+    public void purchase() {
+        this.isPurchased = true;
+    }
 }
