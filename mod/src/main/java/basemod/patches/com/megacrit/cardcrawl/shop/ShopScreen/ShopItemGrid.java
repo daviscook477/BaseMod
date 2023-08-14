@@ -9,9 +9,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.evacipated.cardcrawl.modthespire.lib.LineFinder;
 import com.evacipated.cardcrawl.modthespire.lib.Matcher;
+import com.evacipated.cardcrawl.modthespire.lib.SpireField;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertLocator;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInstrumentPatch;
+import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch2;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.megacrit.cardcrawl.core.Settings;
@@ -26,7 +28,6 @@ import com.megacrit.cardcrawl.shop.StorePotion;
 import com.megacrit.cardcrawl.shop.StoreRelic;
 import java.util.ArrayList;
 import java.util.LinkedList;
-
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
 import javassist.expr.ExprEditor;
@@ -38,6 +39,16 @@ public class ShopItemGrid {
     public static NavButton leftArrow;
     public static NavButton rightArrow;
     private static float pageIdxY;
+
+    @SpirePatch2(clz = StoreRelic.class, method = SpirePatch.CLASS)
+    public static class RelicFields {
+        public static SpireField<Integer> row = new SpireField<>(() -> 0);
+    }
+
+    @SpirePatch2(clz = StorePotion.class, method = SpirePatch.CLASS)
+    public static class PotionFields {
+        public static SpireField<Integer> row = new SpireField<>(() -> 0);
+    }
 
     @SpirePatch2(
         clz = ShopScreen.class,
@@ -81,9 +92,11 @@ public class ShopItemGrid {
             locator = Locator.class
         )
         public static void Insert() {
-            currentPage.hide();
-            leftArrow.hide();
-            rightArrow.hide();
+            if (!currentPage.isEmpty()) {
+                currentPage.hide();
+                leftArrow.hide();
+                rightArrow.hide();
+            }
         }
 
         private static class Locator extends SpireInsertLocator {
@@ -127,6 +140,48 @@ public class ShopItemGrid {
     }
 
     @SpirePatch2(
+        clz = StoreRelic.class,
+        method = "update"
+    )
+    public static class SetRelicYBasedOnRow {
+        @SpireInsertPatch(
+            locator = Locator.class
+        )
+        public static void Insert(StoreRelic __instance, float rugY) {
+            __instance.relic.currentY = rugY + (RelicFields.row.get(__instance) == 0 ? 400.0F : 200.0F) * Settings.yScale;
+        }
+
+        private static class Locator extends SpireInsertLocator {
+            @Override
+            public int[] Locate(CtBehavior ctb) throws Exception {
+                Matcher finalMatcher = new Matcher.MethodCallMatcher(Hitbox.class, "move");
+                return LineFinder.findInOrder(ctb, new ArrayList<Matcher>(), finalMatcher);
+            }
+        }
+    }
+
+    @SpirePatch2(
+        clz = StorePotion.class,
+        method = "update"
+    )
+    public static class SetPotionYBasedOnRow {
+        @SpireInsertPatch(
+            locator = Locator.class
+        )
+        public static void Insert(StorePotion __instance, float rugY) {
+            __instance.potion.posY = rugY + (PotionFields.row.get(__instance) == 0 ? 400.0F : 200.0F) * Settings.yScale;
+        }
+
+        private static class Locator extends SpireInsertLocator {
+            @Override
+            public int[] Locate(CtBehavior ctb) throws Exception {
+                Matcher finalMatcher = new Matcher.MethodCallMatcher(Hitbox.class, "move");
+                return LineFinder.findInOrder(ctb, new ArrayList<Matcher>(), finalMatcher);
+            }
+        }
+    }
+
+    @SpirePatch2(
         clz = ShopScreen.class,
         method = "render"
     )
@@ -158,22 +213,29 @@ public class ShopItemGrid {
     }
 
     public static void addItem(CustomShopItem item) {
-        if (currentPage != null && currentPage.tryAddItem(item))
-            return;
-        ShopItemPage newPage = new ShopItemPage();
-        newPage.tryAddItem(item);
-        pages.addLast(newPage);
-        if (currentPage == null)
-            currentPage = newPage;
+        for (ShopItemPage page : pages)
+            if (page.tryAddItem(item))
+                return;
+        ShopItemPage page = new ShopItemPage();
+        page.tryAddItem(item);
+        pages.addLast(page);
     }
 
     public static void removeEmptyPages() {
-        ShopItemPage page = currentPage;
-        if (page.isEmpty()) {
-            int newIdx = pages.indexOf(page) - 1;
-            pages.remove(page);
-            currentPage = (newIdx == -1 ? null : pages.get(newIdx));
+        pages.removeIf((page) -> page.isEmpty());
+        currentPage = pages.contains(currentPage)
+            ? currentPage
+            : (pages.isEmpty() ? null : pages.getFirst());
+    }
+
+    public static int getNextSlot() {
+        int slot = -1;
+        for (ShopItemPage page : pages) {
+            slot = page.getNextSlot();
+            if (slot != -1)
+                break;
         }
+        return slot == -1 ? 0 : slot;
     }
 
     public static class ShopItemPage {
@@ -199,7 +261,8 @@ public class ShopItemGrid {
         }
 
         public void render(SpriteBatch sb) {
-            row1.render(sb);
+            if (!row1.isEmpty())
+                row1.render(sb);
             row2.render(sb);
             leftArrow.render(sb);
             rightArrow.render(sb);
@@ -221,6 +284,13 @@ public class ShopItemGrid {
         public boolean isEmpty() {
             return row1.isEmpty() && row2.isEmpty();
         }
+
+        public int getNextSlot() {
+            int slot = row1.getNextSlot();
+            if (slot != -1)
+                return slot;
+            return row2.getNextSlot();
+        }
     }
 
     public static class ShopItemRow {
@@ -239,23 +309,17 @@ public class ShopItemGrid {
 
         public static ShopItemRow makeDefaultRelicRow(ArrayList<StoreRelic> relics, int row) {
             ShopItemRow itemRow = new ShopItemRow(row);
-            itemRow.items = new ArrayList<>();
-            itemRow.row = row;
             itemRow.isDefaultRelics = true;
-            for (StoreRelic relic : relics) {
-                itemRow.items.add(new CustomShopItem(relic));
-            }
+            for (StoreRelic relic : relics)
+                itemRow.tryAddItem(new CustomShopItem(relic));
             return itemRow;
         }
 
         public static ShopItemRow makeDefaultPotionRow(ArrayList<StorePotion> potions, int row) {
             ShopItemRow itemRow = new ShopItemRow(row);
-            itemRow.items = new ArrayList<>();
-            itemRow.row = row;
             itemRow.isDefaultPotions = true;
-            for (StorePotion potion : potions) {
-                itemRow.items.add(new CustomShopItem(potion));
-            }
+            for (StorePotion potion : potions)
+                itemRow.tryAddItem(new CustomShopItem(potion));
             return itemRow;
         }
 
@@ -270,6 +334,14 @@ public class ShopItemGrid {
         }
 
         public void update(float rugY) {
+            items.forEach((item) -> {
+                if (!item.isPurchased) {
+                    if (item.storePotion != null)
+                        PotionFields.row.set(item.storePotion, this.row);
+                    if (item.storeRelic != null)
+                        RelicFields.row.set(item.storeRelic, this.row);
+                }
+            });
             if (isDefaultRelics) {
                 ReflectionHacks.privateMethod(ShopScreen.class, "updateRelics").invoke(AbstractDungeon.shopScreen);
                 return;
@@ -278,9 +350,8 @@ public class ShopItemGrid {
                 ReflectionHacks.privateMethod(ShopScreen.class, "updatePotions").invoke(AbstractDungeon.shopScreen);
                 return;
             }
-            for (CustomShopItem item : items) {
-                item.update(rugY);
-            }
+
+            items.forEach((item) -> item.update(rugY + (Settings.isFourByThree ? 50.0F : 0.0F)));
         }
 
         public void render(SpriteBatch sb) {
@@ -293,9 +364,12 @@ public class ShopItemGrid {
                 return;
             }
             if (AbstractDungeon.shopScreen != null)
-                for (CustomShopItem item : items) {
+                for (CustomShopItem item : items)
                     item.render(sb);
-                }
+        }
+
+        public int getNextSlot() {
+            return items.size() < MAX_ITEMS_PER_ROW ? items.size() : -1;
         }
 
         public void hide() {
@@ -305,9 +379,7 @@ public class ShopItemGrid {
         }
 
         public boolean isEmpty() {
-            BaseMod.logger.info("Checking if row is empty: " + items.size());
-            BaseMod.logger.info("Checking if row is empty: " + items.stream().filter(item -> !item.isPurchased).count());
-            return (items.stream().filter(item -> !item.isPurchased).count() == 0);
+            return items.isEmpty() || (items.stream().filter((item) -> !item.isPurchased).count() == 0);
         }
     }
 
