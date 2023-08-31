@@ -3,6 +3,7 @@ package basemod.abstracts;
 import basemod.BaseMod;
 import basemod.ReflectionHacks;
 import basemod.helpers.BaseModCardTags;
+import basemod.helpers.CardModifierManager;
 import basemod.helpers.TooltipInfo;
 import basemod.patches.com.megacrit.cardcrawl.screens.SingleCardViewPopup.TitleFontSize;
 import com.badlogic.gdx.Gdx;
@@ -15,6 +16,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.cards.DamageInfo;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
@@ -97,10 +99,14 @@ public abstract class CustomCard extends AbstractCard {
 		if (img != null) {
 			loadCardImage(img);
 		}
+
+		initializeInherentMods();
 	}
 
 	public CustomCard(String id, String name, RegionName img, int cost, String rawDescription, CardType type, CardColor color, CardRarity rarity, CardTarget target) {
 		super(id, name, "status/beta", img.name, cost, rawDescription, type, color, rarity, target);
+
+		initializeInherentMods();
 	}
 	
 	// 
@@ -556,5 +562,45 @@ public abstract class CustomCard extends AbstractCard {
 		public RegionName(String name) {
 			this.name = name;
 		}
+	}
+
+	private static boolean shouldApplyInitialMods = true;
+	private boolean modsInitialized = false;
+
+	@Override
+	public AbstractCard makeStatEquivalentCopy() {
+		shouldApplyInitialMods = !modsInitialized;
+		return super.makeStatEquivalentCopy();
+	}
+
+	private void initializeInherentMods() { //called inside CustomCard constructor
+		if (!modsInitialized) {
+			applyInitialModifiers();
+			modsInitialized = true;
+		}
+	}
+
+	protected void applyInitialModifiers() {
+		for (AbstractCardModifier mod : getInitialModifiers()) {
+			CardModifierManager.addModifier(this, mod);
+		}
+	}
+
+	protected List<AbstractCardModifier> getInitialModifiers() {
+		return Collections.emptyList();
+	}
+
+	@SpirePatch2(clz = AbstractCard.class, method = SpirePatch.CONSTRUCTOR, paramtypez = {String.class, String.class, String.class, int.class, String.class, CardType.class, CardColor.class, CardRarity.class, CardTarget.class, DamageInfo.DamageType.class})
+	private static class AbstractCardConstructorPatch {
+
+		@SpirePrefixPatch
+		private static void constructorPrefix(AbstractCard __instance) {
+			if (__instance instanceof CustomCard) {
+				CustomCard custom = (CustomCard) __instance;
+				custom.modsInitialized = !shouldApplyInitialMods;
+			}
+			shouldApplyInitialMods = true;
+		}
+
 	}
 }

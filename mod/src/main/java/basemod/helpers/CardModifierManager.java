@@ -118,30 +118,29 @@ public class CardModifierManager
         if (replace) {
             removeAllModifiers(newCard, includeInherent);
         }
-        ArrayList<AbstractCardModifier> removed = new ArrayList<>();
+        ArrayList<AbstractCardModifier> toCopy = new ArrayList<>();
         modifiers(oldCard).removeIf(mod -> {
-            if (!mod.isInherent(oldCard) || includeInherent) {
-                removed.add(mod);
+            if (includeInherent || !mod.isInherent(oldCard)) {
+                toCopy.add(mod);
                 return removeOld;
             }
             return false;
         });
-        ArrayList<AbstractCardModifier> applied = new ArrayList<>();
-        removed.forEach(mod -> {
+        toCopy.forEach(mod -> {
             if (removeOld) {
                 mod.onRemove(oldCard);
             }
             AbstractCardModifier newMod = mod.makeCopy();
             if (newMod.shouldApply(newCard)) {
                 modifiers(newCard).add(newMod);
-                applied.add(newMod);
+                newMod.onInitialApplication(newCard);
             }
         });
-        applied.forEach(mod -> mod.onInitialApplication(newCard));
         if (removeOld) {
             onCardModified(oldCard);
             oldCard.initializeDescription();
         }
+        Collections.sort(modifiers(newCard));
         onCardModified(newCard);
         newCard.initializeDescription();
     }
