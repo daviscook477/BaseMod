@@ -4,6 +4,7 @@ import basemod.BaseMod;
 import basemod.ReflectionHacks;
 import basemod.abstracts.AbstractCardModifier;
 import basemod.helpers.CardModifierManager;
+import basemod.patches.com.megacrit.cardcrawl.rooms.AbstractRoom.StartBattleHook;
 import basemod.patches.com.megacrit.cardcrawl.saveAndContinue.SaveFile.ModSaves;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -29,10 +30,12 @@ import com.megacrit.cardcrawl.helpers.CardHelper;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.metrics.Metrics;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
+import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 import com.megacrit.cardcrawl.screens.runHistory.RunHistoryScreen;
 import com.megacrit.cardcrawl.screens.runHistory.TinyCard;
 import com.megacrit.cardcrawl.screens.stats.RunData;
+import com.megacrit.cardcrawl.vfx.cardManip.ShowCardBrieflyEffect;
 import javassist.*;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
@@ -925,6 +928,39 @@ public class CardModifierPatches
             public int[] Locate(CtBehavior ctBehavior) throws Exception {
                 Matcher m = new Matcher.MethodCallMatcher(RunHistoryScreen.class, "cardForName");
                 return new int[]{LineFinder.findInOrder(ctBehavior, m)[0]+1};
+            }
+        }
+    }
+
+    @SpirePatch(
+            clz = AbstractRoom.class,
+            method = "update"
+    )
+    public static class CardModStartBattleHook {
+
+        @SpireInsertPatch(
+                locator = StartBattleLocator.class
+        )
+        public static void Insert(AbstractRoom __instance) {
+            CardGroup[] cardGroups = new CardGroup[] {
+                    AbstractDungeon.player.drawPile,
+                    AbstractDungeon.player.hand,
+                    AbstractDungeon.player.discardPile,
+                    AbstractDungeon.player.exhaustPile
+            };
+
+            for (CardGroup cardGroup : cardGroups) {
+                for (AbstractCard c : cardGroup.group) {
+                    CardModifierManager.onBattleStart(c);
+                }
+            }
+        }
+
+        private static class StartBattleLocator extends SpireInsertLocator {
+            @Override
+            public int[] Locate(CtBehavior ctBehavior) throws Exception {
+                Matcher finalMatcher = new Matcher.MethodCallMatcher(AbstractPlayer.class, "applyStartOfCombatPreDrawLogic");
+                return LineFinder.findInOrder(ctBehavior, finalMatcher);
             }
         }
     }

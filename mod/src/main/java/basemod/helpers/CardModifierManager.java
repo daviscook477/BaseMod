@@ -13,6 +13,7 @@ import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
+import com.megacrit.cardcrawl.vfx.cardManip.ShowCardBrieflyEffect;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -341,6 +342,16 @@ public class CardModifierManager
         for (AbstractCardModifier mod : modifiers(card)) {
             mod.onCardModified(card);
         }
+    }
+
+    public static void onBattleStart(AbstractCard card) {
+        boolean showCard = false;
+        for (AbstractCardModifier mod : modifiers(card)) {
+            if (mod.onBattleStart(card)) {
+                showCard = true;
+            }
+        }
+        if (showCard) AbstractDungeon.effectList.add(0, new ShowCardBrieflyEffect(card.makeStatEquivalentCopy()));
     }
 
     public static List<CardBorderGlowManager.GlowInfo> getGlows(AbstractCard card) {

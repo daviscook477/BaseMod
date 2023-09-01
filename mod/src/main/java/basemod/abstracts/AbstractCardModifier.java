@@ -238,6 +238,14 @@ public abstract class AbstractCardModifier implements Comparable<AbstractCardMod
     }
 
     /**
+     * Behaves the same as StSLib's StartupCard.
+     * Triggers at the start of battle. Return true to have the card flash on the screen.
+     */
+    public boolean onBattleStart(AbstractCard card) {
+        return false;
+    }
+
+    /**
      * return a Color if the cardmod should cause the card to glow a different color than it usually does. This should return
      * null if it doesn't want the card to be affected.
      */
