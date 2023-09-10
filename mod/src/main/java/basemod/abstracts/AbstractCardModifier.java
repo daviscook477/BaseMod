@@ -4,11 +4,13 @@ import basemod.helpers.CardBorderGlowManager;
 import basemod.helpers.TooltipInfo;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.actions.utility.UseCardAction;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.CardGroup;
 import com.megacrit.cardcrawl.cards.DamageInfo;
 import com.megacrit.cardcrawl.core.AbstractCreature;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 
 import java.lang.annotation.ElementType;
@@ -263,5 +265,13 @@ public abstract class AbstractCardModifier implements Comparable<AbstractCardMod
     @Retention(RetentionPolicy.RUNTIME)
     public @interface SaveIgnore
     {
+    }
+
+    public void addToTop(AbstractGameAction action) {
+        AbstractDungeon.actionManager.addToTop(action);
+    }
+
+    public void addToBot(AbstractGameAction action) {
+        AbstractDungeon.actionManager.addToBottom(action);
     }
 }
