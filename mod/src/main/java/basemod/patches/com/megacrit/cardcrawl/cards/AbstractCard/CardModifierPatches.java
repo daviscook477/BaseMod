@@ -39,10 +39,13 @@ import javassist.expr.FieldAccess;
 import javassist.expr.MethodCall;
 import org.clapper.util.classutil.*;
 import com.evacipated.cardcrawl.modthespire.Loader;
+import sun.misc.Unsafe;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CardModifierPatches
 {
@@ -733,8 +736,10 @@ public class CardModifierPatches
     }
 
     public static RuntimeTypeAdapterFactory<AbstractCardModifier> modifierAdapter;
+    private static List<Class<?>> offendingCardMods = new ArrayList<>();
 
     public static void initializeAdapterFactory() {
+        System.out.println("When the heck does this happen anyway??");
         modifierAdapter = RuntimeTypeAdapterFactory.of(AbstractCardModifier.class, "classname");
         ClassFinder finder = new ClassFinder();
         for (ModInfo info : Loader.MODINFOS) {
@@ -752,16 +757,40 @@ public class CardModifierPatches
         );
         ArrayList<ClassInfo> cardModifiers = new ArrayList<>();
         finder.findClasses(cardModifiers, filter);
+        System.out.println("finished compiling list of cardmodifier classes.");
+        System.out.println("list size: " + cardModifiers.size());
+
+        Gson gson = new GsonBuilder().create();
+        Unsafe unsafe = null;
         for (ClassInfo info : cardModifiers) {
             try {
-                Class c = Class.forName(info.getClassName());
-                if (!c.isAnnotationPresent(AbstractCardModifier.SaveIgnore.class)) {
-                    modifierAdapter.registerSubtype(c, info.getClassName());
+                Class foundClass = Class.forName(info.getClassName());
+                if (!foundClass.isAnnotationPresent(AbstractCardModifier.SaveIgnore.class)) {
+                    try {
+                        if (unsafe == null) {
+                            Field f = Unsafe.class.getDeclaredField("theUnsafe");
+                            f.setAccessible(true);
+                            unsafe = (Unsafe) f.get(null);
+                        }
+                        Object object = unsafe.allocateInstance(foundClass);
+                        String serialized = gson.toJson(object);
+                        gson.fromJson(serialized, foundClass);
+                        modifierAdapter.registerSubtype(foundClass, info.getClassName());
+                    } catch (Exception e) {
+                        BaseMod.logger.warn("Test serialization failed on class " + foundClass + ".");
+                        BaseMod.logger.info("Unserializable cardmods cannot be saved when placed on the master deck. To remove this warning, mark your cardmod class with @SaveIgnore.");
+                        e.printStackTrace();
+                        offendingCardMods.add(foundClass);
+                    }
                 }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static boolean unsavable(AbstractCardModifier mod) {
+        return mod.getClass().isAnnotationPresent(AbstractCardModifier.SaveIgnore.class) || offendingCardMods.contains(mod.getClass());
     }
 
     public static final String CARDMODS_KEY = "basemod:card_modifiers";
@@ -780,17 +809,13 @@ public class CardModifierPatches
             Gson gson = builder.create();
             for (AbstractCard card : AbstractDungeon.player.masterDeck.group) {
                 ArrayList<AbstractCardModifier> cardModifierList = CardModifierPatches.CardModifierFields.cardModifiers.get(card);
-                ArrayList<AbstractCardModifier> saveIgnores = new ArrayList<>();
-                for (AbstractCardModifier mod : cardModifierList) {
-                    if (mod.getClass().isAnnotationPresent(AbstractCardModifier.SaveIgnore.class)) {
-                        saveIgnores.add(mod);
-                    }
-                }
+
+                List<AbstractCardModifier> saveIgnores = cardModifierList.stream().filter(CardModifierPatches::unsavable).collect(Collectors.toList());
                 if (!saveIgnores.isEmpty()) {
-                    BaseMod.logger.warn("attempted to save un-savable card modifiers. Modifiers marked @SaveIgnore will not be saved on master deck.");
+                    BaseMod.logger.warn("attempted to save un-savable card modifier(s). Un-serializable modifiers and modifiers marked @SaveIgnore will not be saved on master deck.");
                     BaseMod.logger.info("affected card: " + card.cardID);
                     for (AbstractCardModifier mod : saveIgnores) {
-                        BaseMod.logger.info("saveIgnore mod: " + mod.getClass().getName());
+                        BaseMod.logger.info("   unsavable mod: " + mod.getClass().getName());
                     }
                     cardModifierList.removeAll(saveIgnores);
                 }
