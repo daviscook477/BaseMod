@@ -739,7 +739,6 @@ public class CardModifierPatches
     private static List<Class<?>> offendingCardMods = new ArrayList<>();
 
     public static void initializeAdapterFactory() {
-        System.out.println("When the heck does this happen anyway??");
         modifierAdapter = RuntimeTypeAdapterFactory.of(AbstractCardModifier.class, "classname");
         ClassFinder finder = new ClassFinder();
         for (ModInfo info : Loader.MODINFOS) {
@@ -757,9 +756,6 @@ public class CardModifierPatches
         );
         ArrayList<ClassInfo> cardModifiers = new ArrayList<>();
         finder.findClasses(cardModifiers, filter);
-        System.out.println("finished compiling list of cardmodifier classes.");
-        System.out.println("list size: " + cardModifiers.size());
-
         Gson gson = new GsonBuilder().create();
         Unsafe unsafe = null;
         for (ClassInfo info : cardModifiers) {
@@ -778,7 +774,7 @@ public class CardModifierPatches
                         modifierAdapter.registerSubtype(foundClass, info.getClassName());
                     } catch (Exception e) {
                         BaseMod.logger.warn("Test serialization failed on class " + foundClass + ".");
-                        BaseMod.logger.info("Unserializable cardmods cannot be saved when placed on the master deck. To remove this warning, mark your cardmod class with @SaveIgnore.");
+                        BaseMod.logger.info("Unserializable cardmods cannot be saved when placed on the master deck. To remove this warning, fix the issue making your cardmod unserializable or mark your cardmod class with @SaveIgnore.");
                         e.printStackTrace();
                         offendingCardMods.add(foundClass);
                     }
