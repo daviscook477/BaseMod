@@ -281,7 +281,7 @@ public class DynamicTextBlocks {
                 return value;
             }
         }
-        //If it's not a creatable number, there was a format error. Just return false instead of blowing up
+        //The input doesn't match any cases above
         return null;
     }
 }
