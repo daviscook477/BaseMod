@@ -12,6 +12,7 @@ public class ModRadioButtonGroup {
     }
 
     public ModRadioButtonGroup(ModToggleButton... buttons){
+        this();
         for(ModToggleButton b : buttons){
             addButton(b);
         }
