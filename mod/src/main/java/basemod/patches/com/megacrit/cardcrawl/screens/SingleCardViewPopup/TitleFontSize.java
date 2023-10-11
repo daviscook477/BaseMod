@@ -48,7 +48,9 @@ public class TitleFontSize
 
 		public static void Postfix(SingleCardViewPopup __instance, SpriteBatch sb)
 		{
-			FontHelper.SCP_cardTitleFont_small = savedFont;
+			if (savedFont != null) {
+				FontHelper.SCP_cardTitleFont_small = savedFont;
+			}
 		}
 	}
 

@@ -4,8 +4,10 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.DescriptionLine;
+import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import javassist.CtBehavior;
+
 
 @SpirePatch(
 		clz= AbstractCard.class,
@@ -13,6 +15,7 @@ import javassist.CtBehavior;
 )
 public class FixDescriptionWidthCustomDynamicVariableCN
 {
+
 	@SpireInsertPatch(
 			locator=Locator.class,
 			localvars={"word", "currentWidth", "sbuilder", "numLines", "CN_DESC_BOX_WIDTH"}
@@ -21,17 +24,18 @@ public class FixDescriptionWidthCustomDynamicVariableCN
 							  StringBuilder currentLine, @ByRef int[] numLines,
 							  float CN_DESC_BOX_WIDTH)
 	{
+		float MAGIC_NUMBER_LENGTH = 20.0F * Settings.scale ;
 		if (word[0].startsWith("!")) {
-			GlyphLayout gl = new GlyphLayout(FontHelper.cardDescFont_N, "!M!");
-			if (currentWidth[0] + gl.width > CN_DESC_BOX_WIDTH) {
+//			GlyphLayout gl = new GlyphLayout(FontHelper.cardDescFont_N, "!M!");
+			if (currentWidth[0] + MAGIC_NUMBER_LENGTH > CN_DESC_BOX_WIDTH) {
 				++numLines[0];
 				__instance.description.add(new DescriptionLine(currentLine.toString(), currentWidth[0]));
 				currentLine.setLength(0);
-				currentWidth[0] = gl.width;
+				currentWidth[0] = MAGIC_NUMBER_LENGTH;
 				currentLine.append(" ").append(word[0]).append("! ");
 			} else {
 				currentLine.append(" ").append(word[0]).append("! ");
-				currentWidth[0] += gl.width;
+				currentWidth[0] += MAGIC_NUMBER_LENGTH;
 			}
 			word[0] = "";
 		}

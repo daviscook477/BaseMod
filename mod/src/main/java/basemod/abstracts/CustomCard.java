@@ -548,6 +548,8 @@ public abstract class CustomCard extends AbstractCard {
 		return portraitTexture;
 	}
 
+	public void onLoadedMisc() {}
+
 	public static class RegionName {
 		public final String name;
 

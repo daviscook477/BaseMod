@@ -1,6 +1,7 @@
 package basemod.patches.com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 
 import basemod.BaseMod;
+import basemod.ReflectionHacks;
 import basemod.abstracts.DynamicVariable;
 import basemod.helpers.CardModifierManager;
 import basemod.helpers.dynamicvariables.BlockVariable;
@@ -23,9 +24,7 @@ import javassist.expr.MethodCall;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Field;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @SpirePatch(
         clz=SingleCardViewPopup.class,
@@ -35,26 +34,38 @@ public class RenderCustomDynamicVariable
 {
     public static void Raw(CtBehavior ctMethodToPatch) throws CannotCompileException
     {
-        final int[] insertLine = {-1};
         ctMethodToPatch.instrument(new ExprEditor() {
+            boolean rounded = false;
+            boolean modified = false;
+
             @Override
-            public void edit(MethodCall m) throws CannotCompileException
-            {
+            public void edit(MethodCall m) throws CannotCompileException {
                 if (m.getMethodName().equals("renderDynamicVariable")) {
-                    if (insertLine[0] == -1) {
-                        insertLine[0] = m.getLineNumber();
-                    }
-                    m.replace("$_ = basemod.patches.com.megacrit.cardcrawl.screens.SingleCardViewPopup.RenderCustomDynamicVariable.Inner.myRenderDynamicVariable(this, tmp, $$);");
+                    m.replace("$_ = " + Inner.class.getName() + ".myRenderDynamicVariable(this, tmp, $$);");
+                    return;
+                }
+
+                if (modified)
+                    return;
+
+                if (rounded && m.getMethodName().equals("charAt")) {
+                    m.replace(
+                            "if (" + Inner.class.getName() + ".checkDynamicVariable(tmp)) {" +
+                                    "start_x += " + Inner.class.getName() + ".renderDynamicVariable(this, tmp, start_x, draw_y, i, font, sb);" +
+                                    "tmp = \"!\";" +
+                                    "$_ = '!';" +
+                                    "}" +
+                                    "else {" +
+                                    "$_ = $proceed($$);" +
+                                    "}"
+                    );
+                    modified = true;
+                }
+                else if (m.getMethodName().equals("round")) {
+                    rounded = true;
                 }
             }
         });
-
-        if (insertLine[0] > 0) {
-            ctMethodToPatch.insertAt(insertLine[0]-1,
-                    "if (tmp.length() != 4 && tmp.length() != 5) {" +
-                            "start_x += basemod.patches.com.megacrit.cardcrawl.screens.SingleCardViewPopup.RenderCustomDynamicVariable.Inner.myRenderDynamicVariable(this, tmp, tmp.charAt(1), start_x, draw_y, i, font, sb, null);" +
-                            "}");
-        }
     }
 
     public static class Inner
@@ -62,47 +73,50 @@ public class RenderCustomDynamicVariable
         private static Logger logger = LogManager.getLogger();
         private static final GlyphLayout gl = new GlyphLayout();
 
-        public static float myRenderDynamicVariable(Object __obj_instance, String key, char ckey, float start_x, float draw_y, int i, BitmapFont font, SpriteBatch sb, Character cend)
+        public static boolean checkDynamicVariable(String key) {
+            Matcher matcher = DynamicVariable.variablePattern.matcher(key);
+            if (matcher.find()) {
+                key = matcher.group(2);
+                return BaseMod.cardDynamicVariableMap.containsKey(key);
+            }
+            return false;
+        }
+
+        //Old method left for compatibility
+        public static float myRenderDynamicVariable(Object __obj_instance, String key, char ckey, float start_x, float draw_y, int i, BitmapFont font, SpriteBatch sb, Character cend) {
+
+            return subRenderDynamicVariable(__obj_instance, "", "" + ckey, (cend == null ? "" : "" + cend), start_x, draw_y, i, font, sb);
+        }
+
+        public static float renderDynamicVariable(Object __obj_instance, String key, float start_x, float draw_y, int i, BitmapFont font, SpriteBatch sb)
         {
+            String pre = "", end = "";
+
+            Matcher matcher = DynamicVariable.variablePattern.matcher(key);
+            if (matcher.find()) {
+                pre = matcher.group(1);
+                key = matcher.group(2);
+                end = matcher.group(3);
+            }
+
+            return subRenderDynamicVariable(__obj_instance, pre, key, end, start_x, draw_y, i, font, sb);
+        }
+
+        @SuppressWarnings("ConstantConditions")
+        private static float subRenderDynamicVariable(Object __obj_instance, String pre, String key, String end, float start_x, float draw_y, int i, BitmapFont font, SpriteBatch sb) {
             SingleCardViewPopup __instance = (SingleCardViewPopup) __obj_instance;
 
             // Get any private variables we need
-            AbstractCard card;
-            float current_x;
-            float current_y;
-            try {
-                Field f = SingleCardViewPopup.class.getDeclaredField("card");
-                f.setAccessible(true);
-                card = (AbstractCard) f.get(__instance);
-
-                f = SingleCardViewPopup.class.getDeclaredField("current_x");
-                f.setAccessible(true);
-                current_x = f.getFloat(__instance);
-
-                f = SingleCardViewPopup.class.getDeclaredField("current_y");
-                f.setAccessible(true);
-                current_y = f.getFloat(__instance);
-            } catch (IllegalAccessException | NoSuchFieldException e) {
-                e.printStackTrace();
-                return 0;
-            }
-
-            String end = "";
-
-            Pattern pattern = Pattern.compile("!(.+)!(.*) ");
-            Matcher matcher = pattern.matcher(key);
-            if (matcher.find()) {
-                key = matcher.group(1);
-                end = matcher.group(2);
-            }
+            AbstractCard card = ReflectionHacks.getPrivate(__instance, SingleCardViewPopup.class, "card");
+            float current_x = ReflectionHacks.getPrivate(__instance, SingleCardViewPopup.class, "current_x");
+            float current_y = ReflectionHacks.getPrivate(__instance, SingleCardViewPopup.class, "current_y");
 
             // Main body of method
-            StringBuilder stringBuilder = new StringBuilder();
             Color c = Settings.CREAM_COLOR;
             int num = 0;
             DynamicVariable dv = BaseMod.cardDynamicVariableMap.get(key);
             if (dv != null) {
-                num = dv.baseValue(card);
+                num = dv.modifiedBaseValue(card);
                 if (dv.upgraded(card)) {
                     c = dv.getUpgradedColor(card);
                 } else {
@@ -112,58 +126,43 @@ public class RenderCustomDynamicVariable
                 logger.error("No dynamic card variable found for key \"" + key + "\"!");
             }
 
-            //cardmods affect base variables
-            int base = -1;
-            boolean modified = false;
-            if (CardModifierPatches.CardModifierFields.needsRecalculation.get(card)) {
-                CardModifierManager.testBaseValues(card);
-                CardModifierPatches.CardModifierFields.needsRecalculation.set(card, false);
-            }
-            if (dv instanceof BlockVariable && CardModifierPatches.CardModifierFields.cardModHasBaseBlock.get(card)) {
-                base = CardModifierPatches.CardModifierFields.cardModBaseBlock.get(card);
-                modified = true;
-            } else if (dv instanceof DamageVariable && CardModifierPatches.CardModifierFields.cardModHasBaseDamage.get(card)) {
-                base = CardModifierPatches.CardModifierFields.cardModBaseDamage.get(card);
-                modified = true;
-            } else if (dv instanceof MagicNumberVariable && CardModifierPatches.CardModifierFields.cardModHasBaseMagic.get(card)) {
-                base = CardModifierPatches.CardModifierFields.cardModBaseMagic.get(card);
-                modified = true;
-            }
-            if (modified) {
-                if (!CardModifierPatches.CardModifierFields.preCalculated.get(card)) {
-                    num = base;
-                }
-                if (CardModifierPatches.CardModifierFields.previewingUpgrade.get(card)) {
-                    c = dv.getIncreasedValueColor();
-                } else {
-                    if (num == base) {
-                        c = dv.getNormalColor();
-                    } else if (num > base) {
-                        c = dv.getIncreasedValueColor();
-                    } else {
-                        c = dv.getDecreasedValueColor();
-                    }
-                }
+            float totalWidth = 0;
+            String variableValue = Integer.toString(num);
+
+            if (!pre.isEmpty()) {
+                gl.setText(font, pre);
+                FontHelper.renderRotatedText(sb, font, pre,
+                        current_x, current_y,
+                        start_x - current_x + gl.width / 2.0f,
+                        i * 1.53f * -font.getCapHeight() + draw_y - current_y + -12.0f,
+                        0.0f, true, Settings.CREAM_COLOR);
+
+                totalWidth += gl.width;
+                start_x += gl.width;
             }
 
-            stringBuilder.append(num);
-            gl.setText(font, stringBuilder.toString());
-            FontHelper.renderRotatedText(sb, font, stringBuilder.toString(),
+            gl.setText(font, variableValue);
+            FontHelper.renderRotatedText(sb, font, variableValue,
                     current_x, current_y,
                     start_x - current_x + gl.width / 2.0f,
                     i * 1.53f * -font.getCapHeight() + draw_y - current_y + -12.0f,
                     0.0f, true, c);
-            if (end != null) {
+
+            totalWidth += gl.width;
+            start_x += gl.width;
+
+            if (!end.isEmpty()) {
+                gl.setText(font, end);
                 FontHelper.renderRotatedText(sb, font, end,
                         current_x, current_y,
-                        start_x - current_x + gl.width + 10.0f * Settings.scale,
+                        start_x - current_x + gl.width / 2.0f,
                         i * 1.53f * -font.getCapHeight() + draw_y - current_y + -12.0f,
                         0.0f, true, Settings.CREAM_COLOR);
-                stringBuilder.append(end);
+
+                totalWidth += gl.width;
             }
-            stringBuilder.append(' ');
-            gl.setText(font, stringBuilder.toString());
-            return gl.width;
+
+            return totalWidth;
         }
     }
 }

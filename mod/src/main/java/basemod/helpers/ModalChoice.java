@@ -91,7 +91,7 @@ public class ModalChoice
                     if (dv.isModified(card)) {
                         num = dv.value(card);
                     } else {
-                        num = dv.baseValue(card);
+                        num = dv.modifiedBaseValue(card);
                     }
                 }
                 stringBuilder.append(num);

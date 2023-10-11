@@ -72,7 +72,7 @@ public class CardBorderGlowManager {
                 return true;
             }
         }
-        return false;
+        return CardModifierManager.hasCustomGlows(card);
     }
 
     public static ArrayList<GlowInfo> getCustomGlowColors(AbstractCard card) {
@@ -82,6 +82,9 @@ public class CardBorderGlowManager {
                 retVal.add(info);
             }
         }
+
+        //include any glows on cardmods
+        retVal.addAll(CardModifierManager.getGlows(card));
         
         //if card is glowing a different color than the default light blue, include it.
         //can't use Color.equals because cards often change their glow color alpha
