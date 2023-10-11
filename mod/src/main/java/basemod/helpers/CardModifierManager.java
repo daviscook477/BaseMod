@@ -3,8 +3,8 @@ package basemod.helpers;
 import basemod.ReflectionHacks;
 import basemod.abstracts.AbstractCardModifier;
 import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.CardModifierPatches;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.evacipated.cardcrawl.modthespire.lib.SpireField;
 import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.actions.utility.UseCardAction;
 import com.megacrit.cardcrawl.cards.AbstractCard;
@@ -14,10 +14,8 @@ import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 
 public class CardModifierManager
 {
@@ -31,9 +29,10 @@ public class CardModifierManager
     public static void addModifier(AbstractCard card, AbstractCardModifier mod) {
         if (mod.shouldApply(card)) {
             modifiers(card).add(mod);
+
             Collections.sort(modifiers(card));
             mod.onInitialApplication(card);
-            testBaseValues(card);
+            onCardModified(card);
             card.initializeDescription();
         }
     }
@@ -45,6 +44,7 @@ public class CardModifierManager
         if (modifiers(card).contains(mod) && (!mod.isInherent(card) || includeInherent)) {
             modifiers(card).remove(mod);
             mod.onRemove(card);
+            onCardModified(card);
         }
         card.initializeDescription();
     }
@@ -53,14 +53,16 @@ public class CardModifierManager
      * removes all modifiers from card that match id. Inherent mods are only included if the method is sent "true"
      */
     public static void removeModifiersById(AbstractCard card, String id, boolean includeInherent) {
-        Iterator<AbstractCardModifier> it = modifiers(card).iterator();
-        while (it.hasNext()) {
-            AbstractCardModifier mod = it.next();
+        ArrayList<AbstractCardModifier> removed = new ArrayList<>();
+        modifiers(card).removeIf(mod -> {
             if (mod.identifier(card).equals(id) && (!mod.isInherent(card) || includeInherent)) {
-                it.remove();
-                mod.onRemove(card);
+                removed.add(mod);
+                return true;
             }
-        }
+            return false;
+        });
+        removed.forEach(mod -> mod.onRemove(card));
+        onCardModified(card);
         card.initializeDescription();
     }
 
@@ -93,14 +95,16 @@ public class CardModifierManager
      * removes all modifiers from card. Mods that are inherent are only included if the method is sent "true"
      */
     public static void removeAllModifiers(AbstractCard card, boolean includeInherent) {
-        Iterator<AbstractCardModifier> it = modifiers(card).iterator();
-        while (it.hasNext()) {
-            AbstractCardModifier mod = it.next();
+        ArrayList<AbstractCardModifier> removed = new ArrayList<>();
+        modifiers(card).removeIf(mod -> {
             if (!mod.isInherent(card) || includeInherent) {
-                it.remove();
-                mod.onRemove(card);
+                removed.add(mod);
+                return true;
             }
-        }
+            return false;
+        });
+        removed.forEach(mod -> mod.onRemove(card));
+        onCardModified(card);
         card.initializeDescription();
     }
 
@@ -114,94 +118,63 @@ public class CardModifierManager
         if (replace) {
             removeAllModifiers(newCard, includeInherent);
         }
-        Iterator<AbstractCardModifier> it = modifiers(oldCard).iterator();
-        while (it.hasNext()) {
-            AbstractCardModifier mod = it.next();
+        ArrayList<AbstractCardModifier> removed = new ArrayList<>();
+        modifiers(oldCard).removeIf(mod -> {
             if (!mod.isInherent(oldCard) || includeInherent) {
-                if (removeOld) {
-                    it.remove();
-                    mod.onRemove(oldCard);
-                }
-                AbstractCardModifier newMod = mod.makeCopy();
-                if (newMod.shouldApply(newCard)) {
-                    modifiers(newCard).add(newMod);
-                    newMod.onInitialApplication(newCard);
-                }
+                removed.add(mod);
+                return removeOld;
             }
-        }
+            return false;
+        });
+        ArrayList<AbstractCardModifier> applied = new ArrayList<>();
+        removed.forEach(mod -> {
+            if (removeOld) {
+                mod.onRemove(oldCard);
+            }
+            AbstractCardModifier newMod = mod.makeCopy();
+            if (newMod.shouldApply(newCard)) {
+                modifiers(newCard).add(newMod);
+                applied.add(newMod);
+            }
+        });
+        applied.forEach(mod -> mod.onInitialApplication(newCard));
         if (removeOld) {
+            onCardModified(oldCard);
             oldCard.initializeDescription();
         }
-        testBaseValues(newCard);
+        onCardModified(newCard);
         newCard.initializeDescription();
     }
 
-    public static void testBaseValues(AbstractCard card) {
-        float damage = card.baseDamage;
-        float block = card.baseBlock;
-        float magic = card.baseMagicNumber;
-        for (AbstractCardModifier modifier : modifiers(card)) {
-            damage = modifier.modifyBaseDamage(damage, card.damageTypeForTurn, card, null);
-            block = modifier.modifyBaseBlock(block, card);
-            magic = modifier.modifyBaseMagic(magic, card);
-        }
-        damage = (int)damage;
-        block = (int)block;
-        magic = (int)magic;
-        if (damage != card.baseDamage) {
-            card.damage = (int)damage; //We have to set these values directly for dynamic text to work in master deck. They get overwritten in combat
-            CardModifierPatches.CardModifierFields.cardModBaseDamage.set(card, (int)damage);
-            CardModifierPatches.CardModifierFields.cardModHasBaseDamage.set(card, true);
-        } else {
-            CardModifierPatches.CardModifierFields.cardModHasBaseDamage.set(card, false);
-        }
-        if (block != card.baseBlock) {
-            card.block = (int)block;
-            CardModifierPatches.CardModifierFields.cardModBaseBlock.set(card, (int)block);
-            CardModifierPatches.CardModifierFields.cardModHasBaseBlock.set(card, true);
-        } else {
-            CardModifierPatches.CardModifierFields.cardModHasBaseBlock.set(card, false);
-        }
-        if (magic != card.baseMagicNumber) {
-            card.magicNumber = (int)magic;
-            CardModifierPatches.CardModifierFields.cardModBaseMagic.set(card, (int)magic);
-            CardModifierPatches.CardModifierFields.cardModHasBaseMagic.set(card, true);
-        } else {
-            CardModifierPatches.CardModifierFields.cardModHasBaseMagic.set(card, false);
-        }
-    }
-
     public static void removeEndOfTurnModifiers(AbstractCard card) {
-        ArrayList<AbstractCardModifier> modifiers = modifiers(card);
-        for (AbstractCardModifier mod : modifiers) {
-            if (mod.removeAtEndOfTurn(card)) {
-                addToBot(new AbstractGameAction() {
-                    @Override
-                    public void update() {
-                        modifiers.remove(mod);
-                        mod.onRemove(card);
-                        card.initializeDescription();
-                        isDone = true;
-                    }
-                });
-            }
-        }
+        deferredConditionalRemoval(card, mod -> mod.removeAtEndOfTurn(card));
     }
 
     public static void removeWhenPlayedModifiers(AbstractCard card) {
+        deferredConditionalRemoval(card, mod -> mod.removeOnCardPlayed(card));
+    }
+
+    private static void deferredConditionalRemoval(AbstractCard card, Predicate<AbstractCardModifier> condition) {
         ArrayList<AbstractCardModifier> modifiers = modifiers(card);
+        ArrayList<AbstractCardModifier> toRemove = new ArrayList<>();
         for (AbstractCardModifier mod : modifiers) {
-            if (mod.removeOnCardPlayed(card)) {
-                addToBot(new AbstractGameAction() {
-                    @Override
-                    public void update() {
+            if (condition.test(mod)) {
+                toRemove.add(mod);
+            }
+        }
+        if (!toRemove.isEmpty()) {
+            addToBot(new AbstractGameAction() {
+                @Override
+                public void update() {
+                    toRemove.forEach(mod -> {
                         modifiers.remove(mod);
                         mod.onRemove(card);
-                        card.initializeDescription();
-                        isDone = true;
-                    }
-                });
-            }
+                    });
+                    onCardModified(card);
+                    card.initializeDescription();
+                    isDone = true;
+                }
+            });
         }
     }
 
@@ -252,6 +225,20 @@ public class CardModifierManager
     public static void onCardRetained(AbstractCard card) {
         for (AbstractCardModifier mod : modifiers(card)) {
             mod.onRetained(card);
+        }
+    }
+
+    public static int modifiedBaseValue(AbstractCard card, int base, String key) {
+        switch (key) {
+            case "D":
+                return (int) onModifyBaseDamage(base, card, null);
+            case "B":
+                return (int) onModifyBaseBlock(base, card);
+            case "M":
+                return (int) onModifyBaseMagic(base, card);
+            default:
+                //Cannot support custom variables, as no way to set their variable values
+                return base;
         }
     }
 
@@ -348,6 +335,48 @@ public class CardModifierManager
         List<String> list = new ArrayList<>();
         modifiers(card).forEach(mod -> list.addAll(mod.extraDescriptors(card)));
         return list;
+    }
+
+    public static void onCardModified(AbstractCard card) {
+        for (AbstractCardModifier mod : modifiers(card)) {
+            mod.onCardModified(card);
+        }
+    }
+
+    public static List<CardBorderGlowManager.GlowInfo> getGlows(AbstractCard card) {
+        List<CardBorderGlowManager.GlowInfo> glows = new ArrayList<>();
+        modifiers(card).forEach(mod -> {
+            Color color = mod.getGlow(card);
+            if (color != null) {
+                glows.add(new CardBorderGlowManager.GlowInfo() {
+                    @Override
+                    public boolean test(AbstractCard card) {
+                        return true;
+                    }
+
+                    @Override
+                    public Color getColor(AbstractCard card) {
+                        return color;
+                    }
+
+                    @Override
+                    public String glowID() {
+                        //unneeded since this glow info is never entering the manager"
+                        return "irrelephant";
+                    }
+                });
+            }
+        });
+        return glows;
+    }
+
+    public static boolean hasCustomGlows(AbstractCard card) {
+        for (AbstractCardModifier mod : modifiers(card)) {
+            if (mod.getGlow(card) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void addToBot(AbstractGameAction action) {

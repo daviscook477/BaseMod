@@ -70,6 +70,7 @@ public abstract class PhasedEvent extends AbstractImageEvent {
                 }
                 //Post-combat saves load the event based on the ID stored in the metrics data.
             }
+            next.reset();
             next.transition(this);
         }
     }
@@ -77,7 +78,7 @@ public abstract class PhasedEvent extends AbstractImageEvent {
     @Override
     protected void buttonEffect(int i) {
         if (currentPhase instanceof ImageEventPhase) {
-            ((ImageEventPhase) currentPhase).optionChosen(i);
+            ((ImageEventPhase) currentPhase).optionChosen(this, i);
         }
     }
 

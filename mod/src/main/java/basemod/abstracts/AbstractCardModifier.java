@@ -1,6 +1,8 @@
 package basemod.abstracts;
 
+import basemod.helpers.CardBorderGlowManager;
 import basemod.helpers.TooltipInfo;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.megacrit.cardcrawl.actions.utility.UseCardAction;
 import com.megacrit.cardcrawl.cards.AbstractCard;
@@ -13,6 +15,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -225,6 +228,21 @@ public abstract class AbstractCardModifier implements Comparable<AbstractCardMod
      */
     public List<String> extraDescriptors(AbstractCard card) {
         return Collections.emptyList();
+    }
+
+    /**
+     * triggers on every modifier present on a card after any changes to the list of modifiers on a card changes.
+     */
+    public void onCardModified(AbstractCard card) {
+
+    }
+
+    /**
+     * return a Color if the cardmod should cause the card to glow a different color than it usually does. This should return
+     * null if it doesn't want the card to be affected.
+     */
+    public Color getGlow(AbstractCard card) {
+        return null;
     }
 
     /**

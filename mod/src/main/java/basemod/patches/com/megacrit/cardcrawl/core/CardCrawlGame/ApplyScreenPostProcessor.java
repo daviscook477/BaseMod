@@ -175,8 +175,11 @@ public class ApplyScreenPostProcessor {
     private static class ShaderScreenSizeUniform {
         private static void Postfix(ShaderProgram ___customShader) {
             if (___customShader != null) {
+                boolean old = ShaderProgram.pedantic;
+                ShaderProgram.pedantic = false;
                 ___customShader.setUniformf("u_scale", Settings.scale);
                 ___customShader.setUniformf("u_screenSize", Settings.WIDTH, Settings.HEIGHT);
+                ShaderProgram.pedantic = old;
             }
         }
     }

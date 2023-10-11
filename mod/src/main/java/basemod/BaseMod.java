@@ -12,10 +12,11 @@ import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.RenderDescripti
 import basemod.patches.com.megacrit.cardcrawl.helpers.TopPanel.TopPanelHelper;
 import basemod.patches.com.megacrit.cardcrawl.screens.select.GridCardSelectScreen.GridCardSelectScreenFields;
 import basemod.patches.com.megacrit.cardcrawl.unlock.UnlockTracker.CountModdedUnlockCards;
+import basemod.patches.imgui.ImGuiPatches;
 import basemod.patches.whatmod.WhatMod;
 import basemod.screens.ModalChoiceScreen;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Version;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -37,7 +38,6 @@ import com.evacipated.cardcrawl.modthespire.lib.SpireField;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.audio.Sfx;
 import com.megacrit.cardcrawl.audio.SoundMaster;
 import com.megacrit.cardcrawl.cards.AbstractCard;
@@ -279,12 +279,13 @@ public class BaseMod {
 
 	private static SpireConfig makeConfig() {
 		Properties defaultProperties = new Properties();
-		defaultProperties.setProperty("console-key", "`");
+		defaultProperties.setProperty("console-key", DevConsole.newToggleKey.save());
 		defaultProperties.setProperty("autocomplete-enabled", Boolean.toString(true));
 		defaultProperties.setProperty("whatmod-enabled", Boolean.toString(true));
 		defaultProperties.setProperty("basemod-fixes", Boolean.toString(true));
 		defaultProperties.setProperty("imgui-search", Boolean.toString(true));
 		defaultProperties.setProperty("imgui-actionqueue", Boolean.toString(true));
+		defaultProperties.setProperty("imgui-key", ImGuiPatches.toggleKey.save());
 
 		try {
 			SpireConfig retConfig = new SpireConfig(BaseModInit.MODNAME, CONFIG_FILE, defaultProperties);
@@ -328,7 +329,7 @@ public class BaseMod {
 
 		String consoleKey = getString("console-key");
 		if (consoleKey != null) {
-			DevConsole.toggleKey = Keys.valueOf(consoleKey);
+			DevConsole.newToggleKey = DevConsole.KeyWithMods.load(consoleKey);
 		}
 		Boolean consoleEnabled = getBoolean("console-enabled");
 		if (consoleEnabled != null) {
@@ -343,6 +344,10 @@ public class BaseMod {
 		Boolean whatmodEnabled = getBoolean("whatmod-enabled");
 		if (whatmodEnabled != null) {
 			WhatMod.enabled = whatmodEnabled;
+		}
+		String imguiKey = getString("imgui-key");
+		if (imguiKey != null) {
+			ImGuiPatches.toggleKey = DevConsole.KeyWithMods.load(imguiKey);
 		}
 
 		fixesEnabled = getBoolean("basemod-fixes");
@@ -990,8 +995,9 @@ public class BaseMod {
 	 */
 	public static float calculateCardDamage(AbstractPlayer player, AbstractMonster mo, AbstractCard c, float tmp) {
 		if (c instanceof CustomCard) {
+			float oldVal = tmp;
 			float newVal = ((CustomCard) c).calculateModifiedCardDamage(player, mo, tmp);
-			if ((int) newVal != c.baseDamage) {
+			if (newVal != oldVal) {
 				c.isDamageModified = true;
 			}
 			return newVal;

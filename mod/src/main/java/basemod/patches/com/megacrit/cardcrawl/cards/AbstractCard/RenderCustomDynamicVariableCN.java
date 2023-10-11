@@ -2,8 +2,6 @@ package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
 import basemod.BaseMod;
 import basemod.abstracts.DynamicVariable;
-import basemod.helpers.dynamicvariables.BlockVariable;
-import basemod.helpers.dynamicvariables.DamageVariable;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
@@ -25,7 +23,7 @@ public class RenderCustomDynamicVariableCN
 	)
 	public static void Insert(AbstractCard __instance, SpriteBatch sb, @ByRef String[] tmp)
 	{
-		if (tmp[0].startsWith("$")) {
+		if (tmp[0].startsWith("$") || tmp[0].equals("D")) {
 			String key = tmp[0];
 
 			Pattern pattern = Pattern.compile("\\$(.+)\\$\\$");
@@ -37,20 +35,13 @@ public class RenderCustomDynamicVariableCN
 			DynamicVariable dv = BaseMod.cardDynamicVariableMap.get(key);
 			if (dv != null) {
 				if (dv.isModified(__instance)) {
-					if (dv.value(__instance) >= dv.baseValue(__instance)) {
+					if (dv.value(__instance) >= dv.modifiedBaseValue(__instance)) {
 						tmp[0] = "[#" + dv.getIncreasedValueColor().toString() + "]" + Integer.toString(dv.value(__instance)) + "[]";
 					} else {
 						tmp[0] = "[#" + dv.getDecreasedValueColor().toString() + "]" + Integer.toString(dv.value(__instance)) + "[]";
 					}
 				} else {
-					//cardmods affect base variables
-					int num = dv.baseValue(__instance);
-					if (dv instanceof BlockVariable && CardModifierPatches.CardModifierFields.cardModHasBaseBlock.get(__instance) && !__instance.isBlockModified) {
-						num = CardModifierPatches.CardModifierFields.cardModBaseBlock.get(__instance);
-					} else if (dv instanceof DamageVariable && CardModifierPatches.CardModifierFields.cardModHasBaseDamage.get(__instance) && !__instance.isDamageModified) {
-						num = CardModifierPatches.CardModifierFields.cardModBaseDamage.get(__instance);
-					}
-					tmp[0] = Integer.toString(num);
+					tmp[0] = Integer.toString(dv.modifiedBaseValue(__instance));
 				}
 			}
 		}
