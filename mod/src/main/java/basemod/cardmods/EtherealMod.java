@@ -7,12 +7,16 @@ import com.megacrit.cardcrawl.helpers.GameDictionary;
 import com.megacrit.cardcrawl.localization.LocalizedStrings;
 import org.apache.commons.lang3.StringUtils;
 
+
 public class EtherealMod extends AbstractCardModifier {
     public static String ID = "basemod:EtherealCardModifier";
+    private static final UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(ID);
 
     @Override
     public String modifyDescription(String rawDescription, AbstractCard card) {
-        return StringUtils.capitalize(GameDictionary.ETHEREAL.NAMES[0]) + (Settings.lineBreakViaCharacter ? " " : "") + LocalizedStrings.PERIOD + " NL " + rawDescription;
+        if ( Settings.language != Settings.GameLanguage.ENG && uiStrings.TEXT[0].contains("Ethereal") )
+            return StringUtils.capitalize(GameDictionary.ETHEREAL.NAMES[0]) + (Settings.lineBreakViaCharacter ? " " : "") + LocalizedStrings.PERIOD + " NL " + rawDescription;
+        return rawDescription + uiStrings.TEXT[0];
     }
 
     @Override
