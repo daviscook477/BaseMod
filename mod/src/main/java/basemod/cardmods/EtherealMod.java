@@ -18,7 +18,7 @@ public class EtherealMod extends AbstractCardModifier {
     public String modifyDescription(String rawDescription, AbstractCard card) {
         if ( Settings.language != Settings.GameLanguage.ENG && uiStrings.TEXT[0].contains("Ethereal") )
             return StringUtils.capitalize(GameDictionary.ETHEREAL.NAMES[0]) + (Settings.lineBreakViaCharacter ? " " : "") + LocalizedStrings.PERIOD + " NL " + rawDescription;
-        return rawDescription + uiStrings.TEXT[0];
+        return uiStrings.TEXT[0] + rawDescription;
     }
 
     @Override

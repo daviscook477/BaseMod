@@ -17,7 +17,7 @@ public class RetainMod extends AbstractCardModifier {
     public String modifyDescription(String rawDescription, AbstractCard card) {
         if ( Settings.language != Settings.GameLanguage.ENG && uiStrings.TEXT[0].contains("Retain") )
             return StringUtils.capitalize(GameDictionary.RETAIN.NAMES[0]) + (Settings.lineBreakViaCharacter ? " " : "") + LocalizedStrings.PERIOD + " NL " + rawDescription;
-        return rawDescription + uiStrings.TEXT[0];
+        return uiStrings.TEXT[0] + rawDescription;
     }
 
     @Override
