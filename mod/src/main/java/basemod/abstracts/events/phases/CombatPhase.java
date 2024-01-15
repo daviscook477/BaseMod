@@ -147,7 +147,8 @@ public class CombatPhase extends EventPhase {
     @Override
     public boolean reopen(PhasedEvent phasedEvent) {
         if (waitingRewards) {
-            AbstractDungeon.getCurrRoom().phase = AbstractRoom.RoomPhase.INCOMPLETE;
+            if (hasFollowup())
+                AbstractDungeon.getCurrRoom().phase = AbstractRoom.RoomPhase.INCOMPLETE;
             waitingRewards = false;
             phasedEvent.waitTimer = 69; //will not reopen again until reward screen is finished
             //See EventCombatProceed
