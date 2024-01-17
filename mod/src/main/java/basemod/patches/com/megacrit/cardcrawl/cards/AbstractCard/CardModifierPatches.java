@@ -27,6 +27,7 @@ import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.CardHelper;
 import com.megacrit.cardcrawl.helpers.FontHelper;
+import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.metrics.Metrics;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
@@ -540,9 +541,17 @@ public class CardModifierPatches
     )
     public static class CardModifierSingleCardViewRender
     {
-        @SpirePostfixPatch
-        public static void Postfix(SingleCardViewPopup __instance, SpriteBatch sb) {
+        @SpireInsertPatch(locator = Locator.class)
+        public static void Insert(SingleCardViewPopup __instance, SpriteBatch sb) {
             CardModifierManager.onSingleCardViewRender(__instance, sb);
+        }
+
+        public static class Locator extends SpireInsertLocator {
+            @Override
+            public int[] Locate(CtBehavior ctBehavior) throws Exception {
+                Matcher m = new Matcher.MethodCallMatcher(Hitbox.class, "render");
+                return LineFinder.findInOrder(ctBehavior, m);
+            }
         }
     }
 
