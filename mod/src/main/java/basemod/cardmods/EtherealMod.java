@@ -2,10 +2,6 @@ package basemod.cardmods;
 
 import basemod.abstracts.AbstractCardModifier;
 import com.megacrit.cardcrawl.cards.AbstractCard;
-import com.megacrit.cardcrawl.core.Settings;
-import com.megacrit.cardcrawl.helpers.GameDictionary;
-import com.megacrit.cardcrawl.localization.LocalizedStrings;
-import org.apache.commons.lang3.StringUtils;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.localization.UIStrings;
 
@@ -16,9 +12,7 @@ public class EtherealMod extends AbstractCardModifier {
 
     @Override
     public String modifyDescription(String rawDescription, AbstractCard card) {
-        if ( Settings.language != Settings.GameLanguage.ENG && uiStrings.TEXT[0].contains("Ethereal") )
-            return StringUtils.capitalize(GameDictionary.ETHEREAL.NAMES[0]) + (Settings.lineBreakViaCharacter ? " " : "") + LocalizedStrings.PERIOD + " NL " + rawDescription;
-        return uiStrings.TEXT[0] + rawDescription;
+        return String.format(uiStrings.TEXT[0], rawDescription);
     }
 
     @Override
