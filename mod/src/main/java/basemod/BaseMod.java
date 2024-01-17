@@ -2561,9 +2561,9 @@ public class BaseMod {
 		}
 		BaseMod.loadCustomStringsFile(RunModStrings.class, path);
 
-		path = String.format("localization/basemod/%s/CardMods.json", Settings.language.name().toLowerCase());
+		path = String.format("localization/basemod/%s/cardMods.json", Settings.language.name().toLowerCase());
 		if (!Gdx.files.internal(path).exists()) {
-			path = String.format("localization/basemod/%s/CardMods.json", Settings.GameLanguage.ENG.name().toLowerCase());
+			path = String.format("localization/basemod/%s/cardMods.json", Settings.GameLanguage.ENG.name().toLowerCase());
 		}
 		BaseMod.loadCustomStringsFile(UIStrings.class, path);
 
