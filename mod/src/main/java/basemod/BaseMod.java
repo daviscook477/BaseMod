@@ -1729,6 +1729,12 @@ public class BaseMod {
 		addCharacter(character, selectButtonPath, portraitPath, characterID, null);
 	}
 
+	public static void addCharacter(AbstractPlayer character,
+									String selectButtonPath,
+									String portraitPath) {
+		addCharacter(character, selectButtonPath, portraitPath, character.chosenClass, null);
+	}
+
 	public static TextureAtlas.AtlasRegion getCardSmallEnergy() {
 		if (AbstractDungeon.player == null) {
 			return AbstractCard.orb_red;
@@ -2574,6 +2580,12 @@ public class BaseMod {
 			path = String.format("localization/basemod/%s/customMods.json", Settings.GameLanguage.ENG.name().toLowerCase());
 		}
 		BaseMod.loadCustomStringsFile(RunModStrings.class, path);
+
+		path = String.format("localization/basemod/%s/cardMods.json", Settings.language.name().toLowerCase());
+		if (!Gdx.files.internal(path).exists()) {
+			path = String.format("localization/basemod/%s/cardMods.json", Settings.GameLanguage.ENG.name().toLowerCase());
+		}
+		BaseMod.loadCustomStringsFile(UIStrings.class, path);
 
 		for (EditStringsSubscriber sub : editStringsSubscribers) {
 			sub.receiveEditStrings();

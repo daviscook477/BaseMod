@@ -53,7 +53,7 @@ public class RenderCardDescriptorsSCV
 				locator = Locator.class,
 				localvars = {"tOffset", "tWidth"}
 		)
-		public static void Insert(SingleCardViewPopup __instance, SpriteBatch sb, AbstractCard ___card, @ByRef float[] tOffset, @ByRef float[] tWidth)
+		public static SpireReturn<Void> Insert(SingleCardViewPopup __instance, SpriteBatch sb, AbstractCard ___card, @ByRef float[] tOffset, @ByRef float[] tWidth)
 		{
 			//RenderCardDescriptors.Frame.Insert(___card, sb, 0, 0, tOffset, tWidth);
 			String typeText;
@@ -88,6 +88,24 @@ public class RenderCardDescriptorsSCV
 				tOffset[0] = (gl.width - 70 * Settings.scale) / 2f;
 				tWidth[0] = (gl.width - 0f) / (62 * Settings.scale);
 			}
+
+			if (___card instanceof CustomCard) {
+				CustomCard card = (CustomCard) ___card;
+
+				if (card.frameLargeRegion != null) // Does it have a custom frame?
+				{
+					renderHelper(sb, (float) Settings.WIDTH / 2.0F, (float) Settings.HEIGHT / 2.0F, ((CustomCard) ___card).frameLargeRegion);
+
+					if (card.frameMiddleLargeRegion != null) // Does it have custom dynamic frame parts?
+					{
+						dynamicFrameRenderHelper(sb, card.frameMiddleLargeRegion, 0.0F, tWidth[0]);
+						dynamicFrameRenderHelper(sb, card.frameLeftLargeRegion, -tOffset[0], 1.0F);
+						dynamicFrameRenderHelper(sb, card.frameRightLargeRegion, tOffset[0], 1.0F);
+						return SpireReturn.Return();
+					}
+				}
+			}
+			return SpireReturn.Continue();
 		}
 
 		private static class Locator extends SpireInsertLocator
@@ -132,5 +150,27 @@ public class RenderCardDescriptorsSCV
 			);
 			return SpireReturn.Return(null);
 		}
+	}
+
+	private static void renderHelper(SpriteBatch sb, float x, float y, TextureAtlas.AtlasRegion img) {
+		if (img != null)
+			sb.draw(img, x + img.offsetX - (float)img.originalWidth / 2.0F, y + img.offsetY - (float)img.originalHeight / 2.0F, (float)img.originalWidth / 2.0F - img.offsetX, (float)img.originalHeight / 2.0F - img.offsetY, (float)img.packedWidth, (float)img.packedHeight, Settings.scale, Settings.scale, 0.0F);
+	}
+
+	private static void dynamicFrameRenderHelper(SpriteBatch sb, TextureAtlas.AtlasRegion img, float xOffset, float xScale) {
+		Vector2 tmp = new Vector2(0, 0);
+		tmp.set(xOffset, 0);
+		sb.draw(
+				img,
+				Settings.WIDTH / 2f + img.offsetX - (img.originalWidth / 2f + 2) + tmp.x,
+				Settings.HEIGHT / 2f + img.offsetY - img.originalHeight / 2f + tmp.y,
+				img.originalWidth / 2f - img.offsetX + 2,
+				img.originalHeight / 2f - img.offsetY,
+				img.packedWidth,
+				img.packedHeight,
+				Settings.scale * xScale,
+				Settings.scale,
+				0f
+		);
 	}
 }

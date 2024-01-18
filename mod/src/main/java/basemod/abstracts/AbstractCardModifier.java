@@ -4,11 +4,13 @@ import basemod.helpers.CardBorderGlowManager;
 import basemod.helpers.TooltipInfo;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.actions.utility.UseCardAction;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.CardGroup;
 import com.megacrit.cardcrawl.cards.DamageInfo;
 import com.megacrit.cardcrawl.core.AbstractCreature;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 
 import java.lang.annotation.ElementType;
@@ -238,6 +240,14 @@ public abstract class AbstractCardModifier implements Comparable<AbstractCardMod
     }
 
     /**
+     * Behaves the same as StSLib's StartupCard.
+     * Triggers at the start of battle. Return true to have the card flash on the screen.
+     */
+    public boolean onBattleStart(AbstractCard card) {
+        return false;
+    }
+
+    /**
      * return a Color if the cardmod should cause the card to glow a different color than it usually does. This should return
      * null if it doesn't want the card to be affected.
      */
@@ -263,5 +273,13 @@ public abstract class AbstractCardModifier implements Comparable<AbstractCardMod
     @Retention(RetentionPolicy.RUNTIME)
     public @interface SaveIgnore
     {
+    }
+
+    public void addToTop(AbstractGameAction action) {
+        AbstractDungeon.actionManager.addToTop(action);
+    }
+
+    public void addToBot(AbstractGameAction action) {
+        AbstractDungeon.actionManager.addToBottom(action);
     }
 }

@@ -1024,4 +1024,35 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 * Fix CardMod base value changes (Mistress Alison)
 * Fix border glow manager not testing for CardMod glows (NellyDevo)
 
+#### v5.53.0 ####
+* Make multiline relic descriptions work on character select screen (JohnnyBazooka89)
+* Don't fade limbo when clearing card queue (Alchyr)
+* Add repeat to dynamic text blocks (herbix)
+* Allow bonusCondition and spawnCondition to be repeated in AddEventParams (Alchyr)
+* Fix Choke power description not updating (SandTag)
+* Remove check for Focus when updating orb descriptions (SandTag)
+* Add scrolling tooltips for relics on SingleRelicView (SandTag)
+* Fix card descriptors and custom card frames not working together (Enbeon)
+* Add PostShopInitializeSubscriber (DandyLion)
+* Add pagination to shop relic grid (DandyLion)
+* Card in use now counts as "in hand" for dynamic text (Mistress Alison)
+* Fix CardMod render not working in SCV (Mistress Alison)
+* Add overload for addCharacter (Alchyr)
+* Nelly gets to keep her purple license
+  * Fix inconsistant CardMod application (NellyDevo)
+  * Add on battle start hook for CardMods (NellyDevo)
+  * Add addToBot and addToTop to CardMods (NellyDevo)
+  * Improve error handling with unserializable CardMods (NellyDevo)
+* Fix for ModRadioButtonGroup (Mindbomber2)
+* Fix magic number not resetting if a CardMod was applied once (herbix)
+* Fix TwitchVoter crashing sometimes (Alchyr)
+* Fix soft lock with endsWithRewardsUI events (Alchyr)
+* Fix queueExtraCard crash (erasels/kiooeht)
+* Fix provided CardMod localization (Rucodeby)
+
+#### v5.53.1 ####
+* Revert changes
+  * Add PostShopInitializeSubscriber (DandyLion)
+  * Add pagination to shop relic grid (DandyLion)
+
 #### dev ####

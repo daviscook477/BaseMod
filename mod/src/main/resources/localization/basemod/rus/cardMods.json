@@ -1,0 +1,22 @@
+{
+    "basemod:ExhaustCardModifier": {
+        "TEXT": [
+            "%s NL Сжигается."
+        ]
+    },
+    "basemod:EtherealCardModifier": {
+        "TEXT": [
+            "Эфирная. NL %s"
+        ]
+    },
+    "basemod:InnateCardModifier": {
+        "TEXT": [
+            "Начальная. NL %s"
+        ]
+    },
+    "basemod:RetainCardModifier": {
+        "TEXT": [
+            "Оставляется. NL %s"
+        ]
+    }
+}

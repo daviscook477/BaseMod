@@ -13,6 +13,7 @@ import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
+import com.megacrit.cardcrawl.vfx.cardManip.ShowCardBrieflyEffect;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -118,30 +119,29 @@ public class CardModifierManager
         if (replace) {
             removeAllModifiers(newCard, includeInherent);
         }
-        ArrayList<AbstractCardModifier> removed = new ArrayList<>();
+        ArrayList<AbstractCardModifier> toCopy = new ArrayList<>();
         modifiers(oldCard).removeIf(mod -> {
-            if (!mod.isInherent(oldCard) || includeInherent) {
-                removed.add(mod);
+            if (includeInherent || !mod.isInherent(oldCard)) {
+                toCopy.add(mod);
                 return removeOld;
             }
             return false;
         });
-        ArrayList<AbstractCardModifier> applied = new ArrayList<>();
-        removed.forEach(mod -> {
+        toCopy.forEach(mod -> {
             if (removeOld) {
                 mod.onRemove(oldCard);
             }
             AbstractCardModifier newMod = mod.makeCopy();
             if (newMod.shouldApply(newCard)) {
                 modifiers(newCard).add(newMod);
-                applied.add(newMod);
+                newMod.onInitialApplication(newCard);
             }
         });
-        applied.forEach(mod -> mod.onInitialApplication(newCard));
         if (removeOld) {
             onCardModified(oldCard);
             oldCard.initializeDescription();
         }
+        Collections.sort(modifiers(newCard));
         onCardModified(newCard);
         newCard.initializeDescription();
     }
@@ -341,6 +341,16 @@ public class CardModifierManager
         for (AbstractCardModifier mod : modifiers(card)) {
             mod.onCardModified(card);
         }
+    }
+
+    public static void onBattleStart(AbstractCard card) {
+        boolean showCard = false;
+        for (AbstractCardModifier mod : modifiers(card)) {
+            if (mod.onBattleStart(card)) {
+                showCard = true;
+            }
+        }
+        if (showCard) AbstractDungeon.effectList.add(0, new ShowCardBrieflyEffect(card.makeStatEquivalentCopy()));
     }
 
     public static List<CardBorderGlowManager.GlowInfo> getGlows(AbstractCard card) {

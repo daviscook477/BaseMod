@@ -2,17 +2,17 @@ package basemod.cardmods;
 
 import basemod.abstracts.AbstractCardModifier;
 import com.megacrit.cardcrawl.cards.AbstractCard;
-import com.megacrit.cardcrawl.core.Settings;
-import com.megacrit.cardcrawl.helpers.GameDictionary;
-import com.megacrit.cardcrawl.localization.LocalizedStrings;
-import org.apache.commons.lang3.StringUtils;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
+import com.megacrit.cardcrawl.localization.UIStrings;
+
 
 public class EtherealMod extends AbstractCardModifier {
     public static String ID = "basemod:EtherealCardModifier";
+    private static final UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(ID);
 
     @Override
     public String modifyDescription(String rawDescription, AbstractCard card) {
-        return StringUtils.capitalize(GameDictionary.ETHEREAL.NAMES[0]) + (Settings.lineBreakViaCharacter ? " " : "") + LocalizedStrings.PERIOD + " NL " + rawDescription;
+        return String.format(uiStrings.TEXT[0], rawDescription);
     }
 
     @Override

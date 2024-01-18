@@ -1,7 +1,6 @@
 package basemod.patches.com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 
 import basemod.abstracts.CustomCard;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
@@ -10,6 +9,8 @@ import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
+
+import static basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.RenderCardDescriptors.getAllDescriptors;
 
 public class CustomRendering {
     @SpirePatch(
@@ -46,6 +47,11 @@ public class CustomRendering {
         {
             //If it's not a CustomCard, no custom rendering
             if (!(___card instanceof CustomCard)) {
+                return SpireReturn.Continue();
+            }
+
+            // If the card has card descriptors, don't render here because the descriptor rendering will break
+            if (!getAllDescriptors(___card).isEmpty()) {
                 return SpireReturn.Continue();
             }
 

@@ -4,6 +4,7 @@ import basemod.BaseMod;
 import basemod.ReflectionHacks;
 import basemod.abstracts.AbstractCardModifier;
 import basemod.helpers.CardModifierManager;
+import basemod.patches.com.megacrit.cardcrawl.rooms.AbstractRoom.StartBattleHook;
 import basemod.patches.com.megacrit.cardcrawl.saveAndContinue.SaveFile.ModSaves;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -27,22 +28,28 @@ import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.CardHelper;
 import com.megacrit.cardcrawl.helpers.FontHelper;
+import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.metrics.Metrics;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
+import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 import com.megacrit.cardcrawl.screens.runHistory.RunHistoryScreen;
 import com.megacrit.cardcrawl.screens.runHistory.TinyCard;
 import com.megacrit.cardcrawl.screens.stats.RunData;
+import com.megacrit.cardcrawl.vfx.cardManip.ShowCardBrieflyEffect;
 import javassist.*;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 import javassist.expr.MethodCall;
 import org.clapper.util.classutil.*;
 import com.evacipated.cardcrawl.modthespire.Loader;
+import sun.misc.Unsafe;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CardModifierPatches
 {
@@ -127,10 +134,8 @@ public class CardModifierPatches
         //modifyBaseMagic
         public static void Prefix(AbstractCard __instance) {
             int magic = (int) CardModifierManager.onModifyBaseMagic(__instance.baseMagicNumber, __instance);
-            if (magic != __instance.baseMagicNumber) {
-                __instance.magicNumber = magic;
-                __instance.isMagicNumberModified = true;
-            }
+            __instance.magicNumber = magic;
+            __instance.isMagicNumberModified = magic != __instance.baseMagicNumber;
         }
 
         //onApplyPowers
@@ -226,10 +231,8 @@ public class CardModifierPatches
         //modifyBaseMagic
         public static void Prefix(AbstractCard __instance) {
             int magic = (int) CardModifierManager.onModifyBaseMagic(__instance.baseMagicNumber, __instance);
-            if (magic != __instance.baseMagicNumber) {
-                __instance.magicNumber = magic;
-                __instance.isMagicNumberModified = true;
-            }
+            __instance.magicNumber = magic;
+            __instance.isMagicNumberModified = magic != __instance.baseMagicNumber;
         }
 
         //onCalculateCardDamage
@@ -540,9 +543,17 @@ public class CardModifierPatches
     )
     public static class CardModifierSingleCardViewRender
     {
-        @SpirePostfixPatch
-        public static void Postfix(SingleCardViewPopup __instance, SpriteBatch sb) {
+        @SpireInsertPatch(locator = Locator.class)
+        public static void Insert(SingleCardViewPopup __instance, SpriteBatch sb) {
             CardModifierManager.onSingleCardViewRender(__instance, sb);
+        }
+
+        public static class Locator extends SpireInsertLocator {
+            @Override
+            public int[] Locate(CtBehavior ctBehavior) throws Exception {
+                Matcher m = new Matcher.MethodCallMatcher(Hitbox.class, "render");
+                return LineFinder.findInOrder(ctBehavior, m);
+            }
         }
     }
 
@@ -733,6 +744,7 @@ public class CardModifierPatches
     }
 
     public static RuntimeTypeAdapterFactory<AbstractCardModifier> modifierAdapter;
+    private static List<Class<?>> offendingCardMods = new ArrayList<>();
 
     public static void initializeAdapterFactory() {
         modifierAdapter = RuntimeTypeAdapterFactory.of(AbstractCardModifier.class, "classname");
@@ -752,16 +764,37 @@ public class CardModifierPatches
         );
         ArrayList<ClassInfo> cardModifiers = new ArrayList<>();
         finder.findClasses(cardModifiers, filter);
+        Gson gson = new GsonBuilder().create();
+        Unsafe unsafe = null;
         for (ClassInfo info : cardModifiers) {
             try {
-                Class c = Class.forName(info.getClassName());
-                if (!c.isAnnotationPresent(AbstractCardModifier.SaveIgnore.class)) {
-                    modifierAdapter.registerSubtype(c, info.getClassName());
+                Class foundClass = Class.forName(info.getClassName());
+                if (!foundClass.isAnnotationPresent(AbstractCardModifier.SaveIgnore.class)) {
+                    try {
+                        if (unsafe == null) {
+                            Field f = Unsafe.class.getDeclaredField("theUnsafe");
+                            f.setAccessible(true);
+                            unsafe = (Unsafe) f.get(null);
+                        }
+                        Object object = unsafe.allocateInstance(foundClass);
+                        String serialized = gson.toJson(object);
+                        gson.fromJson(serialized, foundClass);
+                        modifierAdapter.registerSubtype(foundClass, info.getClassName());
+                    } catch (Exception e) {
+                        BaseMod.logger.warn("Test serialization failed on class " + foundClass + ".");
+                        BaseMod.logger.info("Unserializable cardmods cannot be saved when placed on the master deck. To remove this warning, fix the issue making your cardmod unserializable or mark your cardmod class with @SaveIgnore.");
+                        e.printStackTrace();
+                        offendingCardMods.add(foundClass);
+                    }
                 }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static boolean unsavable(AbstractCardModifier mod) {
+        return mod.getClass().isAnnotationPresent(AbstractCardModifier.SaveIgnore.class) || offendingCardMods.contains(mod.getClass());
     }
 
     public static final String CARDMODS_KEY = "basemod:card_modifiers";
@@ -780,17 +813,13 @@ public class CardModifierPatches
             Gson gson = builder.create();
             for (AbstractCard card : AbstractDungeon.player.masterDeck.group) {
                 ArrayList<AbstractCardModifier> cardModifierList = CardModifierPatches.CardModifierFields.cardModifiers.get(card);
-                ArrayList<AbstractCardModifier> saveIgnores = new ArrayList<>();
-                for (AbstractCardModifier mod : cardModifierList) {
-                    if (mod.getClass().isAnnotationPresent(AbstractCardModifier.SaveIgnore.class)) {
-                        saveIgnores.add(mod);
-                    }
-                }
+
+                List<AbstractCardModifier> saveIgnores = cardModifierList.stream().filter(CardModifierPatches::unsavable).collect(Collectors.toList());
                 if (!saveIgnores.isEmpty()) {
-                    BaseMod.logger.warn("attempted to save un-savable card modifiers. Modifiers marked @SaveIgnore will not be saved on master deck.");
+                    BaseMod.logger.warn("attempted to save un-savable card modifier(s). Un-serializable modifiers and modifiers marked @SaveIgnore will not be saved on master deck.");
                     BaseMod.logger.info("affected card: " + card.cardID);
                     for (AbstractCardModifier mod : saveIgnores) {
-                        BaseMod.logger.info("saveIgnore mod: " + mod.getClass().getName());
+                        BaseMod.logger.info("   unsavable mod: " + mod.getClass().getName());
                     }
                     cardModifierList.removeAll(saveIgnores);
                 }
@@ -925,6 +954,39 @@ public class CardModifierPatches
             public int[] Locate(CtBehavior ctBehavior) throws Exception {
                 Matcher m = new Matcher.MethodCallMatcher(RunHistoryScreen.class, "cardForName");
                 return new int[]{LineFinder.findInOrder(ctBehavior, m)[0]+1};
+            }
+        }
+    }
+
+    @SpirePatch(
+            clz = AbstractRoom.class,
+            method = "update"
+    )
+    public static class CardModStartBattleHook {
+
+        @SpireInsertPatch(
+                locator = StartBattleLocator.class
+        )
+        public static void Insert(AbstractRoom __instance) {
+            CardGroup[] cardGroups = new CardGroup[] {
+                    AbstractDungeon.player.drawPile,
+                    AbstractDungeon.player.hand,
+                    AbstractDungeon.player.discardPile,
+                    AbstractDungeon.player.exhaustPile
+            };
+
+            for (CardGroup cardGroup : cardGroups) {
+                for (AbstractCard c : cardGroup.group) {
+                    CardModifierManager.onBattleStart(c);
+                }
+            }
+        }
+
+        private static class StartBattleLocator extends SpireInsertLocator {
+            @Override
+            public int[] Locate(CtBehavior ctBehavior) throws Exception {
+                Matcher finalMatcher = new Matcher.MethodCallMatcher(AbstractPlayer.class, "applyStartOfCombatPreDrawLogic");
+                return LineFinder.findInOrder(ctBehavior, finalMatcher);
             }
         }
     }
