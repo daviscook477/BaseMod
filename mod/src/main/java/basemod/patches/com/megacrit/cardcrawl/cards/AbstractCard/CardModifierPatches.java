@@ -134,8 +134,10 @@ public class CardModifierPatches
         //modifyBaseMagic
         public static void Prefix(AbstractCard __instance) {
             int magic = (int) CardModifierManager.onModifyBaseMagic(__instance.baseMagicNumber, __instance);
-            __instance.magicNumber = magic;
-            __instance.isMagicNumberModified = magic != __instance.baseMagicNumber;
+            if (magic != __instance.baseMagicNumber) {
+                __instance.magicNumber = magic;
+                __instance.isMagicNumberModified = true;
+            }
         }
 
         //onApplyPowers
@@ -231,8 +233,10 @@ public class CardModifierPatches
         //modifyBaseMagic
         public static void Prefix(AbstractCard __instance) {
             int magic = (int) CardModifierManager.onModifyBaseMagic(__instance.baseMagicNumber, __instance);
-            __instance.magicNumber = magic;
-            __instance.isMagicNumberModified = magic != __instance.baseMagicNumber;
+            if (magic != __instance.baseMagicNumber) {
+                __instance.magicNumber = magic;
+                __instance.isMagicNumberModified = true;
+            }
         }
 
         //onCalculateCardDamage
