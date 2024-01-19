@@ -51,12 +51,18 @@ public class ShopGridPatch {
     @SpirePatch2(clz = ShopScreen.class, method = "initRelics")
     public static class InitRelics {
 
-        @SpirePostfixPatch
-        public static void AddGridRelics(ArrayList<StoreRelic> ___relics) {
-            for (StoreRelic relic : ___relics) {
-                CustomShopItem item = new CustomShopItem();
-                item.storeRelic = relic;
-                ShopGrid.tryAddItem(item);
+        @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "relic" })
+        public static void AddGridRelics(StoreRelic relic) {
+            CustomShopItem item = new CustomShopItem();
+            item.storeRelic = relic;
+            ShopGrid.tryAddItem(item);
+        }
+
+        private static class ArrayAddLocator extends SpireInsertLocator {
+
+            @Override
+            public int[] Locate(CtBehavior ct) throws Exception {
+                return LineFinder.findInOrder(ct, new Matcher.MethodCallMatcher(ArrayList.class, "add"));
             }
         }
     }
@@ -64,14 +70,23 @@ public class ShopGridPatch {
     @SpirePatch2(clz = ShopScreen.class, method = "initPotions")
     public static class PostInitPotions {
 
-        @SpirePostfixPatch
-        public static void AddGridPotionsAndSetCoords(ArrayList<StorePotion> ___potions) {
-            for (StorePotion potion : ___potions) {
-                CustomShopItem item = new CustomShopItem();
-                item.storePotion = potion;
-                ShopGrid.tryAddItem(item);
-            }
+        @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "potion" })
+        public static void AddGridPotions(StorePotion potion) {
+            CustomShopItem item = new CustomShopItem();
+            item.storePotion = potion;
+            ShopGrid.tryAddItem(item);
+        }
 
+        private static class ArrayAddLocator extends SpireInsertLocator {
+
+            @Override
+            public int[] Locate(CtBehavior ct) throws Exception {
+                return LineFinder.findInOrder(ct, new Matcher.MethodCallMatcher(ArrayList.class, "add"));
+            }
+        }
+
+        @SpirePostfixPatch
+        public static void SetItemCoords() {
             for (ShopGrid.Row row : ShopGrid.currentPage.rows) {
                 for (CustomShopItem item : row.items) {
                     if (item.storePotion != null) {

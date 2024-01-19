@@ -60,16 +60,16 @@ public class CustomShopItem {
         this(new StorePotion(potion, 0, AbstractDungeon.shopScreen));
     }
 
+    @SuppressWarnings("unchecked")
     public CustomShopItem(StoreRelic storeRelic) {
         this.storeRelic = storeRelic;
-        @SuppressWarnings("unchecked")
         ArrayList<StoreRelic> relics = (ArrayList<StoreRelic>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "relics");
         relics.add(this.storeRelic);
     }
 
+    @SuppressWarnings("unchecked")
     public CustomShopItem(StorePotion storePotion) {
         this.storePotion = storePotion;
-        @SuppressWarnings("unchecked")
         ArrayList<StorePotion> potions = (ArrayList<StorePotion>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "potions");
         potions.add(this.storePotion);
     }
