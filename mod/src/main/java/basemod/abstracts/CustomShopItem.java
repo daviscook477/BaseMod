@@ -1,7 +1,9 @@
 package basemod.abstracts;
 
 import basemod.ReflectionHacks;
-import basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopItemGrid;
+import basemod.ShopGrid;
+import java.util.ArrayList;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -14,6 +16,10 @@ import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.helpers.TipHelper;
 import com.megacrit.cardcrawl.helpers.controller.CInputActionSet;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
+import com.megacrit.cardcrawl.potions.AbstractPotion;
+import com.megacrit.cardcrawl.relics.AbstractRelic;
+import com.megacrit.cardcrawl.relics.Courier;
+import com.megacrit.cardcrawl.relics.MembershipCard;
 import com.megacrit.cardcrawl.shop.ShopScreen;
 import com.megacrit.cardcrawl.shop.StorePotion;
 import com.megacrit.cardcrawl.shop.StoreRelic;
@@ -21,6 +27,7 @@ import com.megacrit.cardcrawl.shop.StoreRelic;
 public class CustomShopItem {
 
     private ShopScreen screenRef;
+    public ShopGrid.Row gridRow;
     public StoreRelic storeRelic;
     public StorePotion storePotion;
 
@@ -32,8 +39,8 @@ public class CustomShopItem {
     private float x, y;
 
     public int price = 0;
-    public int slot = 0;
-    public int row;
+    public int row = 0;
+    public int col = 0;
 
     public boolean isPurchased = false;
 
@@ -43,55 +50,69 @@ public class CustomShopItem {
     private static final float PRICE_OFFSET_X = ReflectionHacks.getPrivateStatic(StoreRelic.class, "RELIC_PRICE_OFFSET_X");
     private static final float PRICE_OFFSET_Y = ReflectionHacks.getPrivateStatic(StoreRelic.class, "RELIC_PRICE_OFFSET_Y");
 
+    public CustomShopItem(AbstractRelic relic) {
+        this.storeRelic = new StoreRelic(relic, 0, AbstractDungeon.shopScreen);
+        @SuppressWarnings("unchecked")
+        ArrayList<StoreRelic> relics = (ArrayList<StoreRelic>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "relics");
+        relics.add(this.storeRelic);
+    }
+
+    public CustomShopItem(AbstractPotion potion) {
+        this.storePotion = new StorePotion(potion, 0, AbstractDungeon.shopScreen);
+        @SuppressWarnings("unchecked")
+        ArrayList<StorePotion> potions = (ArrayList<StorePotion>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "potions");
+        potions.add(this.storePotion);
+    }
+
     public CustomShopItem(StoreRelic storeRelic) {
         this.storeRelic = storeRelic;
-        this.slot = ReflectionHacks.getPrivate(storeRelic, StoreRelic.class, "slot");
     }
 
     public CustomShopItem(StorePotion storePotion) {
         this.storePotion = storePotion;
-        this.slot = ReflectionHacks.getPrivate(storePotion, StorePotion.class, "slot");
     }
 
-    public CustomShopItem(ShopScreen screenRef, Texture img, int price) {
-        this.slot = ShopItemGrid.getNextSlot();
+    public CustomShopItem(Texture img, int price, String tipTitle, String tipBody) {
+        this(AbstractDungeon.shopScreen, img, price, tipTitle, tipBody);
+    }
+
+    public CustomShopItem(ShopScreen screenRef, Texture img, int price, String tipTitle, String tipBody) {
         this.screenRef = screenRef;
+        this.tipTitle = tipTitle;
+        this.tipBody = tipBody;
         this.img = img;
         this.hb = new Hitbox(img.getWidth() * Settings.scale, img.getHeight() * Settings.scale);
         applyDiscounts(price);
     }
 
-    public CustomShopItem(ShopScreen screenRef, Texture img, int price, String tipTitle, String tipBody) {
-        this(screenRef, img, price);
-        this.tipTitle = tipTitle;
-        this.tipBody = tipBody;
-    }
-
     public void applyDiscounts(int price) {
-        this.price = (int)(price
-            * (AbstractDungeon.player.hasRelic("The Courier") ? 0.8F : 1.0F)
-            * (AbstractDungeon.player.hasRelic("Membership Card") ? 0.5F : 1.0F));
+        float mult = 1F;
+        for (AbstractRelic relic : AbstractDungeon.player.relics)
+            if (relic.relicId.equals(Courier.ID))
+                mult *= 0.8F;
+            else if (relic.relicId.equals(MembershipCard.ID))
+                mult *= 0.5F;
+        this.price = (int)(mult * price);
     }
 
     public void update(float rugY) {
         if (!this.isPurchased) {
             if (storeRelic != null && storeRelic.relic != null) {
-                storeRelic.update(rugY);
                 this.isPurchased = storeRelic.isPurchased;
                 if (this.isPurchased) {
                     this.storeRelic.relic = null;
                     this.storeRelic = null;
                 }
             } else if (storePotion != null && storePotion.potion != null) {
-                storePotion.update(rugY);
                 this.isPurchased = storePotion.isPurchased;
                 if (this.isPurchased) {
                     this.storePotion.potion = null;
                     this.storePotion = null;
                 }
             } else {
-                this.x = 1000.0F * Settings.xScale + 150.0F * this.slot * Settings.xScale;
-                this.y = rugY + (this.row == 0 ? 400.0F : 200.0F) * Settings.yScale;
+
+                this.x = gridRow.getX(col);
+                this.y = gridRow.getY(row, rugY);
 
                 this.hb.move(this.x, this.y);
                 this.hb.update();
@@ -105,17 +126,13 @@ public class CustomShopItem {
                     this.hb.clicked = false;
                 }
             }
-            ShopItemGrid.removeEmptyPages();
+            ShopGrid.removeEmptyPages();
         }
     }
 
     public void render(SpriteBatch sb) {
         if (!this.isPurchased) {
-            if (storeRelic != null && storeRelic.relic != null)
-                this.storeRelic.render(sb);
-            else if (storePotion != null && storePotion.potion != null)
-                this.storePotion.render(sb);
-            else {
+            if (storeRelic == null && storePotion == null) {
                 sb.setColor(Color.WHITE);
                 // assumes the size of a relic image
                 sb.draw(img, x - 64.0F, y - 64.0F, 64.0F, 64.0F, 128.0F, 128.0F, Settings.scale, Settings.scale, 0.0F, 0, 0, 128, 128, false, false);
@@ -152,18 +169,8 @@ public class CustomShopItem {
     }
 
     protected void attemptPurchase() {
-        if (!this.isPurchased) {
-            if (storeRelic != null && storeRelic.relic != null) {
-                this.storeRelic.purchaseRelic();
-                this.storeRelic.relic = null;
-                this.storeRelic = null;
-                this.isPurchased = true;
-            } else if (storePotion != null && storePotion.potion != null) {
-                this.storePotion.purchasePotion();
-                this.storePotion.potion = null;
-                this.storePotion = null;
-                this.isPurchased = true;
-            } else if (AbstractDungeon.player.gold >= this.price){
+        if (!this.isPurchased && this.storePotion == null && this.storeRelic == null) {
+            if (AbstractDungeon.player.gold >= this.price){
                 purchase();
             } else {
                 this.screenRef.playCantBuySfx();
