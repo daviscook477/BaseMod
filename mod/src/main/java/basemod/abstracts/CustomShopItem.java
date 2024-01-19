@@ -26,7 +26,7 @@ import com.megacrit.cardcrawl.shop.StoreRelic;
 
 public class CustomShopItem {
 
-    private ShopScreen screenRef;
+    public ShopScreen screenRef;
     public ShopGrid.Row gridRow;
     public StoreRelic storeRelic;
     public StorePotion storePotion;
@@ -50,26 +50,28 @@ public class CustomShopItem {
     private static final float PRICE_OFFSET_X = ReflectionHacks.getPrivateStatic(StoreRelic.class, "RELIC_PRICE_OFFSET_X");
     private static final float PRICE_OFFSET_Y = ReflectionHacks.getPrivateStatic(StoreRelic.class, "RELIC_PRICE_OFFSET_Y");
 
+    public CustomShopItem() { /* not recommended */ }
+
     public CustomShopItem(AbstractRelic relic) {
-        this.storeRelic = new StoreRelic(relic, 0, AbstractDungeon.shopScreen);
+        this(new StoreRelic(relic, 0, AbstractDungeon.shopScreen));
+    }
+
+    public CustomShopItem(AbstractPotion potion) {
+        this(new StorePotion(potion, 0, AbstractDungeon.shopScreen));
+    }
+
+    public CustomShopItem(StoreRelic storeRelic) {
+        this.storeRelic = storeRelic;
         @SuppressWarnings("unchecked")
         ArrayList<StoreRelic> relics = (ArrayList<StoreRelic>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "relics");
         relics.add(this.storeRelic);
     }
 
-    public CustomShopItem(AbstractPotion potion) {
-        this.storePotion = new StorePotion(potion, 0, AbstractDungeon.shopScreen);
+    public CustomShopItem(StorePotion storePotion) {
+        this.storePotion = storePotion;
         @SuppressWarnings("unchecked")
         ArrayList<StorePotion> potions = (ArrayList<StorePotion>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "potions");
         potions.add(this.storePotion);
-    }
-
-    public CustomShopItem(StoreRelic storeRelic) {
-        this.storeRelic = storeRelic;
-    }
-
-    public CustomShopItem(StorePotion storePotion) {
-        this.storePotion = storePotion;
     }
 
     public CustomShopItem(Texture img, int price, String tipTitle, String tipBody) {
@@ -97,34 +99,18 @@ public class CustomShopItem {
 
     public void update(float rugY) {
         if (!this.isPurchased) {
-            if (storeRelic != null && storeRelic.relic != null) {
-                this.isPurchased = storeRelic.isPurchased;
-                if (this.isPurchased) {
-                    this.storeRelic.relic = null;
-                    this.storeRelic = null;
-                }
-            } else if (storePotion != null && storePotion.potion != null) {
-                this.isPurchased = storePotion.isPurchased;
-                if (this.isPurchased) {
-                    this.storePotion.potion = null;
-                    this.storePotion = null;
-                }
-            } else {
-
-                this.x = gridRow.getX(col);
-                this.y = gridRow.getY(row, rugY);
-
-                this.hb.move(this.x, this.y);
-                this.hb.update();
-                if (this.hb.hovered) {
-                    this.screenRef.moveHand(this.x - 190.0F * Settings.scale, this.y - 70.0F * Settings.scale);
-                    if (InputHelper.justClickedLeft)
-                        this.hb.clickStarted = true;
-                }
-                if (this.hb.clicked || (this.hb.hovered && CInputActionSet.select.isJustPressed())) {
-                    attemptPurchase();
-                    this.hb.clicked = false;
-                }
+            this.x = gridRow.getX(col);
+            this.y = gridRow.getY(row, rugY);
+            this.hb.move(this.x, this.y);
+            this.hb.update();
+            if (this.hb.hovered) {
+                this.screenRef.moveHand(this.x - 190.0F * Settings.scale, this.y - 70.0F * Settings.scale);
+                if (InputHelper.justClickedLeft)
+                    this.hb.clickStarted = true;
+            }
+            if (this.hb.clicked || (this.hb.hovered && CInputActionSet.select.isJustPressed())) {
+                attemptPurchase();
+                this.hb.clicked = false;
             }
             ShopGrid.removeEmptyPages();
         }

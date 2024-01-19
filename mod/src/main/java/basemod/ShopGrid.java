@@ -20,7 +20,9 @@ import basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.Stor
 
 public class ShopGrid {
 
-    public static int defaultPageRows = 3;
+    public static final String DEFAULT_PAGE_ID = "basemod";
+
+    public static int defaultPageRows = 2;
 
     public static int defaultPageCols = 3;
 
@@ -44,29 +46,45 @@ public class ShopGrid {
 
     public static NavButton rightArrow;
 
-    private static float pageIdxY; // the top of the page?
+    private static float pageY;
 
     public static void initialize() {
-        pages.add(currentPage = makeDefaultPage());
+        pages.clear();
+        currentPage = addDefaultPage();
         rightArrow = new NavButton(true);
         leftArrow = new NavButton(false);
     }
 
-    public static Page makeDefaultPage() {
+    public static Page addDefaultPage() {
         int[] rowSizes = new int[defaultPageRows];
             for (int i = 0; i < rowSizes.length; i++)
                 rowSizes[i] = defaultPageCols;
-        return new Page(rowSizes);
+        Page page = new Page(rowSizes);
+        pages.addLast(page);
+        return page;
     }
 
-    public static void addItem(CustomShopItem item) {
+    public static Page addCustomPage(String modId, int ... rowSizes) {
+        Page page = new Page(modId, rowSizes);
+        customPages.addLast(page);
+        return page;
+    }
+
+    public static boolean tryAddItem(CustomShopItem item) {
         for (Page page : pages)
             if (page.tryAddItem(item))
-                return;
+                return true;
 
-        Page page = makeDefaultPage();
-        page.tryAddItem(item);
-        pages.add(page);
+        Page page = addDefaultPage();
+        pages.addLast(page);
+        return page.tryAddItem(item);
+    }
+
+    public static boolean tryAddItemToCustomPage(String id, CustomShopItem item) {
+        for (Page customPage : customPages)
+            if (customPage.id.equals(id) && customPage.tryAddItem(item))
+                return true;
+        return false;
     }
 
     public static float gridWidth() {
@@ -98,15 +116,22 @@ public class ShopGrid {
     // }
 
     public static class Page {
+
+        public String id = DEFAULT_PAGE_ID;
+
         public ArrayList<Row> rows = new ArrayList<Row>();
 
         public Page(int ... rowSizes) {
             for (int i = 0; i < rowSizes.length; i++) {
                 int size = rowSizes[i];
-                Row row = new Row(0, size);
-                row.owner = this;
-                rows.add(new Row(0, size));
+                Row row = new Row(this, i, size);
+                rows.add(row);
             }
+        }
+
+        public Page(String id, int ... rowSizes) {
+            this(rowSizes);
+            this.id = id;
         }
 
         public void hide() {
@@ -119,7 +144,7 @@ public class ShopGrid {
                 row.update(rugY);
             leftArrow.update(rugY);
             rightArrow.update(rugY);
-            pageIdxY = rugY + 500.0F * Settings.yScale; // <-- is this wrong?
+            pageY = rugY + 500.0F * Settings.yScale;
         }
 
         public void render(SpriteBatch sb) {
@@ -134,7 +159,7 @@ public class ShopGrid {
                     FontHelper.buttonLabelFont,
                     (pages.indexOf(currentPage) + 1) + "/" + pages.size(),
                     1150.0F * Settings.xScale,
-                    pageIdxY,
+                    pageY,
                     Color.WHITE
                 );
             }
@@ -217,7 +242,8 @@ public class ShopGrid {
 
         public int maxColumns;
 
-        public Row(int rowNumber, int maxColumns) {
+        public Row(Page owner, int rowNumber, int maxColumns) {
+            this.owner = owner;
             this.items = new ArrayList<>();
             this.maxColumns = maxColumns;
             this.rowNumber = rowNumber;
@@ -228,14 +254,14 @@ public class ShopGrid {
         }
 
         public float getY(int row, float rugY) {
-            return rugY + bottomEdge + (row + 1) / owner.rows.size() * gridHeight();
+            return rugY + bottomEdge + (row + 1) / (owner.rows.size() + 1) * gridHeight();
         }
 
         public boolean tryAddItem(CustomShopItem item) {
             if (items.size() < maxColumns) {
                 item.row = rowNumber;
-                item.col = items.size();
                 items.add(item);
+                item.col = items.size() - 1;
                 return true;
             }
             return false;
@@ -247,12 +273,10 @@ public class ShopGrid {
                     item.update(rugY);
                 } else if (!item.isPurchased) {
                     if (item.storePotion != null) {
-                        StorePotionPatches.row.set(item.storePotion, rowNumber);
-                        StorePotionPatches.col.set(item.storePotion, items.indexOf(item));
+                        StorePotionPatches.gridRow.set(item.storePotion, this);
                     }
                     else if (item.storeRelic != null) {
-                        StoreRelicPatches.row.set(item.storeRelic, rowNumber);
-                        StoreRelicPatches.col.set(item.storeRelic, items.indexOf(item));
+                        StoreRelicPatches.gridRow.set(item.storeRelic, this);
                     }
                 }
             }

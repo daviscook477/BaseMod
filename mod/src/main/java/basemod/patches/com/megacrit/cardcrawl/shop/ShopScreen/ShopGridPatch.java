@@ -31,16 +31,9 @@ public class ShopGridPatch {
             BaseMod.publishPostShopInitialize();
         }
 
-        @SpireInsertPatch(locator = Locator.class)
+        @SpirePrefixPatch
         public static void InitializeGrid () {
             basemod.ShopGrid.initialize();
-        }
-
-        private static class Locator extends SpireInsertLocator {
-            @Override
-            public int[] Locate(CtBehavior ct) throws Exception {
-                return LineFinder.findInOrder(ct, new Matcher.MethodCallMatcher(ShopScreen.class, "initRelics"));
-            }
         }
     }
 
@@ -56,18 +49,40 @@ public class ShopGridPatch {
     }
 
     @SpirePatch2(clz = ShopScreen.class, method = "initRelics")
-    public static class AddGridRelics {
-        public static void Postfix(ArrayList<StoreRelic> ___relics) {
-            for (StoreRelic relic : ___relics)
-                ShopGrid.addItem(new CustomShopItem(relic));
+    public static class InitRelics {
+
+        @SpirePostfixPatch
+        public static void AddGridRelics(ArrayList<StoreRelic> ___relics) {
+            for (StoreRelic relic : ___relics) {
+                CustomShopItem item = new CustomShopItem();
+                item.storeRelic = relic;
+                ShopGrid.tryAddItem(item);
+            }
         }
     }
 
     @SpirePatch2(clz = ShopScreen.class, method = "initPotions")
-    public static class AddGridPotions {
-        public static void Postfix(ArrayList<StorePotion> ___potions) {
-            for (StorePotion potion : ___potions)
-                ShopGrid.addItem(new CustomShopItem(potion));
+    public static class PostInitPotions {
+
+        @SpirePostfixPatch
+        public static void AddGridPotionsAndSetCoords(ArrayList<StorePotion> ___potions) {
+            for (StorePotion potion : ___potions) {
+                CustomShopItem item = new CustomShopItem();
+                item.storePotion = potion;
+                ShopGrid.tryAddItem(item);
+            }
+
+            for (ShopGrid.Row row : ShopGrid.currentPage.rows) {
+                for (CustomShopItem item : row.items) {
+                    if (item.storePotion != null) {
+                        StorePotionPatches.row.set(item.storePotion, item.row);
+                        StorePotionPatches.col.set(item.storePotion, item.col);
+                    } else if (item.storeRelic != null) {
+                        StoreRelicPatches.row.set(item.storeRelic, item.row);
+                        StoreRelicPatches.col.set(item.storeRelic, item.col);
+                    }
+                }
+            }
         }
     }
 
@@ -92,9 +107,11 @@ public class ShopGridPatch {
 
             @SpireInsertPatch(locator = HBMoveLocator.class)
             public static void Insert(StoreRelic __instance, float rugY) {
-                ShopGrid.Row gridRow = StoreRelicPatches.gridRow.get(__instance);
-                __instance.relic.currentY = gridRow.getY(row.get(__instance), rugY);
-                __instance.relic.currentX = gridRow.getX(col.get(__instance));
+                if (__instance.relic != null) {
+                    ShopGrid.Row relicRow = gridRow.get(__instance);
+                    __instance.relic.currentY = relicRow.getY(row.get(__instance), rugY);
+                    __instance.relic.currentX = relicRow.getX(col.get(__instance));
+                }
             }
 
             private static class HBMoveLocator extends SpireInsertLocator {
@@ -116,8 +133,10 @@ public class ShopGridPatch {
                             item.storeRelic.relic = null;
                             item.storeRelic = null;
                             item.isPurchased = true;
+                            break;
                         }
                     }
+                    ShopGrid.removeEmptyPages();
                 }
             }
         }
@@ -131,13 +150,15 @@ public class ShopGridPatch {
         public static SpireField<ShopGrid.Row> gridRow = new SpireField<>(() -> null);
 
         @SpirePatch2(clz = StorePotion.class, method = "update")
-        public static class SetPotionYBasedOnRow {
+        public static class SetCoords {
 
             @SpireInsertPatch(locator = Locator.class)
             public static void Insert(StorePotion __instance, float rugY) {
-                ShopGrid.Row gridRow = StorePotionPatches.gridRow.get(__instance);
-                __instance.potion.posY = gridRow.getY(row.get(__instance), rugY);
-                __instance.potion.posX = gridRow.getX(col.get(__instance));
+                if (__instance.potion != null) {
+                    ShopGrid.Row potionRow = gridRow.get(__instance);
+                    __instance.potion.posY = potionRow.getY(row.get(__instance), rugY);
+                    __instance.potion.posX = potionRow.getX(col.get(__instance));
+                }
             }
 
             private static class Locator extends SpireInsertLocator {
@@ -153,14 +174,16 @@ public class ShopGridPatch {
         public static class UpdateGridRow {
             public static void Postfix(StorePotion __instance) {
                 if (__instance.isPurchased) {
-                    ShopGrid.Row gridRow = StorePotionPatches.gridRow.get(__instance);
-                    for (CustomShopItem item : gridRow.items) {
+                    ShopGrid.Row potionRow = gridRow.get(__instance);
+                    for (CustomShopItem item : potionRow.items) {
                         if (item.storePotion == __instance) {
                             item.storePotion.potion = null;
                             item.storePotion = null;
                             item.isPurchased = true;
+                            break;
                         }
                     }
+                    ShopGrid.removeEmptyPages();
                 }
             }
         }
