@@ -15,8 +15,6 @@ import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.helpers.controller.CInputActionSet;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import basemod.abstracts.CustomShopItem;
-import basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StorePotionPatches;
-import basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StoreRelicPatches;
 
 public class ShopGrid {
 
@@ -109,6 +107,7 @@ public class ShopGrid {
         rightArrow.hide();
     }
 
+    // dandy-TODO
     // public static void show() {
     //     currentPage.show();
     //     leftArrow.show();
@@ -123,9 +122,7 @@ public class ShopGrid {
 
         public Page(int ... rowSizes) {
             for (int i = 0; i < rowSizes.length; i++) {
-                int size = rowSizes[i];
-                Row row = new Row(this, i, size);
-                rows.add(row);
+                rows.add(new Row(this, i, rowSizes[i]));
             }
         }
 
@@ -250,18 +247,18 @@ public class ShopGrid {
         }
 
         public float getX(int col) {
-            return leftEdge + (col + 1) / (maxColumns + 1) * gridWidth();
+            return leftEdge + (col + 1F) / (maxColumns + 1F) * gridWidth();
         }
 
         public float getY(int row, float rugY) {
-            return rugY + bottomEdge + (row + 1) / (owner.rows.size() + 1) * gridHeight();
+            return rugY + bottomEdge + (row + 1F) / (owner.rows.size() + 1F) * gridHeight();
         }
 
         public boolean tryAddItem(CustomShopItem item) {
             if (items.size() < maxColumns) {
                 item.row = rowNumber;
+                item.col = items.size();
                 items.add(item);
-                item.col = items.size() - 1;
                 return true;
             }
             return false;
@@ -271,13 +268,6 @@ public class ShopGrid {
             for (CustomShopItem item : items) {
                 if (item.storePotion == null && item.storeRelic == null) {
                     item.update(rugY);
-                } else if (!item.isPurchased) {
-                    if (item.storePotion != null) {
-                        StorePotionPatches.gridRow.set(item.storePotion, this);
-                    }
-                    else if (item.storeRelic != null) {
-                        StoreRelicPatches.gridRow.set(item.storeRelic, this);
-                    }
                 }
             }
         }
@@ -285,7 +275,7 @@ public class ShopGrid {
         public void render(SpriteBatch sb) {
             if (AbstractDungeon.shopScreen != null)
                 for (CustomShopItem item : items)
-                    if (item.storePotion != null && item.storeRelic != null)
+                    if (item.storePotion == null && item.storeRelic == null)
                         item.render(sb);
         }
 

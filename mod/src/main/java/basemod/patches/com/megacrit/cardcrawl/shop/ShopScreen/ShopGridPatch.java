@@ -4,13 +4,13 @@ import java.util.ArrayList;
 
 import com.evacipated.cardcrawl.modthespire.lib.LineFinder;
 import com.evacipated.cardcrawl.modthespire.lib.Matcher;
-import com.evacipated.cardcrawl.modthespire.lib.SpireField;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertLocator;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch2;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePrefixPatch;
+import com.evacipated.cardcrawl.modthespire.lib.SpireReturn;
 import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.shop.ShopScreen;
 import com.megacrit.cardcrawl.shop.StorePotion;
@@ -23,110 +23,100 @@ import javassist.CtBehavior;
 
 public class ShopGridPatch {
 
-    @SpirePatch2(clz = ShopScreen.class, method = "init")
-    public static class ShopScreenInit {
+    @SpirePatch2(clz = ShopScreen.class, method = SpirePatch.CLASS)
+    public static class ShopScreenPatches {
 
-        @SpirePostfixPatch
-        public static void PostShopInitializeHook() {
-            BaseMod.publishPostShopInitialize();
-        }
+        @SpirePatch2(clz = ShopScreen.class, method = "init")
+        public static class ShopScreenInit {
 
-        @SpirePrefixPatch
-        public static void InitializeGrid () {
-            basemod.ShopGrid.initialize();
-        }
-    }
-
-    @SpirePatch2(clz = ShopScreen.class, method = "open")
-    public static class ShopScreenOpen {
-
-        @SpirePostfixPatch
-        public static void HideGridOnOpen() {
-            if (!ShopGrid.currentPage.isEmpty()) {
-                ShopGrid.hide();
+            @SpirePostfixPatch
+            public static void PostShopInitializeHook() {
+                BaseMod.publishPostShopInitialize();
             }
-        }
-    }
 
-    @SpirePatch2(clz = ShopScreen.class, method = "initRelics")
-    public static class InitRelics {
-
-        @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "relic" })
-        public static void AddGridRelics(StoreRelic relic) {
-            CustomShopItem item = new CustomShopItem();
-            item.storeRelic = relic;
-            ShopGrid.tryAddItem(item);
-        }
-
-        private static class ArrayAddLocator extends SpireInsertLocator {
-
-            @Override
-            public int[] Locate(CtBehavior ct) throws Exception {
-                return LineFinder.findInOrder(ct, new Matcher.MethodCallMatcher(ArrayList.class, "add"));
-            }
-        }
-    }
-
-    @SpirePatch2(clz = ShopScreen.class, method = "initPotions")
-    public static class PostInitPotions {
-
-        @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "potion" })
-        public static void AddGridPotions(StorePotion potion) {
-            CustomShopItem item = new CustomShopItem();
-            item.storePotion = potion;
-            ShopGrid.tryAddItem(item);
-        }
-
-        private static class ArrayAddLocator extends SpireInsertLocator {
-
-            @Override
-            public int[] Locate(CtBehavior ct) throws Exception {
-                return LineFinder.findInOrder(ct, new Matcher.MethodCallMatcher(ArrayList.class, "add"));
+            @SpirePrefixPatch
+            public static void InitializeGrid(ShopScreen __instance) {
+                basemod.ShopGrid.initialize();
             }
         }
 
-        @SpirePostfixPatch
-        public static void SetItemCoords() {
-            for (ShopGrid.Row row : ShopGrid.currentPage.rows) {
-                for (CustomShopItem item : row.items) {
-                    if (item.storePotion != null) {
-                        StorePotionPatches.row.set(item.storePotion, item.row);
-                        StorePotionPatches.col.set(item.storePotion, item.col);
-                    } else if (item.storeRelic != null) {
-                        StoreRelicPatches.row.set(item.storeRelic, item.row);
-                        StoreRelicPatches.col.set(item.storeRelic, item.col);
-                    }
+        @SpirePatch2(clz = ShopScreen.class, method = "open")
+        public static class ShopScreenOpen {
+
+            @SpirePostfixPatch
+            public static void HideGridOnOpen() {
+                if (!ShopGrid.currentPage.isEmpty()) {
+                    ShopGrid.hide();
                 }
             }
         }
-    }
 
-    @SpirePatch2(clz = ShopScreen.class, method = "updateRelics")
-    public static class UpdateGridRelics {
+        @SpirePatch2(clz = ShopScreen.class, method = "initRelics")
+        public static class InitRelics {
 
-        @SpirePrefixPatch
-        public static void UpdateCurrentPage(float ___rugY) {
-            ShopGrid.currentPage.update(___rugY);
+            @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "relic" })
+            public static void AddGridRelic(StoreRelic relic) {
+                CustomShopItem item = new CustomShopItem();
+                item.storeRelic = relic;
+                BaseMod.logger.info(ShopGrid.tryAddItem(item));
+            }
+
+            private static class ArrayAddLocator extends SpireInsertLocator {
+
+                @Override
+                public int[] Locate(CtBehavior ct) throws Exception {
+                    return LineFinder.findInOrder(ct, new Matcher.MethodCallMatcher(ArrayList.class, "add"));
+                }
+            }
+        }
+
+        @SpirePatch2(clz = ShopScreen.class, method = "initPotions")
+        public static class PostInitPotions {
+
+            @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "potion" })
+            public static void AddGridPotion(StorePotion potion) {
+                CustomShopItem item = new CustomShopItem();
+                item.storePotion = potion;
+                BaseMod.logger.info(ShopGrid.tryAddItem(item));
+            }
+
+            private static class ArrayAddLocator extends SpireInsertLocator {
+
+                @Override
+                public int[] Locate(CtBehavior ct) throws Exception {
+                    return LineFinder.findInOrder(ct, new Matcher.MethodCallMatcher(ArrayList.class, "add"));
+                }
+            }
+        }
+
+        @SpirePatch2(clz = ShopScreen.class, method = "updateRelics")
+        public static class UpdateGrid {
+
+            @SpirePrefixPatch
+            public static void UpdateCurrentPage(float ___rugY) {
+                ShopGrid.currentPage.update(___rugY);
+            }
         }
     }
 
-    @SpirePatch2(clz = StoreRelic.class, method = SpirePatch.CLASS)
     public static class StoreRelicPatches {
-
-        public static SpireField<Integer> row = new SpireField<>(() -> 0);
-        public static SpireField<Integer> col = new SpireField<>(() -> 0);
-        public static SpireField<ShopGrid.Row> gridRow = new SpireField<>(() -> null);
 
         @SpirePatch2(clz = StoreRelic.class, method = "update")
         public static class SetCoords {
 
             @SpireInsertPatch(locator = HBMoveLocator.class)
-            public static void Insert(StoreRelic __instance, float rugY) {
+            public static SpireReturn<Void> Insert(StoreRelic __instance, float rugY) {
+
                 if (__instance.relic != null) {
-                    ShopGrid.Row relicRow = gridRow.get(__instance);
-                    __instance.relic.currentY = relicRow.getY(row.get(__instance), rugY);
-                    __instance.relic.currentX = relicRow.getX(col.get(__instance));
+                    for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
+                        for (CustomShopItem item : gridRow.items)
+                            if (item.storeRelic == __instance) {
+                                __instance.relic.currentY = gridRow.getY(item.row, rugY);
+                                __instance.relic.currentX = gridRow.getX(item.col);
+                                return SpireReturn.Continue();
+                            }
                 }
+                return SpireReturn.Continue();
             }
 
             private static class HBMoveLocator extends SpireInsertLocator {
@@ -142,38 +132,39 @@ public class ShopGridPatch {
         public static class UpdateGridRow {
             public static void Postfix(StoreRelic __instance) {
                 if (__instance.isPurchased) {
-                    ShopGrid.Row gridRow = StoreRelicPatches.gridRow.get(__instance);
-                    for (CustomShopItem item : gridRow.items) {
-                        if (item.storeRelic == __instance) {
-                            item.storeRelic.relic = null;
-                            item.storeRelic = null;
-                            item.isPurchased = true;
-                            break;
+                    for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
+                        for (CustomShopItem item : gridRow.items) {
+                            if (item.storeRelic == __instance) {
+                                item.storeRelic.relic = null;
+                                item.storeRelic = null;
+                                item.isPurchased = true;
+                                break;
+                            }
                         }
-                    }
                     ShopGrid.removeEmptyPages();
                 }
             }
         }
     }
 
-    @SpirePatch2(clz = StorePotion.class, method = SpirePatch.CLASS)
     public static class StorePotionPatches {
-
-        public static SpireField<Integer> row = new SpireField<>(() -> 0);
-        public static SpireField<Integer> col = new SpireField<>(() -> 0);
-        public static SpireField<ShopGrid.Row> gridRow = new SpireField<>(() -> null);
 
         @SpirePatch2(clz = StorePotion.class, method = "update")
         public static class SetCoords {
 
             @SpireInsertPatch(locator = Locator.class)
-            public static void Insert(StorePotion __instance, float rugY) {
+            public static SpireReturn<Void> Insert(StorePotion __instance, float rugY) {
                 if (__instance.potion != null) {
-                    ShopGrid.Row potionRow = gridRow.get(__instance);
-                    __instance.potion.posY = potionRow.getY(row.get(__instance), rugY);
-                    __instance.potion.posX = potionRow.getX(col.get(__instance));
+                    for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
+                        for (CustomShopItem item : gridRow.items) {
+                            if (item.storePotion == __instance) {
+                                __instance.potion.posY = gridRow.getY(item.row, rugY);
+                                __instance.potion.posX = gridRow.getX(item.col);
+                                return SpireReturn.Continue();
+                            }
+                        }
                 }
+                return SpireReturn.Continue();
             }
 
             private static class Locator extends SpireInsertLocator {
@@ -189,15 +180,15 @@ public class ShopGridPatch {
         public static class UpdateGridRow {
             public static void Postfix(StorePotion __instance) {
                 if (__instance.isPurchased) {
-                    ShopGrid.Row potionRow = gridRow.get(__instance);
-                    for (CustomShopItem item : potionRow.items) {
-                        if (item.storePotion == __instance) {
-                            item.storePotion.potion = null;
-                            item.storePotion = null;
-                            item.isPurchased = true;
-                            break;
+                    for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
+                        for (CustomShopItem item : gridRow.items) {
+                            if (item.storePotion == __instance) {
+                                item.storePotion.potion = null;
+                                item.storePotion = null;
+                                item.isPurchased = true;
+                                break;
+                            }
                         }
-                    }
                     ShopGrid.removeEmptyPages();
                 }
             }
