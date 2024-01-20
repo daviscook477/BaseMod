@@ -23,7 +23,11 @@ public class Shop extends ConsoleCommand {
     public static void cmdShopHelp() {
         DevConsole.couldNotParse();
         DevConsole.log("options are:");
-        DevConsole.log("* remove [row] [col]");
-        DevConsole.log("* add [relic/potion] [id]");
+        DevConsole.log("* add page [row size] [row size] ...");
+        DevConsole.log("* add potion [id]");
+        DevConsole.log("* add relic [id]");
+        DevConsole.log("* add row [id] [id] ...");
+        DevConsole.log("* remove item [row] [col]");
+        DevConsole.log("* remove page");
     }
 }

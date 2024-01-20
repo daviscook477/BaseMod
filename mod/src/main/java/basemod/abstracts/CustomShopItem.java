@@ -2,7 +2,6 @@ package basemod.abstracts;
 
 import basemod.ReflectionHacks;
 import basemod.ShopGrid;
-import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -50,8 +49,6 @@ public class CustomShopItem {
     private static final float PRICE_OFFSET_X = ReflectionHacks.getPrivateStatic(StoreRelic.class, "RELIC_PRICE_OFFSET_X");
     private static final float PRICE_OFFSET_Y = ReflectionHacks.getPrivateStatic(StoreRelic.class, "RELIC_PRICE_OFFSET_Y");
 
-    public CustomShopItem() { /* not recommended */ }
-
     public CustomShopItem(AbstractRelic relic) {
         this(new StoreRelic(relic, 0, AbstractDungeon.shopScreen));
     }
@@ -60,18 +57,12 @@ public class CustomShopItem {
         this(new StorePotion(potion, 0, AbstractDungeon.shopScreen));
     }
 
-    @SuppressWarnings("unchecked")
     public CustomShopItem(StoreRelic storeRelic) {
         this.storeRelic = storeRelic;
-        ArrayList<StoreRelic> relics = (ArrayList<StoreRelic>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "relics");
-        relics.add(this.storeRelic);
     }
 
-    @SuppressWarnings("unchecked")
     public CustomShopItem(StorePotion storePotion) {
         this.storePotion = storePotion;
-        ArrayList<StorePotion> potions = (ArrayList<StorePotion>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "potions");
-        potions.add(this.storePotion);
     }
 
     public CustomShopItem(Texture img, int price, String tipTitle, String tipBody) {

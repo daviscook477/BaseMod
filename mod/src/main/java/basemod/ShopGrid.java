@@ -14,6 +14,10 @@ import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.helpers.controller.CInputActionSet;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
+import com.megacrit.cardcrawl.shop.ShopScreen;
+import com.megacrit.cardcrawl.shop.StorePotion;
+import com.megacrit.cardcrawl.shop.StoreRelic;
+
 import basemod.abstracts.CustomShopItem;
 
 public class ShopGrid {
@@ -44,6 +48,8 @@ public class ShopGrid {
 
     public static NavButton rightArrow;
 
+    private static Hitbox hb;
+
     private static float pageY;
 
     public static void initialize() {
@@ -51,6 +57,14 @@ public class ShopGrid {
         currentPage = addDefaultPage();
         rightArrow = new NavButton(true);
         leftArrow = new NavButton(false);
+        hb = new Hitbox(gridWidth(), gridHeight());
+        hb.move(leftEdge, bottomEdge);
+    }
+
+    public static Page addEmptyPage() {
+        Page page = new Page();
+        pages.addLast(page);
+        return page;
     }
 
     public static Page addDefaultPage() {
@@ -66,6 +80,28 @@ public class ShopGrid {
         Page page = new Page(modId, rowSizes);
         customPages.addLast(page);
         return page;
+    }
+
+    public static boolean removePage(Page page) {
+        if (pages.contains(page)) {
+            if (page == currentPage)
+                currentPage = page.getNextPage();
+            pages.remove(page);
+            return true;
+        } else if (customPages.contains(page)) {
+            if (page == currentPage)
+                currentPage = page.getNextPage();
+            customPages.remove(page);
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean removePage(String modId) {
+        for (Page page : customPages)
+            if (page.id.equals(modId))
+                return removePage(page);
+        return false;
     }
 
     public static boolean tryAddItem(CustomShopItem item) {
@@ -86,7 +122,7 @@ public class ShopGrid {
     }
 
     public static float gridWidth() {
-        return leftEdge - rightEdge;
+        return rightEdge - leftEdge;
     }
 
     public static float gridHeight() {
@@ -139,6 +175,7 @@ public class ShopGrid {
         public void update(float rugY) {
             for (Row row : rows)
                 row.update(rugY);
+            hb.update();
             leftArrow.update(rugY);
             rightArrow.update(rugY);
             pageY = rugY + 500.0F * Settings.yScale;
@@ -150,6 +187,7 @@ public class ShopGrid {
                     row.render(sb);
             leftArrow.render(sb);
             rightArrow.render(sb);
+            hb.render(sb);
             if (pages.size() > 1) {
                 FontHelper.renderFontCentered(
                     sb,
@@ -170,6 +208,16 @@ public class ShopGrid {
                 }
             }
             return false;
+        }
+
+        public Row addRow() {
+            return addRow(defaultPageCols);
+        }
+
+        public Row addRow(int size) {
+            Row row = new Row(this, rows.size(), size);
+            rows.add(row);
+            return row;
         }
 
         public boolean isFull() {
@@ -254,11 +302,20 @@ public class ShopGrid {
             return rugY + bottomEdge + (row + 1F) / (owner.rows.size() + 1F) * gridHeight();
         }
 
+        @SuppressWarnings("unchecked")
         public boolean tryAddItem(CustomShopItem item) {
             if (items.size() < maxColumns) {
                 item.row = rowNumber;
                 item.col = items.size();
                 items.add(item);
+                if (item.storePotion != null) {
+                    ArrayList<StoreRelic> relics = (ArrayList<StoreRelic>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "relics");
+                    relics.add(item.storeRelic);
+                }
+                if (item.storePotion != null) {
+                    ArrayList<StorePotion> potions = (ArrayList<StorePotion>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "potions");
+                    potions.add(item.storePotion);
+                }
                 return true;
             }
             return false;

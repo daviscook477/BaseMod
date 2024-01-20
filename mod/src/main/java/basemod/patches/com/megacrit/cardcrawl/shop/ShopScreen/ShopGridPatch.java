@@ -56,9 +56,8 @@ public class ShopGridPatch {
 
             @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "relic" })
             public static void AddGridRelic(StoreRelic relic) {
-                CustomShopItem item = new CustomShopItem();
-                item.storeRelic = relic;
-                BaseMod.logger.info(ShopGrid.tryAddItem(item));
+                if (!ShopGrid.tryAddItem(new CustomShopItem(relic)))
+                    BaseMod.logger.warn("not adding default shop relic because grid is full, is this intentional?");
             }
 
             private static class ArrayAddLocator extends SpireInsertLocator {
@@ -75,9 +74,8 @@ public class ShopGridPatch {
 
             @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "potion" })
             public static void AddGridPotion(StorePotion potion) {
-                CustomShopItem item = new CustomShopItem();
-                item.storePotion = potion;
-                BaseMod.logger.info(ShopGrid.tryAddItem(item));
+                if (!ShopGrid.tryAddItem(new CustomShopItem(potion)))
+                    BaseMod.logger.warn("not adding default potion because grid is full, is this intentional?");
             }
 
             private static class ArrayAddLocator extends SpireInsertLocator {
