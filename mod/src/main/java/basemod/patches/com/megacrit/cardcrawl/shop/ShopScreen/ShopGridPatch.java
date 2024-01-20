@@ -2,6 +2,7 @@ package basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.LineFinder;
 import com.evacipated.cardcrawl.modthespire.lib.Matcher;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertLocator;
@@ -88,11 +89,20 @@ public class ShopGridPatch {
         }
 
         @SpirePatch2(clz = ShopScreen.class, method = "updateRelics")
-        public static class UpdateGrid {
+        public static class Update {
 
             @SpirePrefixPatch
-            public static void UpdateCurrentPage(float ___rugY) {
+            public static void UpdateGrid(float ___rugY) {
                 ShopGrid.update(___rugY);
+            }
+        }
+
+        @SpirePatch2(clz = ShopScreen.class, method = "render")
+        public static class Render {
+
+            @SpirePostfixPatch
+            public static void RenderGrid(SpriteBatch sb) {
+                ShopGrid.render(sb);
             }
         }
     }
@@ -109,7 +119,8 @@ public class ShopGridPatch {
                     for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
                         for (CustomShopItem item : gridRow.items)
                             if (item.storeRelic == __instance) {
-                                __instance.relic.currentY = gridRow.getY(item.row, rugY);
+                                if (gridRow.owner.rows.size() != 2)
+                                    __instance.relic.currentY = gridRow.getY(item.row, rugY);
                                 __instance.relic.currentX = gridRow.getX(item.col);
                                 return SpireReturn.Continue();
                             }
@@ -156,7 +167,8 @@ public class ShopGridPatch {
                     for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
                         for (CustomShopItem item : gridRow.items) {
                             if (item.storePotion == __instance) {
-                                __instance.potion.posY = gridRow.getY(item.row, rugY);
+                                if (gridRow.owner.rows.size() != 2)
+                                    __instance.potion.posY = gridRow.getY(item.row, rugY);
                                 __instance.potion.posX = gridRow.getX(item.col);
                                 return SpireReturn.Continue();
                             }

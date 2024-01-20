@@ -305,7 +305,7 @@ public class ShopGrid {
         }
 
         public float getY(int row, float rugY) {
-            return rugY + bottomEdge + (row + 1F) / (owner.rows.size() + 1F) * gridHeight();
+            return rugY + (topEdge - ((row + 1F) / (owner.rows.size() + 1F) + gridHeight())) - (gridHeight() * 0.2F);
         }
 
         @SuppressWarnings("unchecked")
