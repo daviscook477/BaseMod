@@ -7,11 +7,13 @@ import com.evacipated.cardcrawl.modthespire.lib.LineFinder;
 import com.evacipated.cardcrawl.modthespire.lib.Matcher;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertLocator;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertPatch;
+import com.evacipated.cardcrawl.modthespire.lib.SpireInstrumentPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch2;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePrefixPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpireReturn;
+import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.shop.ShopScreen;
 import com.megacrit.cardcrawl.shop.StorePotion;
@@ -20,7 +22,10 @@ import com.megacrit.cardcrawl.shop.StoreRelic;
 import basemod.BaseMod;
 import basemod.ShopGrid;
 import basemod.abstracts.CustomShopItem;
+import javassist.CannotCompileException;
 import javassist.CtBehavior;
+import javassist.expr.ExprEditor;
+import javassist.expr.FieldAccess;
 
 public class ShopGridPatch {
 
@@ -119,8 +124,11 @@ public class ShopGridPatch {
                     for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
                         for (CustomShopItem item : gridRow.items)
                             if (item.storeRelic == __instance) {
-                                if (gridRow.owner.rows.size() != 2)
+                                if (gridRow.owner.rows.size() != 2) {
                                     __instance.relic.currentY = gridRow.getY(item.row, rugY);
+                                } else {
+                                    __instance.relic.currentY = rugY + (item.row == 0 ? 200F : 400F) * Settings.xScale;
+                                }
                                 __instance.relic.currentX = gridRow.getX(item.col);
                                 return SpireReturn.Continue();
                             }
@@ -179,8 +187,11 @@ public class ShopGridPatch {
                     for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
                         for (CustomShopItem item : gridRow.items) {
                             if (item.storePotion == __instance) {
-                                if (gridRow.owner.rows.size() != 2)
+                                if (gridRow.owner.rows.size() != 2) {
                                     __instance.potion.posY = gridRow.getY(item.row, rugY);
+                                } else {
+                                    __instance.potion.posY = rugY + (item.row == 0 ? 200F : 400F) * Settings.xScale;
+                                }
                                 __instance.potion.posX = gridRow.getX(item.col);
                                 return SpireReturn.Continue();
                             }
