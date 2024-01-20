@@ -92,7 +92,7 @@ public class ShopGridPatch {
 
             @SpirePrefixPatch
             public static void UpdateCurrentPage(float ___rugY) {
-                ShopGrid.currentPage.update(___rugY);
+                ShopGrid.update(___rugY);
             }
         }
     }

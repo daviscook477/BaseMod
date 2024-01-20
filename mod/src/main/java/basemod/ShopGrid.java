@@ -48,8 +48,6 @@ public class ShopGrid {
 
     public static NavButton rightArrow;
 
-    private static Hitbox hb;
-
     private static float pageY;
 
     public static void initialize() {
@@ -57,8 +55,6 @@ public class ShopGrid {
         currentPage = addDefaultPage();
         rightArrow = new NavButton(true);
         leftArrow = new NavButton(false);
-        hb = new Hitbox(gridWidth(), gridHeight());
-        hb.move(leftEdge, bottomEdge);
     }
 
     public static Page addEmptyPage() {
@@ -150,6 +146,18 @@ public class ShopGrid {
     //     rightArrow.show();
     // }
 
+    public static void update(float rugY) {
+        currentPage.update(rugY);
+    }
+
+    public static void render(SpriteBatch sb) {
+        if (Settings.isDebug || Settings.isInfo) {
+            sb.setColor(Color.RED);
+            sb.draw(ImageMaster.DEBUG_HITBOX_IMG, leftEdge, bottomEdge, gridWidth(), gridHeight());
+        }
+        currentPage.render(sb);
+    }
+
     public static class Page {
 
         public String id = DEFAULT_PAGE_ID;
@@ -175,7 +183,6 @@ public class ShopGrid {
         public void update(float rugY) {
             for (Row row : rows)
                 row.update(rugY);
-            hb.update();
             leftArrow.update(rugY);
             rightArrow.update(rugY);
             pageY = rugY + 500.0F * Settings.yScale;
@@ -187,7 +194,6 @@ public class ShopGrid {
                     row.render(sb);
             leftArrow.render(sb);
             rightArrow.render(sb);
-            hb.render(sb);
             if (pages.size() > 1) {
                 FontHelper.renderFontCentered(
                     sb,
@@ -308,13 +314,15 @@ public class ShopGrid {
                 item.row = rowNumber;
                 item.col = items.size();
                 items.add(item);
-                if (item.storePotion != null) {
+                if (item.storeRelic != null) {
                     ArrayList<StoreRelic> relics = (ArrayList<StoreRelic>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "relics");
-                    relics.add(item.storeRelic);
+                    if (!relics.contains(item.storeRelic))
+                        relics.add(item.storeRelic);
                 }
                 if (item.storePotion != null) {
                     ArrayList<StorePotion> potions = (ArrayList<StorePotion>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "potions");
-                    potions.add(item.storePotion);
+                    if (!potions.contains(item.storePotion))
+                        potions.add(item.storePotion);
                 }
                 return true;
             }

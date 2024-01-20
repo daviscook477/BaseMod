@@ -2,7 +2,6 @@ package basemod.devcommands.shop;
 
 import basemod.DevConsole;
 import basemod.devcommands.ConsoleCommand;
-import basemod.devcommands.relic.Relic;
 
 public class Shop extends ConsoleCommand {
     public Shop() {
@@ -17,7 +16,7 @@ public class Shop extends ConsoleCommand {
 
     @Override
     public void errorMsg() {
-        Relic.cmdRelicHelp();
+        cmdShopHelp();
     }
 
     public static void cmdShopHelp() {
