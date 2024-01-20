@@ -150,10 +150,10 @@ public class ShopGrid {
         currentPage.update(rugY);
     }
 
-    public static void render(SpriteBatch sb) {
+    public static void render(SpriteBatch sb, float rugY) {
         if (Settings.isDebug || Settings.isInfo) {
             sb.setColor(Color.RED);
-            sb.draw(ImageMaster.DEBUG_HITBOX_IMG, leftEdge, bottomEdge, gridWidth(), gridHeight());
+            sb.draw(ImageMaster.DEBUG_HITBOX_IMG, leftEdge, rugY + bottomEdge, gridWidth(), gridHeight());
         }
         currentPage.render(sb);
     }

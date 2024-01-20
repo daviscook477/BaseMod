@@ -32,7 +32,7 @@ public class ShopAddPage extends ConsoleCommand {
         } else {
             BaseMod.logger.info("HERE2");
             ShopGrid.Page page = ShopGrid.addEmptyPage();
-            for (int i = 3; i < tokens.length; i++)
+            for (int i = 2; i < tokens.length; i++)
                 page.addRow(Integer.parseInt(tokens[i]));
             while (page.tryAddItem(ShopAdd.randomItem()));
             ShopGrid.currentPage = page;
