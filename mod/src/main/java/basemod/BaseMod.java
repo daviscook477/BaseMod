@@ -11,7 +11,6 @@ import basemod.interfaces.*;
 import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.RenderDescriptionEnergy;
 import basemod.patches.com.megacrit.cardcrawl.helpers.TopPanel.TopPanelHelper;
 import basemod.patches.com.megacrit.cardcrawl.screens.select.GridCardSelectScreen.GridCardSelectScreenFields;
-import basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopItemGrid;
 import basemod.patches.com.megacrit.cardcrawl.unlock.UnlockTracker.CountModdedUnlockCards;
 import basemod.patches.imgui.ImGuiPatches;
 import basemod.patches.whatmod.WhatMod;

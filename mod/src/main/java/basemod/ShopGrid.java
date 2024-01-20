@@ -281,6 +281,25 @@ public class ShopGrid {
             }
             return currentPage;
         }
+
+        public boolean contains(String id) {
+            for (Row row : rows)
+                for (CustomShopItem item : row.items) {
+                    if ((item.storePotion != null && item.storePotion.potion.ID.equals(id))
+                        || (item.storeRelic != null && item.storeRelic.relic.relicId.equals(id))
+                        || (item.id.equals(id)))
+                        return true;
+                }
+            return false;
+        }
+
+        public boolean contains (StoreRelic relic) {
+            return contains(relic.relic.relicId);
+        }
+
+        public boolean contains(StorePotion potion) {
+            return contains(potion.potion.ID);
+        }
     }
 
     public static class Row {
@@ -394,13 +413,13 @@ public class ShopGrid {
             int curIdx = pages.indexOf(currentPage);
             if (!forward && curIdx > 0) {
                 TextureRegion region = new TextureRegion(texture);
-                sb.draw(region, x - 64.0F * Settings.scale, y - 64.0F * Settings.scale, 128.0F, 128.0F, 128.0F, 128.0F, Settings.scale / 2, Settings.scale / 2, 0.0F);
+                sb.draw(region, x - 96.0F * Settings.scale, y - 96.0F * Settings.scale, 128.0F, 128.0F, 128.0F, 128.0F, Settings.scale / 2, Settings.scale / 2, 0.0F);
                 hb.render(sb);
             }
             if (forward && curIdx < pages.size() - 1) {
                 TextureRegion flippedRegion = new TextureRegion(texture);
                 flippedRegion.flip(true, false);
-                sb.draw(flippedRegion, x - 64.0F * Settings.scale, y - 64.0F * Settings.scale, 128.0F, 128.0F, 128.0F, 128.0F, Settings.scale / 2, Settings.scale / 2, 0.0F);
+                sb.draw(flippedRegion, x - 96.0F * Settings.scale, y - 96.0F * Settings.scale, 128.0F, 128.0F, 128.0F, 128.0F, Settings.scale / 2, Settings.scale / 2, 0.0F);
                 hb.render(sb);
             }
         }

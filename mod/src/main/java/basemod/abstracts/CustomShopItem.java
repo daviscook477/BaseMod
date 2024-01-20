@@ -1,5 +1,6 @@
 package basemod.abstracts;
 
+import basemod.BaseMod;
 import basemod.ReflectionHacks;
 import basemod.ShopGrid;
 
@@ -24,6 +25,8 @@ import com.megacrit.cardcrawl.shop.StorePotion;
 import com.megacrit.cardcrawl.shop.StoreRelic;
 
 public class CustomShopItem {
+
+    public String id;
 
     public ShopScreen screenRef;
     public ShopGrid.Row gridRow;
@@ -58,18 +61,28 @@ public class CustomShopItem {
     }
 
     public CustomShopItem(StoreRelic storeRelic) {
-        this.storeRelic = storeRelic;
+        if (storeRelic.relic != null) {
+            this.storeRelic = storeRelic;
+            this.id = ShopGrid.DEFAULT_PAGE_ID + ":" + storeRelic.relic.relicId;
+        } else {
+            BaseMod.logger.error("StoreRelic cannot have a null relic");
+        }
     }
 
     public CustomShopItem(StorePotion storePotion) {
-        this.storePotion = storePotion;
+        if (storePotion.potion != null) {
+            this.storePotion = storePotion;
+            this.id = ShopGrid.DEFAULT_PAGE_ID + ":" + storePotion.potion.ID;
+        } else {
+            BaseMod.logger.error("StorePotion cannot have a null potion");
+        }
     }
 
-    public CustomShopItem(Texture img, int price, String tipTitle, String tipBody) {
-        this(AbstractDungeon.shopScreen, img, price, tipTitle, tipBody);
+    public CustomShopItem(String modId, Texture img, int price, String tipTitle, String tipBody) {
+        this(modId, AbstractDungeon.shopScreen, img, price, tipTitle, tipBody);
     }
 
-    public CustomShopItem(ShopScreen screenRef, Texture img, int price, String tipTitle, String tipBody) {
+    public CustomShopItem(String modId, ShopScreen screenRef, Texture img, int price, String tipTitle, String tipBody) {
         this.screenRef = screenRef;
         this.tipTitle = tipTitle;
         this.tipBody = tipBody;
@@ -109,7 +122,7 @@ public class CustomShopItem {
 
     public void render(SpriteBatch sb) {
         if (!this.isPurchased) {
-            if (storeRelic == null && storePotion == null) {
+            if (storeRelic == null && storePotion == null && ShopGrid.currentPage.contains(id)) {
                 sb.setColor(Color.WHITE);
                 // assumes the size of a relic image
                 sb.draw(img, x - 64.0F, y - 64.0F, 64.0F, 64.0F, 128.0F, 128.0F, Settings.scale, Settings.scale, 0.0F, 0, 0, 128, 128, false, false);

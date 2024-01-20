@@ -154,15 +154,27 @@ public class ShopGridPatch {
                 }
             }
         }
+
+        @SpirePatch2(clz = StoreRelic.class, method = "render")
+        public static class Render {
+
+            @SpirePrefixPatch
+            public static SpireReturn<Void> CheckIfRelicInCurrentPage(StoreRelic __instance, SpriteBatch sb) {
+                if (__instance.relic != null && !ShopGrid.currentPage.contains(__instance)) {
+                    return SpireReturn.Return();
+                }
+                return SpireReturn.Continue();
+            }
+        }
     }
 
     public static class StorePotionPatches {
 
         @SpirePatch2(clz = StorePotion.class, method = "update")
-        public static class SetCoords {
+        public static class Update {
 
-            @SpireInsertPatch(locator = Locator.class)
-            public static SpireReturn<Void> Insert(StorePotion __instance, float rugY) {
+            @SpireInsertPatch(locator = HBMoveLocator.class)
+            public static SpireReturn<Void> SetCoords(StorePotion __instance, float rugY) {
                 if (__instance.potion != null) {
                     for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
                         for (CustomShopItem item : gridRow.items) {
@@ -177,7 +189,7 @@ public class ShopGridPatch {
                 return SpireReturn.Continue();
             }
 
-            private static class Locator extends SpireInsertLocator {
+            private static class HBMoveLocator extends SpireInsertLocator {
                 @Override
                 public int[] Locate(CtBehavior ctb) throws Exception {
                     Matcher finalMatcher = new Matcher.MethodCallMatcher(Hitbox.class, "move");
@@ -187,7 +199,7 @@ public class ShopGridPatch {
         }
 
         @SpirePatch2(clz = StorePotion.class, method = "purchasePotion")
-        public static class UpdateGridRow {
+        public static class PurchasePotion {
             public static void Postfix(StorePotion __instance) {
                 if (__instance.isPurchased) {
                     for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
@@ -201,6 +213,18 @@ public class ShopGridPatch {
                         }
                     ShopGrid.removeEmptyPages();
                 }
+            }
+        }
+
+        @SpirePatch2(clz = StorePotion.class, method = "render")
+        public static class Render {
+
+            @SpirePrefixPatch
+            public static SpireReturn<Void> CheckIfPotionInCurrentPage(StorePotion __instance, SpriteBatch sb) {
+                if (__instance.potion != null && !ShopGrid.currentPage.contains(__instance)) {
+                    return SpireReturn.Return();
+                }
+                return SpireReturn.Continue();
             }
         }
     }
