@@ -22,7 +22,7 @@ import basemod.abstracts.CustomShopItem;
 
 public class ShopGrid {
 
-    public static final String DEFAULT_PAGE_ID = "basemod";
+    public static final String DEFAULT_PAGE_ID = "basemod:";
 
     private static int pageIdCounter = 0;
 
@@ -34,7 +34,7 @@ public class ShopGrid {
 
     public static float leftEdge = Settings.WIDTH * 0.44F;
 
-    public static float topEdge = Settings.HEIGHT * 0.44F;
+    public static float topEdge = Settings.HEIGHT * 0.48F;
     
     public static float bottomEdge = Settings.HEIGHT * 0.075F;
 
@@ -44,7 +44,7 @@ public class ShopGrid {
     // this list has the pages for the remaining items that were added and the initial shop items
     public static LinkedList<Page> pages = new LinkedList<>();
 
-    // used for when the shop grid is empty
+    // used for when the shop grid is empty, will always have id of basemod:1 and cannot be removed
     public static final Page EMPTY_SHOP_PAGE = new Page();
 
     private static Page currentPage;
@@ -60,6 +60,7 @@ public class ShopGrid {
         currentPage = addDefaultPage();
         rightArrow = new NavButton(true);
         leftArrow = new NavButton(false);
+        pageIdCounter = 0;
     }
 
     public static Page getCurrentPage() {
@@ -106,7 +107,7 @@ public class ShopGrid {
         if (page == currentPage) {
             currentPage = page.getNextPage();
             if (currentPage == page)
-                currentPage = addEmptyPage();
+                currentPage = EMPTY_SHOP_PAGE;
         }
         if (pages.contains(page))
             return pages.remove(page);
@@ -138,14 +139,13 @@ public class ShopGrid {
                 return true;
 
         Page page = addDefaultPage();
-        pages.addLast(page);
         return page.tryAddItem(item);
     }
 
     public static boolean tryAddItemToCustomPage(String id, CustomShopItem item) {
         for (Page customPage : customPages)
-            if (customPage.id.equals(id) && customPage.tryAddItem(item))
-                return true;
+            if (customPage.id.equals(id))
+                return customPage.tryAddItem(item);
         return false;
     }
 
@@ -351,6 +351,22 @@ public class ShopGrid {
                         return true;
             return false;
         }
+
+        public CustomShopItem getItem(StorePotion potion) {
+            for (Row row : rows)
+                for (CustomShopItem item : row.items)
+                    if (potion == item.storePotion)
+                        return item;
+            return null;
+        }
+
+        public CustomShopItem getItem(StoreRelic relic) {
+            for (Row row : rows)
+                for (CustomShopItem item : row.items)
+                    if (relic == item.storeRelic)
+                        return item;
+            return null;
+        }
     }
 
     public static class Row {
@@ -383,6 +399,7 @@ public class ShopGrid {
             if (items.size() < maxColumns) {
                 item.row = rowNumber;
                 item.col = items.size();
+                item.gridRow = this;
                 items.add(item);
                 if (item.storeRelic != null) {
                     ArrayList<StoreRelic> relics = (ArrayList<StoreRelic>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "relics");

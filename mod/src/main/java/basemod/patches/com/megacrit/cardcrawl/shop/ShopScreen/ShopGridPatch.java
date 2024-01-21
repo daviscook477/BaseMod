@@ -7,6 +7,7 @@ import com.evacipated.cardcrawl.modthespire.lib.LineFinder;
 import com.evacipated.cardcrawl.modthespire.lib.Matcher;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertLocator;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertPatch;
+import com.evacipated.cardcrawl.modthespire.lib.SpireInstrumentPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch2;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
@@ -21,7 +22,10 @@ import com.megacrit.cardcrawl.shop.StoreRelic;
 import basemod.BaseMod;
 import basemod.ShopGrid;
 import basemod.abstracts.CustomShopItem;
+import javassist.CannotCompileException;
 import javassist.CtBehavior;
+import javassist.expr.ExprEditor;
+import javassist.expr.MethodCall;
 
 public class ShopGridPatch {
 
@@ -180,6 +184,86 @@ public class ShopGridPatch {
                 }
                 return SpireReturn.Continue();
             }
+
+            public static boolean canRender(StoreRelic instance) {
+                if (ShopGrid.getCurrentPage().contains(instance)
+                    && ((ShopGrid.getCurrentPage().getItem(instance).gridRow.maxColumns > 5)
+                        || ShopGrid.getCurrentPage().rows.size() > 4))
+                            return false;
+                return true;
+            }
+
+            public static boolean canRenderGold(SpriteBatch sb, StoreRelic instance) {
+                if (!canRender(instance)) {
+                    if (instance.relic.hb.hovered) {
+                         // render the cost above the tooltips
+                    }
+                    return false;
+                }
+                return true;
+            }
+
+            public static float goldY(StoreRelic instance, float yOffset) {
+                if (ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
+                    return instance.relic.currentY - 75F * Settings.yScale;
+                return instance.relic.currentY + yOffset;
+            }
+
+            @SpireInstrumentPatch
+            public static ExprEditor ChangeGoldPosition() {
+                return new ExprEditor() {
+                    public void edit(MethodCall m) throws CannotCompileException {
+                        if (m.getMethodName().equals("draw")) {
+                            m.replace(""
+                                + "{"
+                                    + "if (basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StoreRelicPatches.Render.canRenderGold($0, this))"
+                                        + "sb.draw($1, $2, basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StoreRelicPatches.Render.goldY(this, RELIC_GOLD_OFFSET_Y), $4, $5);"
+                                + "}"
+                            );
+                        }
+                    }
+                };
+            }
+
+            public static boolean canRenderText(SpriteBatch sb, StoreRelic instance) {
+                if (!canRender(instance)) {
+                    if (instance.relic.hb.hovered) {
+                        // render the text above the tooltips
+                    }
+                    return false;
+                }
+                return true;
+            }
+
+            public static float textX(StoreRelic instance, float xOffset) {
+                if (ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().getItem(instance).gridRow.maxColumns > 4)
+                    return instance.relic.currentX + 3F * Settings.scale;
+                return instance.relic.currentX + xOffset;
+            }
+
+            public static float textY(StoreRelic instance, float yOffset) {
+                if (ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
+                    return instance.relic.currentY - 40F * Settings.scale;
+                return instance.relic.currentY + yOffset;
+            }
+
+            @SpireInstrumentPatch
+            public static ExprEditor ChangeTextPosition() {
+                return new ExprEditor() {
+                    public void edit(MethodCall m) throws CannotCompileException {
+                        if (m.getMethodName().equals("renderFontLeftTopAligned")) {
+                            m.replace(""
+                                + "{"
+                                    + "if (basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StoreRelicPatches.Render.canRenderText($1, this))"
+                                        + "com.megacrit.cardcrawl.helpers.FontHelper.renderFontLeftTopAligned($1, $2, $3, "
+                                        + "basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StoreRelicPatches.Render.textX(this, RELIC_PRICE_OFFSET_X), "
+                                        + "basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StoreRelicPatches.Render.textY(this, RELIC_PRICE_OFFSET_Y), $6);"
+                                + "}"
+                            );
+                        }
+                    }
+                };
+            }
         }
     }
 
@@ -246,6 +330,86 @@ public class ShopGridPatch {
                     return SpireReturn.Return();
                 }
                 return SpireReturn.Continue();
+            }
+
+            public static boolean canRender(StorePotion instance) {
+                if (ShopGrid.getCurrentPage().contains(instance)
+                    && ((ShopGrid.getCurrentPage().getItem(instance).gridRow.maxColumns > 5)
+                        || ShopGrid.getCurrentPage().rows.size() > 4))
+                            return false;
+                return true;
+            }
+
+            public static boolean canRenderGold(SpriteBatch sb, StorePotion instance) {
+                if (!canRender(instance)) {
+                    if (instance.potion.hb.hovered) {
+                         // render the cost above the tooltips
+                    }
+                    return false;
+                }
+                return true;
+            }
+
+            public static float goldY(StorePotion instance, float yOffset) {
+                if (ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
+                    return instance.potion.posY - 75F * Settings.yScale;
+                return instance.potion.posY + yOffset;
+            }
+
+            @SpireInstrumentPatch
+            public static ExprEditor ChangeGoldPosition() {
+                return new ExprEditor() {
+                    public void edit(MethodCall m) throws CannotCompileException {
+                        if (m.getMethodName().equals("draw")) {
+                            m.replace(""
+                                + "{"
+                                    + "if (basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StorePotionPatches.Render.canRenderGold($0, this))"
+                                        + "sb.draw($1, $2, basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StorePotionPatches.Render.goldY(this, RELIC_GOLD_OFFSET_Y), $4, $5);"
+                                + "}"
+                            );
+                        }
+                    }
+                };
+            }
+
+            public static boolean canRenderText(SpriteBatch sb, StorePotion instance) {
+                if (!canRender(instance)) {
+                    if (instance.potion.hb.hovered) {
+                        // render the text above the tooltips
+                    }
+                    return false;
+                }
+                return true;
+            }
+
+            public static float textX(StorePotion instance, float xOffset) {
+                if (ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().getItem(instance).gridRow.maxColumns > 4)
+                    return instance.potion.posX + 3F * Settings.scale;
+                return instance.potion.posX + xOffset;
+            }
+
+            public static float textY(StorePotion instance, float yOffset) {
+                if (ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
+                    return instance.potion.posY - 40F * Settings.scale;
+                return instance.potion.posY + yOffset;
+            }
+
+            @SpireInstrumentPatch
+            public static ExprEditor ChangeTextPosition() {
+                return new ExprEditor() {
+                    public void edit(MethodCall m) throws CannotCompileException {
+                        if (m.getMethodName().equals("renderFontLeftTopAligned")) {
+                            m.replace(""
+                                + "{"
+                                    + "if (basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StorePotionPatches.Render.canRenderText($1, this))"
+                                        + "com.megacrit.cardcrawl.helpers.FontHelper.renderFontLeftTopAligned($1, $2, $3, "
+                                        + "basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StorePotionPatches.Render.textX(this, RELIC_PRICE_OFFSET_X), "
+                                        + "basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StorePotionPatches.Render.textY(this, RELIC_PRICE_OFFSET_Y), $6);"
+                                + "}"
+                            );
+                        }
+                    }
+                };
             }
         }
     }

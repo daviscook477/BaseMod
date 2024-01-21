@@ -26,6 +26,8 @@ import com.megacrit.cardcrawl.shop.StoreRelic;
 
 public class CustomShopItem {
 
+    public String customShopId;
+
     public ShopScreen screenRef;
     public ShopGrid.Row gridRow;
     public StoreRelic storeRelic;
