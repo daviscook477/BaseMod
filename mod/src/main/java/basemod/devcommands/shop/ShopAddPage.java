@@ -26,14 +26,14 @@ public class ShopAddPage extends ConsoleCommand {
         if (tokens.length == 3) {
             ShopGrid.Page page = ShopGrid.addDefaultPage();
             while (page.tryAddItem(ShopAdd.randomItem()));
-            ShopGrid.currentPage = page;
+            ShopGrid.setCurrentPage(page);
         } else {
             ShopGrid.Page page = ShopGrid.addEmptyPage();
             try {
                 for (int i = 3; i < tokens.length; i++)
                 page.addRow(Integer.parseInt(tokens[i]));
                 while (page.tryAddItem(ShopAdd.randomItem()));
-                ShopGrid.currentPage = page;
+                ShopGrid.setCurrentPage(page);
             } catch (NumberFormatException nfe) {
                 nfe.printStackTrace();
                 Shop.cmdShopHelp();

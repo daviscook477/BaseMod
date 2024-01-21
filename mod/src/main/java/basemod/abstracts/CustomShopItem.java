@@ -26,8 +26,6 @@ import com.megacrit.cardcrawl.shop.StoreRelic;
 
 public class CustomShopItem {
 
-    public String id;
-
     public ShopScreen screenRef;
     public ShopGrid.Row gridRow;
     public StoreRelic storeRelic;
@@ -63,7 +61,6 @@ public class CustomShopItem {
     public CustomShopItem(StoreRelic storeRelic) {
         if (storeRelic.relic != null) {
             this.storeRelic = storeRelic;
-            this.id = ShopGrid.DEFAULT_PAGE_ID + ":" + storeRelic.relic.relicId;
         } else {
             BaseMod.logger.error("StoreRelic cannot have a null relic");
         }
@@ -72,7 +69,6 @@ public class CustomShopItem {
     public CustomShopItem(StorePotion storePotion) {
         if (storePotion.potion != null) {
             this.storePotion = storePotion;
-            this.id = ShopGrid.DEFAULT_PAGE_ID + ":" + storePotion.potion.ID;
         } else {
             BaseMod.logger.error("StorePotion cannot have a null potion");
         }
@@ -122,7 +118,7 @@ public class CustomShopItem {
 
     public void render(SpriteBatch sb) {
         if (!this.isPurchased) {
-            if (storeRelic == null && storePotion == null && ShopGrid.currentPage.contains(id)) {
+            if (storeRelic == null && storePotion == null) {
                 sb.setColor(Color.WHITE);
                 // assumes the size of a relic image
                 sb.draw(img, x - 64.0F, y - 64.0F, 64.0F, 64.0F, 128.0F, 128.0F, Settings.scale, Settings.scale, 0.0F, 0, 0, 128, 128, false, false);
@@ -147,12 +143,10 @@ public class CustomShopItem {
             if (storeRelic != null && storeRelic.relic != null) {
                 this.storeRelic.hide();
                 this.y = storeRelic.relic.currentY;
-            }
-            else if (storePotion != null && storePotion.potion != null) {
+            } else if (storePotion != null && storePotion.potion != null) {
                 this.storePotion.hide();
                 this.y = storePotion.potion.posY;
-            }
-            else {
+            } else {
                 this.y = Settings.HEIGHT + 200.0F * Settings.scale;
             }
         }
@@ -160,7 +154,7 @@ public class CustomShopItem {
 
     protected void attemptPurchase() {
         if (!this.isPurchased && this.storePotion == null && this.storeRelic == null) {
-            if (AbstractDungeon.player.gold >= this.price){
+            if (AbstractDungeon.player.gold >= this.price) {
                 purchase();
             } else {
                 this.screenRef.playCantBuySfx();

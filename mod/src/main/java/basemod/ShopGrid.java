@@ -24,6 +24,8 @@ public class ShopGrid {
 
     public static final String DEFAULT_PAGE_ID = "basemod";
 
+    private static int pageIdCounter = 0;
+
     public static int defaultPageRows = 2;
 
     public static int defaultPageCols = 3;
@@ -42,7 +44,10 @@ public class ShopGrid {
     // this list has the pages for the remaining items that were added and the initial shop items
     public static LinkedList<Page> pages = new LinkedList<>();
 
-    public static Page currentPage;
+    // used for when the shop grid is empty
+    public static final Page EMPTY_SHOP_PAGE = new Page();
+
+    private static Page currentPage;
 
     public static NavButton leftArrow;
 
@@ -55,6 +60,19 @@ public class ShopGrid {
         currentPage = addDefaultPage();
         rightArrow = new NavButton(true);
         leftArrow = new NavButton(false);
+    }
+
+    public static Page getCurrentPage() {
+        if (currentPage == null || (pages.isEmpty() && customPages.isEmpty()))
+            return EMPTY_SHOP_PAGE;
+        return currentPage;
+    }
+
+    public static void setCurrentPage(Page page) {
+        if (page == null)
+            currentPage = EMPTY_SHOP_PAGE;
+        else
+            currentPage = page;
     }
 
     public static Page addEmptyPage() {
@@ -72,6 +90,12 @@ public class ShopGrid {
         return page;
     }
 
+    public static Page addPage(int ... rowSizes) {
+        Page page = new Page(rowSizes);
+        pages.addLast(page);
+        return page;
+    }
+
     public static Page addCustomPage(String modId, int ... rowSizes) {
         Page page = new Page(modId, rowSizes);
         customPages.addLast(page);
@@ -82,7 +106,7 @@ public class ShopGrid {
         if (page == currentPage) {
             currentPage = page.getNextPage();
             if (currentPage == page)
-                currentPage = null;
+                currentPage = addEmptyPage();
         }
         if (pages.contains(page))
             return pages.remove(page);
@@ -91,9 +115,19 @@ public class ShopGrid {
         return false;
     }
 
-    public static boolean removePage(String modId) {
+    public static boolean removePage(int idx) {
+        Page page = pages.get(idx);
+        if (page != null)
+            return removePage(page);
+        return false;
+    }
+
+    public static boolean removePage(String pageId) {
+        for (Page page : pages)
+            if (page.id.equals(pageId))
+                return removePage(page);
         for (Page page : customPages)
-            if (page.id.equals(modId))
+            if (page.id.equals(pageId))
                 return removePage(page);
         return false;
     }
@@ -124,29 +158,27 @@ public class ShopGrid {
     }
 
     public static void removeEmptyPages() {
-        BaseMod.logger.info("HERE");
-        Page previousPage = currentPage.getPreviousPage();
+        Page previousPage = null;
+        if (currentPage != null)
+            previousPage = currentPage.getPreviousPage();
         pages.removeIf((page) -> page.isEmpty());
         customPages.removeIf((page) -> page.isEmpty());
         if (!pages.contains(currentPage) && !customPages.contains(currentPage))
             currentPage = previousPage;
+        else if (currentPage == previousPage)
+            currentPage = EMPTY_SHOP_PAGE;
     }
 
     public static void hide() {
-        currentPage.hide();
+        if (currentPage != null)
+            currentPage.hide();
         leftArrow.hide();
         rightArrow.hide();
     }
 
-    // dandy-TODO
-    // public static void show() {
-    //     currentPage.show();
-    //     leftArrow.show();
-    //     rightArrow.show();
-    // }
-
     public static void update(float rugY) {
-        currentPage.update(rugY);
+        if (currentPage != null)
+            currentPage.update(rugY);
     }
 
     public static void render(SpriteBatch sb, float rugY) {
@@ -154,12 +186,25 @@ public class ShopGrid {
             sb.setColor(Color.RED);
             sb.draw(ImageMaster.DEBUG_HITBOX_IMG, leftEdge, rugY + bottomEdge, gridWidth(), gridHeight());
         }
-        currentPage.render(sb);
+        if (currentPage != null)
+            currentPage.render(sb);
+    }
+
+    public static boolean isEmpty() {
+        if (getCurrentPage() == EMPTY_SHOP_PAGE)
+            return true;
+        for (Page page : pages)
+            if (!page.isEmpty())
+                return false;
+        for (Page page : customPages)
+            if (!page.isEmpty())
+                return false;
+        return true;
     }
 
     public static class Page {
 
-        public String id = DEFAULT_PAGE_ID;
+        public String id;
 
         public ArrayList<Row> rows = new ArrayList<Row>();
 
@@ -167,10 +212,13 @@ public class ShopGrid {
             for (int i = 0; i < rowSizes.length; i++) {
                 rows.add(new Row(this, i, rowSizes[i]));
             }
+            this.id = DEFAULT_PAGE_ID + ++pageIdCounter;
         }
 
         public Page(String id, int ... rowSizes) {
-            this(rowSizes);
+            for (int i = 0; i < rowSizes.length; i++) {
+                rows.add(new Row(this, i, rowSizes[i]));
+            }
             this.id = id;
         }
 
@@ -281,23 +329,27 @@ public class ShopGrid {
             return currentPage;
         }
 
-        public boolean contains(String id) {
+        public boolean contains(CustomShopItem item) {
             for (Row row : rows)
-                for (CustomShopItem item : row.items) {
-                    if ((item.storePotion != null && item.storePotion.potion.ID.equals(id))
-                        || (item.storeRelic != null && item.storeRelic.relic.relicId.equals(id))
-                        || (item.id.equals(id)))
-                        return true;
-                }
+                if (row.items.contains(item))
+                    return true;
             return false;
         }
 
         public boolean contains (StoreRelic relic) {
-            return contains(relic.relic.relicId);
+            for (Row row : rows)
+                for (CustomShopItem item : row.items)
+                    if (relic == item.storeRelic)
+                        return true;
+            return false;
         }
 
         public boolean contains(StorePotion potion) {
-            return contains(potion.potion.ID);
+            for (Row row : rows)
+                for (CustomShopItem item : row.items)
+                    if (potion == item.storePotion)
+                        return true;
+            return false;
         }
     }
 
@@ -323,7 +375,7 @@ public class ShopGrid {
         }
 
         public float getY(int row, float rugY) {
-            return rugY + (topEdge - ((row + 1F) / (owner.rows.size() + 1F) + gridHeight())) - (gridHeight() * 0.2F);
+            return rugY + (topEdge - ((row + 1F) / (owner.rows.size() + 1F) * gridHeight()));
         }
 
         @SuppressWarnings("unchecked")
@@ -408,17 +460,13 @@ public class ShopGrid {
         }
 
         public void render(SpriteBatch sb) {
-            sb.setColor(Color.WHITE);
             int curIdx = pages.indexOf(currentPage);
-            if (!forward && curIdx > 0) {
+            if (((!forward && curIdx > 0) || (forward && curIdx < pages.size() - 1))) {
+                sb.setColor(Color.WHITE);
                 TextureRegion region = new TextureRegion(texture);
+                if (forward)
+                    region.flip(true, false);
                 sb.draw(region, x - 96.0F * Settings.scale, y - 96.0F * Settings.scale, 128.0F, 128.0F, 128.0F, 128.0F, Settings.scale / 2, Settings.scale / 2, 0.0F);
-                hb.render(sb);
-            }
-            if (forward && curIdx < pages.size() - 1) {
-                TextureRegion flippedRegion = new TextureRegion(texture);
-                flippedRegion.flip(true, false);
-                sb.draw(flippedRegion, x - 96.0F * Settings.scale, y - 96.0F * Settings.scale, 128.0F, 128.0F, 128.0F, 128.0F, Settings.scale / 2, Settings.scale / 2, 0.0F);
                 hb.render(sb);
             }
         }

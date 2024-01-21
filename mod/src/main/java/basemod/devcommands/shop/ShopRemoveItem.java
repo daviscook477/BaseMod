@@ -20,13 +20,15 @@ public class ShopRemoveItem extends ConsoleCommand {
     public ArrayList<String> extraOptions(String[] tokens, int depth) {
         ArrayList<String> opts = new ArrayList<>();
         if (tokens.length == 3) {
-            for (int i = 0; i < ShopGrid.currentPage.rows.size(); i++)
-                opts.add(String.valueOf(i));
+            if (ShopGrid.getCurrentPage() != ShopGrid.EMPTY_SHOP_PAGE) {
+                for (int i = 0; i < ShopGrid.getCurrentPage().rows.size(); i++)
+                    opts.add(String.valueOf(i));
+            }
         }
         else {
             try {
                 int row = Integer.parseInt(tokens[3]);
-                for (int i = 0; i < ShopGrid.currentPage.rows.get(row).maxColumns; i++)
+                for (int i = 0; i < ShopGrid.getCurrentPage().rows.get(row).maxColumns; i++)
                     opts.add(String.valueOf(i));
             } catch (NumberFormatException nfe) {
                 nfe.printStackTrace();
@@ -46,13 +48,13 @@ public class ShopRemoveItem extends ConsoleCommand {
         try {
             int row = Integer.parseInt(tokens[3]);
             if (tokens.length == 4) {
-                Iterator<CustomShopItem> it = ShopGrid.currentPage.rows.get(row).items.iterator();
+                Iterator<CustomShopItem> it = ShopGrid.getCurrentPage().rows.get(row).items.iterator();
                 while (it.hasNext()) {
                     it.remove();
                 }
             } else {
                 int col = Integer.parseInt(tokens[4]);
-                ShopGrid.currentPage.rows.get(row).items.remove(col);
+                ShopGrid.getCurrentPage().rows.get(row).items.remove(col);
             }
         } catch(NumberFormatException nfe) {
             nfe.printStackTrace();

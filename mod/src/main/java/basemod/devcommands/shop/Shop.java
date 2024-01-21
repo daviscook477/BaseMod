@@ -27,6 +27,6 @@ public class Shop extends ConsoleCommand {
         DevConsole.log("* add relic [id]");
         DevConsole.log("* add row [id] [id] ...");
         DevConsole.log("* remove item [row] [col]");
-        DevConsole.log("* remove page");
+        DevConsole.log("* remove page [id]");
     }
 }

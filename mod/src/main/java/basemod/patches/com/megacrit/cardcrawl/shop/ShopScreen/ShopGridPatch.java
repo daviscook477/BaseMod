@@ -47,7 +47,7 @@ public class ShopGridPatch {
 
             @SpirePostfixPatch
             public static void HideGridOnOpen() {
-                if (!ShopGrid.currentPage.isEmpty()) {
+                if (!ShopGrid.getCurrentPage().isEmpty()) {
                     ShopGrid.hide();
                 }
             }
@@ -124,13 +124,13 @@ public class ShopGridPatch {
             public static SpireReturn<Void> Insert(StoreRelic __instance, float rugY) {
 
                 if (__instance.relic != null) { // dandy-TODO: for compatibility, add check to see if relic/potion was added to grid, otherwise continue
-                    for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
+                    for (ShopGrid.Row gridRow : ShopGrid.getCurrentPage().rows)
                         for (CustomShopItem item : gridRow.items)
                             if (item.storeRelic == __instance) {
-                                if (gridRow.owner.rows.size() != 2) {
+                                if (gridRow.owner.rows.size() > 2) {
                                     __instance.relic.currentY = gridRow.getY(item.row, rugY);
                                 } else {
-                                    __instance.relic.currentY = rugY + (item.row == 0 ? 200F : 400F) * Settings.xScale;
+                                    __instance.relic.currentY = rugY + (item.row == 0 ? 400F : 200F) * Settings.xScale;
                                 }
                                 __instance.relic.currentX = gridRow.getX(item.col);
                                 return SpireReturn.Continue();
@@ -154,7 +154,7 @@ public class ShopGridPatch {
             @SpirePostfixPatch
             public static void RemoveRelic(StoreRelic __instance) {
                 if (__instance.isPurchased) {
-                    for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
+                    for (ShopGrid.Row gridRow : ShopGrid.getCurrentPage().rows)
                         for (CustomShopItem item : gridRow.items) {
                             if (item.storeRelic == __instance) {
                                 item.storeRelic.relic = null;
@@ -175,7 +175,7 @@ public class ShopGridPatch {
 
             @SpirePrefixPatch
             public static SpireReturn<Void> CheckIfRelicInCurrentPage(StoreRelic __instance, SpriteBatch sb) {
-                if (__instance.relic != null && !ShopGrid.currentPage.contains(__instance)) {
+                if (__instance.relic != null && !ShopGrid.getCurrentPage().contains(__instance)) {
                     return SpireReturn.Return();
                 }
                 return SpireReturn.Continue();
@@ -191,13 +191,13 @@ public class ShopGridPatch {
             @SpireInsertPatch(locator = HBMoveLocator.class)
             public static SpireReturn<Void> SetCoords(StorePotion __instance, float rugY) {
                 if (__instance.potion != null) { // dandy-TODO: for compatibility, add check to see if relic/potion was added to grid, otherwise continue
-                    for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
+                    for (ShopGrid.Row gridRow : ShopGrid.getCurrentPage().rows)
                         for (CustomShopItem item : gridRow.items) {
                             if (item.storePotion == __instance) {
-                                if (gridRow.owner.rows.size() != 2) {
+                                if (gridRow.owner.rows.size() > 2) {
                                     __instance.potion.posY = gridRow.getY(item.row, rugY);
                                 } else {
-                                    __instance.potion.posY = rugY + (item.row == 0 ? 200F : 400F) * Settings.xScale;
+                                    __instance.potion.posY = rugY + (item.row == 0 ? 400F : 200F) * Settings.xScale;
                                 }
                                 __instance.potion.posX = gridRow.getX(item.col);
                                 return SpireReturn.Continue();
@@ -221,12 +221,14 @@ public class ShopGridPatch {
         public static class PurchasePotion {
             public static void Postfix(StorePotion __instance) {
                 if (__instance.isPurchased) {
-                    for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
+                    for (ShopGrid.Row gridRow : ShopGrid.getCurrentPage().rows)
                         for (CustomShopItem item : gridRow.items) {
                             if (item.storePotion == __instance) {
                                 item.storePotion.potion = null;
                                 item.storePotion = null;
                                 item.isPurchased = true;
+
+                                ShopGrid.removeEmptyPages();
                                 break;
                             }
                         }
@@ -240,7 +242,7 @@ public class ShopGridPatch {
 
             @SpirePrefixPatch
             public static SpireReturn<Void> CheckIfPotionInCurrentPage(StorePotion __instance, SpriteBatch sb) {
-                if (__instance.potion != null && !ShopGrid.currentPage.contains(__instance)) {
+                if (__instance.potion != null && !ShopGrid.getCurrentPage().contains(__instance)) {
                     return SpireReturn.Return();
                 }
                 return SpireReturn.Continue();
