@@ -7,7 +7,6 @@ import com.evacipated.cardcrawl.modthespire.lib.LineFinder;
 import com.evacipated.cardcrawl.modthespire.lib.Matcher;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertLocator;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertPatch;
-import com.evacipated.cardcrawl.modthespire.lib.SpireInstrumentPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch2;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
@@ -22,10 +21,7 @@ import com.megacrit.cardcrawl.shop.StoreRelic;
 import basemod.BaseMod;
 import basemod.ShopGrid;
 import basemod.abstracts.CustomShopItem;
-import javassist.CannotCompileException;
 import javassist.CtBehavior;
-import javassist.expr.ExprEditor;
-import javassist.expr.FieldAccess;
 
 public class ShopGridPatch {
 
@@ -105,9 +101,16 @@ public class ShopGridPatch {
         @SpirePatch2(clz = ShopScreen.class, method = "render")
         public static class Render {
 
-            @SpirePostfixPatch
-            public static void RenderGrid(SpriteBatch sb) {
-                ShopGrid.render(sb);
+            @SpireInsertPatch(locator = RenderRelicsLocator.class)
+            public static void RenderGrid(SpriteBatch sb, float ___rugY) {
+                ShopGrid.render(sb, ___rugY);
+            }
+
+            private static class RenderRelicsLocator extends SpireInsertLocator {
+                @Override
+                public int[] Locate(CtBehavior ct) throws Exception {
+                    return LineFinder.findInOrder(ct, new Matcher.MethodCallMatcher(ShopScreen.class, "renderRelics"));
+                }
             }
         }
     }
@@ -120,7 +123,7 @@ public class ShopGridPatch {
             @SpireInsertPatch(locator = HBMoveLocator.class)
             public static SpireReturn<Void> Insert(StoreRelic __instance, float rugY) {
 
-                if (__instance.relic != null) {
+                if (__instance.relic != null) { // dandy-TODO: for compatibility, add check to see if relic/potion was added to grid, otherwise continue
                     for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
                         for (CustomShopItem item : gridRow.items)
                             if (item.storeRelic == __instance) {
@@ -132,6 +135,7 @@ public class ShopGridPatch {
                                 __instance.relic.currentX = gridRow.getX(item.col);
                                 return SpireReturn.Continue();
                             }
+                    return SpireReturn.Return();
                 }
                 return SpireReturn.Continue();
             }
@@ -146,8 +150,9 @@ public class ShopGridPatch {
         }
 
         @SpirePatch2(clz = StoreRelic.class, method = "purchaseRelic")
-        public static class UpdateGridRow {
-            public static void Postfix(StoreRelic __instance) {
+        public static class PurchaseRelic {
+            @SpirePostfixPatch
+            public static void RemoveRelic(StoreRelic __instance) {
                 if (__instance.isPurchased) {
                     for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
                         for (CustomShopItem item : gridRow.items) {
@@ -155,7 +160,9 @@ public class ShopGridPatch {
                                 item.storeRelic.relic = null;
                                 item.storeRelic = null;
                                 item.isPurchased = true;
-                                break;
+
+                                ShopGrid.removeEmptyPages();
+                                return;
                             }
                         }
                     ShopGrid.removeEmptyPages();
@@ -183,7 +190,7 @@ public class ShopGridPatch {
 
             @SpireInsertPatch(locator = HBMoveLocator.class)
             public static SpireReturn<Void> SetCoords(StorePotion __instance, float rugY) {
-                if (__instance.potion != null) {
+                if (__instance.potion != null) { // dandy-TODO: for compatibility, add check to see if relic/potion was added to grid, otherwise continue
                     for (ShopGrid.Row gridRow : ShopGrid.currentPage.rows)
                         for (CustomShopItem item : gridRow.items) {
                             if (item.storePotion == __instance) {
@@ -196,6 +203,7 @@ public class ShopGridPatch {
                                 return SpireReturn.Continue();
                             }
                         }
+                    return SpireReturn.Return();
                 }
                 return SpireReturn.Continue();
             }

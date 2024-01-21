@@ -1,5 +1,6 @@
 package basemod.devcommands.shop;
 
+import basemod.DevConsole;
 import basemod.ShopGrid;
 import basemod.devcommands.ConsoleCommand;
 
@@ -19,6 +20,7 @@ public class ShopRemovePage extends ConsoleCommand {
 
     @Override
     protected void execute(String[] tokens, int depth) {
-        ShopGrid.removePage(ShopGrid.currentPage);
+        if (!ShopGrid.removePage(ShopGrid.currentPage))
+            DevConsole.log("could not remove page");
     }
 }

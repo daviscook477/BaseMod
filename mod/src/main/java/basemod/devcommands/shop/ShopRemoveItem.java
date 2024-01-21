@@ -24,9 +24,14 @@ public class ShopRemoveItem extends ConsoleCommand {
                 opts.add(String.valueOf(i));
         }
         else {
-            int row = Integer.parseInt(tokens[3]);
-            for (int i = 0; i < ShopGrid.currentPage.rows.get(row).maxColumns; i++)
-                opts.add(String.valueOf(i));
+            try {
+                int row = Integer.parseInt(tokens[3]);
+                for (int i = 0; i < ShopGrid.currentPage.rows.get(row).maxColumns; i++)
+                    opts.add(String.valueOf(i));
+            } catch (NumberFormatException nfe) {
+                nfe.printStackTrace();
+                Shop.cmdShopHelp();
+            }
         }
         return opts;
     }
@@ -38,15 +43,20 @@ public class ShopRemoveItem extends ConsoleCommand {
 
     @Override
     protected void execute(String[] tokens, int depth) {
-        int row = Integer.parseInt(tokens[3]);
-        if (tokens.length == 4) {
-            Iterator<CustomShopItem> it = ShopGrid.currentPage.rows.get(row).items.iterator();
-            while (it.hasNext()) {
-                it.remove();
+        try {
+            int row = Integer.parseInt(tokens[3]);
+            if (tokens.length == 4) {
+                Iterator<CustomShopItem> it = ShopGrid.currentPage.rows.get(row).items.iterator();
+                while (it.hasNext()) {
+                    it.remove();
+                }
+            } else {
+                int col = Integer.parseInt(tokens[4]);
+                ShopGrid.currentPage.rows.get(row).items.remove(col);
             }
-        } else {
-            int col = Integer.parseInt(tokens[5]);
-            ShopGrid.currentPage.rows.get(row).items.remove(col);
+        } catch(NumberFormatException nfe) {
+            nfe.printStackTrace();
+            Shop.cmdShopHelp();
         }
     }
 

@@ -79,17 +79,15 @@ public class ShopGrid {
     }
 
     public static boolean removePage(Page page) {
-        if (pages.contains(page)) {
-            if (page == currentPage)
-                currentPage = page.getNextPage();
-            pages.remove(page);
-            return true;
-        } else if (customPages.contains(page)) {
-            if (page == currentPage)
-                currentPage = page.getNextPage();
-            customPages.remove(page);
-            return true;
+        if (page == currentPage) {
+            currentPage = page.getNextPage();
+            if (currentPage == page)
+                currentPage = null;
         }
+        if (pages.contains(page))
+            return pages.remove(page);
+        else if (customPages.contains(page))
+            return customPages.remove(page);
         return false;
     }
 
@@ -126,6 +124,7 @@ public class ShopGrid {
     }
 
     public static void removeEmptyPages() {
+        BaseMod.logger.info("HERE");
         Page previousPage = currentPage.getPreviousPage();
         pages.removeIf((page) -> page.isEmpty());
         customPages.removeIf((page) -> page.isEmpty());
@@ -199,7 +198,7 @@ public class ShopGrid {
                     sb,
                     FontHelper.buttonLabelFont,
                     (pages.indexOf(currentPage) + 1) + "/" + pages.size(),
-                    1150.0F * Settings.xScale,
+                    1130F * Settings.xScale,
                     pageY,
                     Color.WHITE
                 );
@@ -392,7 +391,7 @@ public class ShopGrid {
         }
 
         public void update(float rugY) {
-            this.x = (forward ? 1225.0F : 1075.0F) * Settings.xScale;
+            this.x = (forward ? 1205.0F : 1055.0F) * Settings.xScale;
             this.y = rugY + 500.0F * Settings.yScale;
             this.hb.move(x, y);
             this.hb.update();
