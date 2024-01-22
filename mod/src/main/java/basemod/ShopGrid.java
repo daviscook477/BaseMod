@@ -167,7 +167,7 @@ public class ShopGrid {
         customPages.removeIf((page) -> page.isEmpty());
         if (!pages.contains(currentPage) && !customPages.contains(currentPage))
             currentPage = previousPage;
-        else if (currentPage == previousPage)
+        else if (currentPage == previousPage && pages.size() == 0 && customPages.size() == 0)
             currentPage = EMPTY_SHOP_PAGE;
     }
 

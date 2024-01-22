@@ -260,7 +260,7 @@ public class ShopGridPatch {
             }
 
             public static boolean canRenderGold(SpriteBatch sb, StoreRelic instance) {
-                if (compatibleWithGrid.get(instance) && !canRender(instance)) {
+                if (!canRender(instance)) {
                     if (instance.relic.hb.hovered) {
                         hoveringItem = true;
                         x = instance.relic.currentX;
@@ -407,7 +407,7 @@ public class ShopGridPatch {
             }
 
             public static boolean canRenderGold(SpriteBatch sb, StorePotion instance) {
-                if (compatibleWithGrid.get(instance) && !canRender(instance)) {
+                if (!canRender(instance)) {
                     if (instance.potion.hb.hovered) {
                         hoveringItem = true;
                         x = instance.potion.posX;
@@ -442,7 +442,7 @@ public class ShopGridPatch {
             }
 
             public static boolean canRenderText(SpriteBatch sb, StorePotion instance) {
-                return compatibleWithGrid.get(instance) && canRender(instance);
+                return canRender(instance);
             }
 
             public static float textX(StorePotion instance, float xOffset) {
