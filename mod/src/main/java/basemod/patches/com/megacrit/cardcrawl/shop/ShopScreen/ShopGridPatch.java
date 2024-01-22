@@ -2,6 +2,7 @@ package basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.LineFinder;
 import com.evacipated.cardcrawl.modthespire.lib.Matcher;
@@ -14,12 +15,16 @@ import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePrefixPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpireReturn;
 import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.Hitbox;
+import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.helpers.TipHelper;
 import com.megacrit.cardcrawl.shop.ShopScreen;
 import com.megacrit.cardcrawl.shop.StorePotion;
 import com.megacrit.cardcrawl.shop.StoreRelic;
 
 import basemod.BaseMod;
+import basemod.ReflectionHacks;
 import basemod.ShopGrid;
 import basemod.abstracts.CustomShopItem;
 import javassist.CannotCompileException;
@@ -28,6 +33,49 @@ import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 
 public class ShopGridPatch {
+
+    private static final float GOLD_IMG_WIDTH = ImageMaster.UI_GOLD.getWidth() * Settings.scale;
+
+    private static final float SHADOW_DIST_X = 4F * Settings.scale;
+
+    private static final float SHADOW_DIST_Y = 4F * Settings.scale;
+
+    private static final float BOX_W = 100F * Settings.scale;
+
+    private static final float OFFSET_X = -50F * Settings.scale;
+
+    private static final float OFFSET_Y = -78F * Settings.scale;
+
+    private static final float TEXT_OFFSET_X = -16F * Settings.scale;
+
+    private static final float TEXT_OFFSET_Y = 16F * Settings.scale;
+
+    private static final float RELIC_GOLD_OFFSET_X = -57F * Settings.scale;
+
+    private static final float RELIC_GOLD_OFFSET_Y = -102F * Settings.scale;
+
+    private static boolean hoveringItem = false;
+
+    private static float x;
+
+    private static float y;
+
+    private static int price;
+
+    public static void renderPrice(SpriteBatch sb) {
+        final float BOX_EDGE_H = ReflectionHacks.getPrivateStatic(TipHelper.class, "BOX_EDGE_H");
+        final float TIP_DESC_LINE_SPACING = ReflectionHacks.getPrivateStatic(TipHelper.class, "TIP_DESC_LINE_SPACING");
+        final Color BASE_COLOR = ReflectionHacks.getPrivateStatic(TipHelper.class, "BASE_COLOR");
+        float h = FontHelper.getHeight(FontHelper.tipBodyFont, Integer.toString(price), 1F);
+        sb.setColor(Settings.TOP_PANEL_SHADOW_COLOR);
+        sb.draw(ImageMaster.KEYWORD_TOP, x + OFFSET_X + SHADOW_DIST_X, y + OFFSET_Y - SHADOW_DIST_Y, BOX_W, BOX_EDGE_H);
+        sb.draw(ImageMaster.KEYWORD_BOT, x + OFFSET_X + SHADOW_DIST_X, y + OFFSET_Y - h - SHADOW_DIST_Y, BOX_W, BOX_EDGE_H + Math.min(h, 0F));
+        sb.setColor(Color.WHITE);
+        sb.draw(ImageMaster.KEYWORD_TOP, x + OFFSET_X, y + OFFSET_Y, BOX_W, BOX_EDGE_H);
+        sb.draw(ImageMaster.KEYWORD_BOT, x + OFFSET_X, y + OFFSET_Y - h, BOX_W, BOX_EDGE_H);
+        sb.draw(ImageMaster.UI_GOLD, x + RELIC_GOLD_OFFSET_X, y + RELIC_GOLD_OFFSET_Y, GOLD_IMG_WIDTH, GOLD_IMG_WIDTH);
+        FontHelper.renderSmartText(sb, FontHelper.tipBodyFont, Integer.toString(price), x + TEXT_OFFSET_X + OFFSET_X + GOLD_IMG_WIDTH, y + TEXT_OFFSET_Y + OFFSET_Y, BOX_W, TIP_DESC_LINE_SPACING, BASE_COLOR);
+    }
 
     @SpirePatch2(clz = ShopScreen.class, method = SpirePatch.CLASS)
     public static class ShopScreenPatches {
@@ -62,7 +110,9 @@ public class ShopGridPatch {
 
             @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "relic" })
             public static void AddGridRelic(StoreRelic relic) {
-                if (!ShopGrid.tryAddItem(new CustomShopItem(relic)))
+                CustomShopItem item = new CustomShopItem(relic);
+                item.applyDiscounts = false;
+                if (!ShopGrid.tryAddItem(item))
                     BaseMod.logger.warn("not adding default shop relic because grid is full, is this intentional?");
             }
 
@@ -80,7 +130,9 @@ public class ShopGridPatch {
 
             @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "potion" })
             public static void AddGridPotion(StorePotion potion) {
-                if (!ShopGrid.tryAddItem(new CustomShopItem(potion)))
+                CustomShopItem item = new CustomShopItem(potion);
+                item.applyDiscounts = false;
+                if (!ShopGrid.tryAddItem(item))
                     BaseMod.logger.warn("not adding default potion because grid is full, is this intentional?");
             }
 
@@ -104,6 +156,17 @@ public class ShopGridPatch {
 
         @SpirePatch2(clz = ShopScreen.class, method = "render")
         public static class Render {
+
+            @SpirePrefixPatch
+            public static void ResetHoveringItem() {
+                hoveringItem = false;
+            }
+
+            @SpirePostfixPatch
+            public static void RenderItemPrice(SpriteBatch sb) {
+                if (hoveringItem)
+                    renderPrice(sb);
+            }
 
             @SpireInsertPatch(locator = RenderRelicsLocator.class)
             public static void RenderGrid(SpriteBatch sb, float ___rugY) {
@@ -196,7 +259,10 @@ public class ShopGridPatch {
             public static boolean canRenderGold(SpriteBatch sb, StoreRelic instance) {
                 if (!canRender(instance)) {
                     if (instance.relic.hb.hovered) {
-                         // render the cost above the tooltips
+                        hoveringItem = true;
+                        x = instance.relic.currentX;
+                        y = instance.relic.currentY;
+                        price = instance.price;
                     }
                     return false;
                 }
@@ -226,13 +292,7 @@ public class ShopGridPatch {
             }
 
             public static boolean canRenderText(SpriteBatch sb, StoreRelic instance) {
-                if (!canRender(instance)) {
-                    if (instance.relic.hb.hovered) {
-                        // render the text above the tooltips
-                    }
-                    return false;
-                }
-                return true;
+                return canRender(instance);
             }
 
             public static float textX(StoreRelic instance, float xOffset) {
@@ -343,7 +403,10 @@ public class ShopGridPatch {
             public static boolean canRenderGold(SpriteBatch sb, StorePotion instance) {
                 if (!canRender(instance)) {
                     if (instance.potion.hb.hovered) {
-                         // render the cost above the tooltips
+                        hoveringItem = true;
+                        x = instance.potion.posX;
+                        y = instance.potion.posY;
+                        price = instance.price;
                     }
                     return false;
                 }
@@ -373,13 +436,7 @@ public class ShopGridPatch {
             }
 
             public static boolean canRenderText(SpriteBatch sb, StorePotion instance) {
-                if (!canRender(instance)) {
-                    if (instance.potion.hb.hovered) {
-                        // render the text above the tooltips
-                    }
-                    return false;
-                }
-                return true;
+                return canRender(instance);
             }
 
             public static float textX(StorePotion instance, float xOffset) {

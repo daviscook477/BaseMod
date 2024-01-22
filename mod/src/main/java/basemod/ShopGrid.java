@@ -44,7 +44,7 @@ public class ShopGrid {
     // this list has the pages for the remaining items that were added and the initial shop items
     public static LinkedList<Page> pages = new LinkedList<>();
 
-    // used for when the shop grid is empty, will always have id of basemod:1 and cannot be removed
+    // used for when the shop grid is empty, will always have id of basemod:0 and cannot be removed
     public static final Page EMPTY_SHOP_PAGE = new Page();
 
     private static Page currentPage;
@@ -57,10 +57,10 @@ public class ShopGrid {
 
     public static void initialize() {
         pages.clear();
+        pageIdCounter = 0;
         currentPage = addDefaultPage();
         rightArrow = new NavButton(true);
         leftArrow = new NavButton(false);
-        pageIdCounter = 0;
     }
 
     public static Page getCurrentPage() {
@@ -212,7 +212,7 @@ public class ShopGrid {
             for (int i = 0; i < rowSizes.length; i++) {
                 rows.add(new Row(this, i, rowSizes[i]));
             }
-            this.id = DEFAULT_PAGE_ID + ++pageIdCounter;
+            this.id = DEFAULT_PAGE_ID + pageIdCounter++;
         }
 
         public Page(String id, int ... rowSizes) {
@@ -232,7 +232,7 @@ public class ShopGrid {
                 row.update(rugY);
             leftArrow.update(rugY);
             rightArrow.update(rugY);
-            pageY = rugY + 500.0F * Settings.yScale;
+            pageY = rugY + 510.0F * Settings.yScale;
         }
 
         public void render(SpriteBatch sb) {
@@ -402,11 +402,18 @@ public class ShopGrid {
                 item.gridRow = this;
                 items.add(item);
                 if (item.storeRelic != null) {
+                    if (item.applyDiscounts) {
+                        item.applyDiscounts(item.storeRelic.price);
+                        item.storeRelic.price = item.price;
+                    }
                     ArrayList<StoreRelic> relics = (ArrayList<StoreRelic>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "relics");
                     if (!relics.contains(item.storeRelic))
                         relics.add(item.storeRelic);
-                }
-                if (item.storePotion != null) {
+                } else if (item.storePotion != null) {
+                    if (item.applyDiscounts) {
+                        item.applyDiscounts(item.storePotion.price);
+                        item.storePotion.price = item.price;
+                    }
                     ArrayList<StorePotion> potions = (ArrayList<StorePotion>)ReflectionHacks.getPrivate(AbstractDungeon.shopScreen, ShopScreen.class, "potions");
                     if (!potions.contains(item.storePotion))
                         potions.add(item.storePotion);
@@ -483,7 +490,7 @@ public class ShopGrid {
                 TextureRegion region = new TextureRegion(texture);
                 if (forward)
                     region.flip(true, false);
-                sb.draw(region, x - 96.0F * Settings.scale, y - 96.0F * Settings.scale, 128.0F, 128.0F, 128.0F, 128.0F, Settings.scale / 2, Settings.scale / 2, 0.0F);
+                sb.draw(region, x - 96.0F * Settings.scale, y - 86.0F * Settings.scale, 128.0F, 128.0F, 128.0F, 128.0F, Settings.scale / 2, Settings.scale / 2, 0.0F);
                 hb.render(sb);
             }
         }

@@ -46,6 +46,8 @@ public class CustomShopItem {
 
     public boolean isPurchased = false;
 
+    public boolean applyDiscounts = true;
+
     private static final float GOLD_IMG_WIDTH = ReflectionHacks.getPrivateStatic(StoreRelic.class, "GOLD_IMG_WIDTH");
     private static final float GOLD_OFFSET_X = ReflectionHacks.getPrivateStatic(StoreRelic.class, "RELIC_GOLD_OFFSET_X");
     private static final float GOLD_OFFSET_Y = ReflectionHacks.getPrivateStatic(StoreRelic.class, "RELIC_GOLD_OFFSET_Y");
@@ -63,6 +65,7 @@ public class CustomShopItem {
     public CustomShopItem(StoreRelic storeRelic) {
         if (storeRelic.relic != null) {
             this.storeRelic = storeRelic;
+            this.price = storeRelic.price;
         } else {
             BaseMod.logger.error("StoreRelic cannot have a null relic");
         }
@@ -71,6 +74,7 @@ public class CustomShopItem {
     public CustomShopItem(StorePotion storePotion) {
         if (storePotion.potion != null) {
             this.storePotion = storePotion;
+            this.price = storePotion.price;
         } else {
             BaseMod.logger.error("StorePotion cannot have a null potion");
         }
@@ -91,11 +95,12 @@ public class CustomShopItem {
 
     public void applyDiscounts(int price) {
         float mult = 1F;
-        for (AbstractRelic relic : AbstractDungeon.player.relics)
+        for (AbstractRelic relic : AbstractDungeon.player.relics) {
             if (relic.relicId.equals(Courier.ID))
                 mult *= 0.8F;
             else if (relic.relicId.equals(MembershipCard.ID))
                 mult *= 0.5F;
+        }
         this.price = (int)(mult * price);
     }
 
