@@ -3,6 +3,7 @@ package basemod.abstracts;
 import basemod.BaseMod;
 import basemod.ReflectionHacks;
 import basemod.ShopGrid;
+import basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -64,6 +65,7 @@ public class CustomShopItem {
 
     public CustomShopItem(StoreRelic storeRelic) {
         if (storeRelic.relic != null) {
+            ShopGridPatch.StoreRelicPatches.compatibleWithGrid.set(storeRelic, true);
             this.storeRelic = storeRelic;
             this.price = storeRelic.price;
         } else {
@@ -73,6 +75,7 @@ public class CustomShopItem {
 
     public CustomShopItem(StorePotion storePotion) {
         if (storePotion.potion != null) {
+            ShopGridPatch.StorePotionPatches.compatibleWithGrid.set(storePotion, true);
             this.storePotion = storePotion;
             this.price = storePotion.price;
         } else {

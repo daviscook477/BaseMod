@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.LineFinder;
 import com.evacipated.cardcrawl.modthespire.lib.Matcher;
+import com.evacipated.cardcrawl.modthespire.lib.SpireField;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertLocator;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInsertPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInstrumentPatch;
@@ -182,15 +183,17 @@ public class ShopGridPatch {
         }
     }
 
+    @SpirePatch2(clz = StoreRelic.class, method = SpirePatch.CLASS)
     public static class StoreRelicPatches {
+
+        public static SpireField<Boolean> compatibleWithGrid = new SpireField<>(() -> false);
 
         @SpirePatch2(clz = StoreRelic.class, method = "update")
         public static class SetCoords {
 
             @SpireInsertPatch(locator = HBMoveLocator.class)
             public static SpireReturn<Void> Insert(StoreRelic __instance, float rugY) {
-
-                if (__instance.relic != null) { // dandy-TODO: for compatibility, add check to see if relic/potion was added to grid, otherwise continue
+                if (__instance.relic != null && compatibleWithGrid.get(__instance)) {
                     for (ShopGrid.Row gridRow : ShopGrid.getCurrentPage().rows)
                         for (CustomShopItem item : gridRow.items)
                             if (item.storeRelic == __instance) {
@@ -220,7 +223,7 @@ public class ShopGridPatch {
         public static class PurchaseRelic {
             @SpirePostfixPatch
             public static void RemoveRelic(StoreRelic __instance) {
-                if (__instance.isPurchased) {
+                if (__instance.isPurchased && compatibleWithGrid.get(__instance)) {
                     for (ShopGrid.Row gridRow : ShopGrid.getCurrentPage().rows)
                         for (CustomShopItem item : gridRow.items) {
                             if (item.storeRelic == __instance) {
@@ -242,14 +245,14 @@ public class ShopGridPatch {
 
             @SpirePrefixPatch
             public static SpireReturn<Void> CheckIfRelicInCurrentPage(StoreRelic __instance, SpriteBatch sb) {
-                if (__instance.relic != null && !ShopGrid.getCurrentPage().contains(__instance)) {
+                if (__instance.relic != null && compatibleWithGrid.get(__instance) && !ShopGrid.getCurrentPage().contains(__instance)) {
                     return SpireReturn.Return();
                 }
                 return SpireReturn.Continue();
             }
 
             public static boolean canRender(StoreRelic instance) {
-                if (ShopGrid.getCurrentPage().contains(instance)
+                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance)
                     && ((ShopGrid.getCurrentPage().getItem(instance).gridRow.maxColumns > 5)
                         || ShopGrid.getCurrentPage().rows.size() > 4))
                             return false;
@@ -257,7 +260,7 @@ public class ShopGridPatch {
             }
 
             public static boolean canRenderGold(SpriteBatch sb, StoreRelic instance) {
-                if (!canRender(instance)) {
+                if (compatibleWithGrid.get(instance) && !canRender(instance)) {
                     if (instance.relic.hb.hovered) {
                         hoveringItem = true;
                         x = instance.relic.currentX;
@@ -270,7 +273,7 @@ public class ShopGridPatch {
             }
 
             public static float goldY(StoreRelic instance, float yOffset) {
-                if (ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
+                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
                     return instance.relic.currentY - 75F * Settings.yScale;
                 return instance.relic.currentY + yOffset;
             }
@@ -296,13 +299,13 @@ public class ShopGridPatch {
             }
 
             public static float textX(StoreRelic instance, float xOffset) {
-                if (ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().getItem(instance).gridRow.maxColumns > 4)
+                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().getItem(instance).gridRow.maxColumns > 4)
                     return instance.relic.currentX + 3F * Settings.scale;
                 return instance.relic.currentX + xOffset;
             }
 
             public static float textY(StoreRelic instance, float yOffset) {
-                if (ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
+                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
                     return instance.relic.currentY - 40F * Settings.scale;
                 return instance.relic.currentY + yOffset;
             }
@@ -327,14 +330,17 @@ public class ShopGridPatch {
         }
     }
 
+    @SpirePatch2(clz = StorePotion.class, method = SpirePatch.CLASS)
     public static class StorePotionPatches {
+
+        public static SpireField<Boolean> compatibleWithGrid = new SpireField<>(() -> false);
 
         @SpirePatch2(clz = StorePotion.class, method = "update")
         public static class Update {
 
             @SpireInsertPatch(locator = HBMoveLocator.class)
             public static SpireReturn<Void> SetCoords(StorePotion __instance, float rugY) {
-                if (__instance.potion != null) { // dandy-TODO: for compatibility, add check to see if relic/potion was added to grid, otherwise continue
+                if (__instance.potion != null && compatibleWithGrid.get(__instance)) {
                     for (ShopGrid.Row gridRow : ShopGrid.getCurrentPage().rows)
                         for (CustomShopItem item : gridRow.items) {
                             if (item.storePotion == __instance) {
@@ -364,7 +370,7 @@ public class ShopGridPatch {
         @SpirePatch2(clz = StorePotion.class, method = "purchasePotion")
         public static class PurchasePotion {
             public static void Postfix(StorePotion __instance) {
-                if (__instance.isPurchased) {
+                if (__instance.isPurchased && compatibleWithGrid.get(__instance)) {
                     for (ShopGrid.Row gridRow : ShopGrid.getCurrentPage().rows)
                         for (CustomShopItem item : gridRow.items) {
                             if (item.storePotion == __instance) {
@@ -386,14 +392,14 @@ public class ShopGridPatch {
 
             @SpirePrefixPatch
             public static SpireReturn<Void> CheckIfPotionInCurrentPage(StorePotion __instance, SpriteBatch sb) {
-                if (__instance.potion != null && !ShopGrid.getCurrentPage().contains(__instance)) {
+                if (__instance.potion != null && compatibleWithGrid.get(__instance) && !ShopGrid.getCurrentPage().contains(__instance)) {
                     return SpireReturn.Return();
                 }
                 return SpireReturn.Continue();
             }
 
             public static boolean canRender(StorePotion instance) {
-                if (ShopGrid.getCurrentPage().contains(instance)
+                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance)
                     && ((ShopGrid.getCurrentPage().getItem(instance).gridRow.maxColumns > 5)
                         || ShopGrid.getCurrentPage().rows.size() > 4))
                             return false;
@@ -401,7 +407,7 @@ public class ShopGridPatch {
             }
 
             public static boolean canRenderGold(SpriteBatch sb, StorePotion instance) {
-                if (!canRender(instance)) {
+                if (compatibleWithGrid.get(instance) && !canRender(instance)) {
                     if (instance.potion.hb.hovered) {
                         hoveringItem = true;
                         x = instance.potion.posX;
@@ -414,7 +420,7 @@ public class ShopGridPatch {
             }
 
             public static float goldY(StorePotion instance, float yOffset) {
-                if (ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
+                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
                     return instance.potion.posY - 75F * Settings.yScale;
                 return instance.potion.posY + yOffset;
             }
@@ -436,17 +442,17 @@ public class ShopGridPatch {
             }
 
             public static boolean canRenderText(SpriteBatch sb, StorePotion instance) {
-                return canRender(instance);
+                return compatibleWithGrid.get(instance) && canRender(instance);
             }
 
             public static float textX(StorePotion instance, float xOffset) {
-                if (ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().getItem(instance).gridRow.maxColumns > 4)
+                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().getItem(instance).gridRow.maxColumns > 4)
                     return instance.potion.posX + 3F * Settings.scale;
                 return instance.potion.posX + xOffset;
             }
 
             public static float textY(StorePotion instance, float yOffset) {
-                if (ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
+                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
                     return instance.potion.posY - 40F * Settings.scale;
                 return instance.potion.posY + yOffset;
             }

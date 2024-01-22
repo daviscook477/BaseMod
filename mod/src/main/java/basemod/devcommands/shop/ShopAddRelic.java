@@ -16,7 +16,7 @@ public class ShopAddRelic extends ConsoleCommand {
     public ShopAddRelic() {
         requiresPlayer = true;
         minExtraTokens = 0;
-        minExtraTokens = 1;
+        maxExtraTokens = 1;
         simpleCheck = true;
     }
 
@@ -34,9 +34,9 @@ public class ShopAddRelic extends ConsoleCommand {
     protected void execute(String[] tokens, int depth) {
         AbstractRelic relic;
         if (tokens.length == 3)
-            relic = AbstractDungeon.returnRandomRelic(AbstractDungeon.returnRandomRelicTier());
+            relic = AbstractDungeon.returnRandomRelic(AbstractDungeon.returnRandomRelicTier()).makeCopy();
         else
-            relic = RelicLibrary.getRelic(tokens[3]);
+            relic = RelicLibrary.getRelic(tokens[3]).makeCopy();
         if (!ShopGrid.tryAddItem(new CustomShopItem(relic)))
             DevConsole.log("could not add " + relic.relicId + " to shop grid");
     }

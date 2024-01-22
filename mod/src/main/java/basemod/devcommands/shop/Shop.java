@@ -25,7 +25,7 @@ public class Shop extends ConsoleCommand {
         DevConsole.log("* add page [row size] [row size] ...");
         DevConsole.log("* add potion [id]");
         DevConsole.log("* add relic [id]");
-        DevConsole.log("* add row [id] [id] ...");
+        DevConsole.log("* add row [size]");
         DevConsole.log("* remove item [row] [col]");
         DevConsole.log("* remove page [id]");
     }

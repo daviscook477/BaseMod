@@ -57,7 +57,7 @@ public class ShopGrid {
 
     public static void initialize() {
         pages.clear();
-        pageIdCounter = 0;
+        pageIdCounter = 1;
         currentPage = addDefaultPage();
         rightArrow = new NavButton(true);
         leftArrow = new NavButton(false);
@@ -104,6 +104,8 @@ public class ShopGrid {
     }
 
     public static boolean removePage(Page page) {
+        if (page == EMPTY_SHOP_PAGE)
+            return false;
         if (page == currentPage) {
             currentPage = page.getNextPage();
             if (currentPage == page)

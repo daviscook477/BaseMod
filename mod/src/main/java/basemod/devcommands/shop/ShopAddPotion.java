@@ -16,7 +16,7 @@ public class ShopAddPotion extends ConsoleCommand {
     public ShopAddPotion() {
         requiresPlayer = true;
         minExtraTokens = 0;
-        minExtraTokens = 1;
+        maxExtraTokens = 1;
         simpleCheck = true;
     }
 

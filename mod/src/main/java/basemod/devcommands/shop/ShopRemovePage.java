@@ -41,5 +41,6 @@ public class ShopRemovePage extends ConsoleCommand {
             if (!ShopGrid.removePage(tokens[3]))
                 DevConsole.log("could not remove page with id " + tokens[3]);
         }
+        ShopGrid.removeEmptyPages();
     }
 }

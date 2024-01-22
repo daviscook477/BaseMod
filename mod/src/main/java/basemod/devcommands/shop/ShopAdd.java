@@ -33,7 +33,7 @@ public class ShopAdd extends ConsoleCommand {
 
     public static CustomShopItem randomItem() {
         if (AbstractDungeon.miscRng.randomBoolean())
-            return new CustomShopItem(AbstractDungeon.returnRandomRelic(AbstractDungeon.returnRandomRelicTier()));
+            return new CustomShopItem(AbstractDungeon.returnRandomRelic(AbstractDungeon.returnRandomRelicTier()).makeCopy());
         else
             return new CustomShopItem(AbstractDungeon.returnRandomPotion());
     }

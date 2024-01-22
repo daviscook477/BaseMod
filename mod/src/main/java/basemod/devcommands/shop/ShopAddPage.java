@@ -17,7 +17,8 @@ public class ShopAddPage extends ConsoleCommand {
     @Override
     public ArrayList<String> extraOptions(String[] tokens, int depth) {
         ArrayList<String> opts = new ArrayList<String>();
-        opts.add("3");
+        for (int i = 1; i < 10; i++)
+            opts.add(Integer.toString(i));
         return opts;
     }
 
