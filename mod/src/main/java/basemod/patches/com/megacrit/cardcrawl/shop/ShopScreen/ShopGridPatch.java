@@ -88,11 +88,6 @@ public class ShopGridPatch {
             public static void PostShopInitializeHook() {
                 BaseMod.publishPostShopInitialize();
             }
-
-            @SpirePrefixPatch
-            public static void InitializeGrid(ShopScreen __instance) {
-                basemod.ShopGrid.initialize();
-            }
         }
 
         @SpirePatch2(clz = ShopScreen.class, method = "open")
@@ -108,6 +103,11 @@ public class ShopGridPatch {
 
         @SpirePatch2(clz = ShopScreen.class, method = "initRelics")
         public static class InitRelics {
+
+            @SpirePrefixPatch
+            public static void InitializeGrid() {
+                basemod.ShopGrid.initialize();
+            }
 
             @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "relic" })
             public static void AddGridRelic(StoreRelic relic) {
@@ -128,6 +128,11 @@ public class ShopGridPatch {
 
         @SpirePatch2(clz = ShopScreen.class, method = "initPotions")
         public static class PostInitPotions {
+
+            @SpirePostfixPatch
+            public static void ClearEmptyPagesAfterInit() {
+                ShopGrid.removeEmptyPages();
+            }
 
             @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "potion" })
             public static void AddGridPotion(StorePotion potion) {

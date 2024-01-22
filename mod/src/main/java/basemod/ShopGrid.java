@@ -447,7 +447,7 @@ public class ShopGrid {
         }
 
         public boolean isEmpty() {
-            return items.isEmpty() || (items.stream().filter((item) -> !item.isPurchased).count() == 0);
+            return items.isEmpty() || (items.stream().filter((item) -> !item.isPurchased && item.isValid()).count() == 0);
         }
 
         public boolean isFull() {

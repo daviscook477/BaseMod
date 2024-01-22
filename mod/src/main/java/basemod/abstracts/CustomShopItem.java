@@ -29,17 +29,17 @@ public class CustomShopItem {
 
     public String customShopId;
 
-    public ShopScreen screenRef;
+    public ShopScreen screenRef = null;
     public ShopGrid.Row gridRow;
-    public StoreRelic storeRelic;
-    public StorePotion storePotion;
+    public StoreRelic storeRelic = null;
+    public StorePotion storePotion = null;
 
-    private String tipTitle = null;
-    private String tipBody = null;
+    public String tipTitle = null;
+    public String tipBody = null;
 
-    private Texture img;
-    private Hitbox hb;
-    private float x, y;
+    public Texture img = null;
+    public Hitbox hb;
+    public float x, y;
 
     public int price = 0;
     public int row = 0;
@@ -177,5 +177,11 @@ public class CustomShopItem {
         this.isPurchased = true;
         AbstractDungeon.player.loseGold(this.price);
         CardCrawlGame.sound.play("SHOP_PURCHASE", 0.1F);
+    }
+
+    public boolean isValid() {
+        return (storePotion != null && storePotion.potion != null)
+            || (storeRelic != null && storeRelic.relic != null)
+            || (screenRef != null && tipTitle != null && tipBody != null && img != null);
     }
 }
