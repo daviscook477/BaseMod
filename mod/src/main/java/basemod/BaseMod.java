@@ -120,6 +120,7 @@ public class BaseMod {
 	private static ArrayList<PostDungeonInitializeSubscriber> postDungeonInitializeSubscribers;
 	private static ArrayList<PostEnergyRechargeSubscriber> postEnergyRechargeSubscribers;
 	private static ArrayList<PostInitializeSubscriber> postInitializeSubscribers;
+	private static ArrayList<PostGridInitializeSubscriber> postGridInitializeSubscribers;
 	private static ArrayList<PostShopInitializeSubscriber> postShopInitializeSubscribers;
 	private static ArrayList<PreMonsterTurnSubscriber> preMonsterTurnSubscribers;
 	private static ArrayList<RenderSubscriber> renderSubscribers;
@@ -462,6 +463,7 @@ public class BaseMod {
 		postDungeonInitializeSubscribers = new ArrayList<>();
 		postEnergyRechargeSubscribers = new ArrayList<>();
 		postInitializeSubscribers = new ArrayList<>();
+		postGridInitializeSubscribers = new ArrayList<>();
 		postShopInitializeSubscribers = new ArrayList<>();
 		preMonsterTurnSubscribers = new ArrayList<>();
 		renderSubscribers = new ArrayList<>();
@@ -2310,6 +2312,16 @@ public class BaseMod {
 		unsubscribeLaterHelper(PostInitializeSubscriber.class);
 	}
 
+	// publishPostGridInitialize -
+	public static void publishPostGridInitialize() {
+		logger.info("publishPostGridInitialize");
+
+		for (PostGridInitializeSubscriber sub : postGridInitializeSubscribers) {
+			sub.receivePostGridInitialize();
+		}
+		unsubscribeLaterHelper(PostGridInitializeSubscriber.class);
+	}
+
 	// publishPostShopInitialize -
 	public static void publishPostShopInitialize() {
 		logger.info("publishPostShopInitialize");
@@ -2317,7 +2329,6 @@ public class BaseMod {
 		for (PostShopInitializeSubscriber sub : postShopInitializeSubscribers) {
 			sub.receivePostShopInitialize();
 		}
-
 		unsubscribeLaterHelper(PostShopInitializeSubscriber.class);
 	}
 

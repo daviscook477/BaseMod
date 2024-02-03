@@ -14,6 +14,7 @@ import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.helpers.MathHelper;
 import com.megacrit.cardcrawl.helpers.TipHelper;
 import com.megacrit.cardcrawl.helpers.controller.CInputActionSet;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
@@ -27,7 +28,7 @@ import com.megacrit.cardcrawl.shop.StoreRelic;
 
 public class CustomShopItem {
 
-    public String customShopId;
+    public String id;
 
     public ShopScreen screenRef = null;
     public ShopGrid.Row gridRow;
@@ -40,6 +41,7 @@ public class CustomShopItem {
     public Texture img = null;
     public Hitbox hb;
     public float x, y;
+    public float scale;
 
     public int price = 0;
     public int row = 0;
@@ -87,12 +89,13 @@ public class CustomShopItem {
         this(modId, AbstractDungeon.shopScreen, img, price, tipTitle, tipBody);
     }
 
-    public CustomShopItem(String modId, ShopScreen screenRef, Texture img, int price, String tipTitle, String tipBody) {
+    public CustomShopItem(String id, ShopScreen screenRef, Texture img, int price, String tipTitle, String tipBody) {
+        this.id = id;
         this.screenRef = screenRef;
         this.tipTitle = tipTitle;
         this.tipBody = tipBody;
         this.img = img;
-        this.hb = new Hitbox(img.getWidth() * Settings.scale, img.getHeight() * Settings.scale);
+        this.hb = new Hitbox(72F * Settings.scale, 72F * Settings.scale);
         applyDiscounts(price);
     }
 
@@ -117,6 +120,9 @@ public class CustomShopItem {
                 this.screenRef.moveHand(this.x - 190.0F * Settings.scale, this.y - 70.0F * Settings.scale);
                 if (InputHelper.justClickedLeft)
                     this.hb.clickStarted = true;
+                this.scale = Settings.scale * 1.25F;
+            } else {
+                this.scale = MathHelper.scaleLerpSnap(this.scale, Settings.scale);
             }
             if (this.hb.clicked || (this.hb.hovered && CInputActionSet.select.isJustPressed())) {
                 attemptPurchase();
@@ -130,20 +136,38 @@ public class CustomShopItem {
         if (!this.isPurchased) {
             if (storeRelic == null && storePotion == null) {
                 sb.setColor(Color.WHITE);
+                hb.render(sb);
                 // assumes the size of a relic image
-                sb.draw(img, x - 64.0F, y - 64.0F, 64.0F, 64.0F, 128.0F, 128.0F, Settings.scale, Settings.scale, 0.0F, 0, 0, 128, 128, false, false);
-                sb.draw(ImageMaster.UI_GOLD, x + GOLD_OFFSET_X, y + GOLD_OFFSET_Y, GOLD_IMG_WIDTH, GOLD_IMG_WIDTH);
-                Color color = Color.WHITE;
-                if (this.price > AbstractDungeon.player.gold)
-                    color = Color.SALMON;
-                FontHelper.renderFontLeftTopAligned(sb, FontHelper.tipHeaderFont, Integer.toString(this.price), x + PRICE_OFFSET_X, y + PRICE_OFFSET_Y, color);
-                if (this.hb.hovered && tipTitle != null && tipBody != null)
-                    TipHelper.renderGenericTip(
-                        InputHelper.mX + 50.0F * Settings.xScale,
-                        InputHelper.mY + 50.0F * Settings.yScale,
-                        tipTitle,
-                        tipBody
-                    );
+                sb.draw(img, x - 64.0F, y - 64.0F, 64.0F, 64.0F, 128.0F, 128.0F, scale, scale, 0.0F, 0, 0, 128, 128, false, false);
+                if (gridRow != null && gridRow.maxColumns <= 5 && gridRow.owner.rows.size() <= 4) {
+                    float goldY = y;
+                    if (gridRow.owner.rows.size() > 3)
+                        goldY += 26F * Settings.scale;
+                    float textX = x;
+                    if (gridRow.maxColumns > 4)
+                        textX -= 10 * Settings.scale;
+                    float textY = y;
+                    if (gridRow.owner.rows.size() > 3)
+                        textY += 22F * Settings.scale;
+
+                    sb.draw(ImageMaster.UI_GOLD, x + GOLD_OFFSET_X, goldY + GOLD_OFFSET_Y, GOLD_IMG_WIDTH, GOLD_IMG_WIDTH);
+                    Color color = Color.WHITE;
+                    if (this.price > AbstractDungeon.player.gold)
+                        color = Color.SALMON;
+                    FontHelper.renderFontLeftTopAligned(sb, FontHelper.tipHeaderFont, Integer.toString(this.price), textX + PRICE_OFFSET_X, textY + PRICE_OFFSET_Y, color);
+                    if (this.hb.hovered && tipTitle != null && tipBody != null)
+                        TipHelper.renderGenericTip(
+                            InputHelper.mX + 50.0F * Settings.xScale,
+                            InputHelper.mY + 50.0F * Settings.xScale,
+                            tipTitle,
+                            tipBody
+                        );
+                } else if (hb.hovered) {
+                    ShopGridPatch.x = x;
+                    ShopGridPatch.y = y;
+                    ShopGridPatch.price = price;
+                    ShopGridPatch.hoveringItem = true;
+                }
             }
         }
     }

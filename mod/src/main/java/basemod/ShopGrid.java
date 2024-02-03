@@ -36,7 +36,7 @@ public class ShopGrid {
 
     public static float topEdge = Settings.HEIGHT * 0.48F;
     
-    public static float bottomEdge = Settings.HEIGHT * 0.075F;
+    public static float bottomEdge = Settings.HEIGHT * 0.035F;
 
     // this list holds pages specifically added by modders
     public static LinkedList<Page> customPages = new LinkedList<>();
@@ -57,6 +57,7 @@ public class ShopGrid {
 
     public static void initialize() {
         pages.clear();
+        customPages.clear();
         pageIdCounter = 1;
         currentPage = addDefaultPage();
         rightArrow = new NavButton(true);
@@ -118,13 +119,6 @@ public class ShopGrid {
         return false;
     }
 
-    public static boolean removePage(int idx) {
-        Page page = pages.get(idx);
-        if (page != null)
-            return removePage(page);
-        return false;
-    }
-
     public static boolean removePage(String pageId) {
         for (Page page : pages)
             if (page.id.equals(pageId))
@@ -172,7 +166,7 @@ public class ShopGrid {
     }
 
     public static void hide() {
-        if (currentPage != null)
+        if (currentPage != null && currentPage != EMPTY_SHOP_PAGE)
             currentPage.hide();
         leftArrow.hide();
         rightArrow.hide();
@@ -243,11 +237,17 @@ public class ShopGrid {
                     row.render(sb);
             leftArrow.render(sb);
             rightArrow.render(sb);
-            if (pages.size() > 1) {
+            if (pages.size() + customPages.size() > 1) {
+                int currPageIdx = 1;
+                if (pages.contains(currentPage))
+                    currPageIdx += pages.indexOf(currentPage);
+                else if (customPages.contains(currentPage))
+                    currPageIdx += pages.size() + customPages.indexOf(currentPage);
+
                 FontHelper.renderFontCentered(
                     sb,
                     FontHelper.buttonLabelFont,
-                    (pages.indexOf(currentPage) + 1) + "/" + pages.size(),
+                    currPageIdx + "/" + (pages.size() + customPages.size()),
                     1130F * Settings.xScale,
                     pageY,
                     Color.WHITE
@@ -265,13 +265,21 @@ public class ShopGrid {
             return false;
         }
 
-        public Row addRow() {
+        public Row addDefaultRow() {
             return addRow(defaultPageCols);
         }
 
         public Row addRow(int size) {
             Row row = new Row(this, rows.size(), size);
             rows.add(row);
+            return row;
+        }
+
+        public Row insertRow(int idx, int size) {
+            Row row = new Row(this, idx, size);
+            rows.add(idx, row);
+            for (int i = idx + 1; i < rows.size(); i++)
+                rows.get(i).rowNumber++;
             return row;
         }
 
@@ -393,7 +401,15 @@ public class ShopGrid {
         }
 
         public float getY(int row, float rugY) {
-            return rugY + (topEdge - ((row + 1F) / (owner.rows.size() + 1F) * gridHeight()));
+            float y = rugY;
+            if (this.owner.rows.size() > 2) {
+                y += (topEdge - ((row + 1F) / (owner.rows.size() + 1F) * gridHeight()));
+            } else if (row == 0) {
+                y += 400F * Settings.xScale;
+            } else {
+                y += 200F * Settings.xScale;
+            }
+            return y;
         }
 
         @SuppressWarnings("unchecked")
@@ -460,6 +476,7 @@ public class ShopGrid {
         public Hitbox hb;
 
         private float x, y;
+        private float scale;
 
         public boolean forward = true;
 
@@ -473,26 +490,40 @@ public class ShopGrid {
             this.y = rugY + 500.0F * Settings.yScale;
             this.hb.move(x, y);
             this.hb.update();
-            if (this.hb.hovered && InputHelper.justClickedLeft)
-                hb.clickStarted = true;
+            if (this.hb.hovered) {
+                this.scale = Settings.scale / 2F * 1.1F;
+                if (InputHelper.justClickedLeft) {
+                    hb.clickStarted = true;
+                }
+            } else {
+                this.scale = Settings.scale / 2F;
+            }
             if (this.hb.clicked || (this.hb.hovered && CInputActionSet.select.isJustPressed())) {
-                int curIdx = pages.indexOf(currentPage);
-                if (forward && curIdx < pages.size() - 1)
-                    currentPage = pages.get(curIdx + 1);
+                int curIdx = -1;
+                if (pages.contains(currentPage))
+                    curIdx = pages.indexOf(currentPage);
+                else if (customPages.contains(currentPage))
+                    curIdx = pages.size() + customPages.indexOf(currentPage);
+                if (forward && curIdx < (pages.size() + customPages.size() - 1))
+                    currentPage = currentPage.getNextPage();
                 else if (!forward && curIdx > 0)
-                    currentPage = pages.get(curIdx - 1);
+                    currentPage = currentPage.getPreviousPage();
                 this.hb.clicked = false;
             }
         }
 
         public void render(SpriteBatch sb) {
-            int curIdx = pages.indexOf(currentPage);
-            if (((!forward && curIdx > 0) || (forward && curIdx < pages.size() - 1))) {
+            int curIdx = -1;
+            if (pages.contains(currentPage))
+                curIdx = pages.indexOf(currentPage);
+            else if (customPages.contains(currentPage))
+                curIdx = pages.size() + customPages.indexOf(currentPage);
+            if (((!forward && curIdx > 0) || (forward && (curIdx < pages.size() + customPages.size() - 1)))) {
                 sb.setColor(Color.WHITE);
                 TextureRegion region = new TextureRegion(texture);
                 if (forward)
                     region.flip(true, false);
-                sb.draw(region, x - 96.0F * Settings.scale, y - 86.0F * Settings.scale, 128.0F, 128.0F, 128.0F, 128.0F, Settings.scale / 2, Settings.scale / 2, 0.0F);
+                sb.draw(region, x - 96.0F * Settings.scale, y - 86.0F * Settings.scale, 128.0F, 128.0F, 128.0F, 128.0F, scale, scale, 0.0F);
                 hb.render(sb);
             }
         }

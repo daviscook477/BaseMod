@@ -16,6 +16,7 @@ import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePrefixPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpireReturn;
 import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
@@ -55,18 +56,18 @@ public class ShopGridPatch {
 
     private static final float RELIC_GOLD_OFFSET_Y = -102F * Settings.scale;
 
-    private static boolean hoveringItem = false;
+    public static boolean hoveringItem = false;
 
-    private static float x;
+    public static float x;
 
-    private static float y;
+    public static float y;
 
-    private static int price;
+    public static int price;
 
     public static void renderPrice(SpriteBatch sb) {
         final float BOX_EDGE_H = ReflectionHacks.getPrivateStatic(TipHelper.class, "BOX_EDGE_H");
         final float TIP_DESC_LINE_SPACING = ReflectionHacks.getPrivateStatic(TipHelper.class, "TIP_DESC_LINE_SPACING");
-        final Color BASE_COLOR = ReflectionHacks.getPrivateStatic(TipHelper.class, "BASE_COLOR");
+        Color color = ReflectionHacks.getPrivateStatic(TipHelper.class, "BASE_COLOR");
         float h = FontHelper.getHeight(FontHelper.tipBodyFont, Integer.toString(price), 1F);
         sb.setColor(Settings.TOP_PANEL_SHADOW_COLOR);
         sb.draw(ImageMaster.KEYWORD_TOP, x + OFFSET_X + SHADOW_DIST_X, y + OFFSET_Y - SHADOW_DIST_Y, BOX_W, BOX_EDGE_H);
@@ -75,7 +76,9 @@ public class ShopGridPatch {
         sb.draw(ImageMaster.KEYWORD_TOP, x + OFFSET_X, y + OFFSET_Y, BOX_W, BOX_EDGE_H);
         sb.draw(ImageMaster.KEYWORD_BOT, x + OFFSET_X, y + OFFSET_Y - h, BOX_W, BOX_EDGE_H);
         sb.draw(ImageMaster.UI_GOLD, x + RELIC_GOLD_OFFSET_X, y + RELIC_GOLD_OFFSET_Y, GOLD_IMG_WIDTH, GOLD_IMG_WIDTH);
-        FontHelper.renderSmartText(sb, FontHelper.tipBodyFont, Integer.toString(price), x + TEXT_OFFSET_X + OFFSET_X + GOLD_IMG_WIDTH, y + TEXT_OFFSET_Y + OFFSET_Y, BOX_W, TIP_DESC_LINE_SPACING, BASE_COLOR);
+        if (price > AbstractDungeon.player.gold)
+            color = Color.SALMON;
+        FontHelper.renderSmartText(sb, FontHelper.tipBodyFont, Integer.toString(price), x + TEXT_OFFSET_X + OFFSET_X + GOLD_IMG_WIDTH, y + TEXT_OFFSET_Y + OFFSET_Y, BOX_W, TIP_DESC_LINE_SPACING, color);
     }
 
     @SpirePatch2(clz = ShopScreen.class, method = SpirePatch.CLASS)
@@ -107,6 +110,7 @@ public class ShopGridPatch {
             @SpirePrefixPatch
             public static void InitializeGrid() {
                 basemod.ShopGrid.initialize();
+                BaseMod.publishPostGridInitialize();
             }
 
             @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "relic" })
@@ -202,11 +206,7 @@ public class ShopGridPatch {
                     for (ShopGrid.Row gridRow : ShopGrid.getCurrentPage().rows)
                         for (CustomShopItem item : gridRow.items)
                             if (item.storeRelic == __instance) {
-                                if (gridRow.owner.rows.size() > 2) {
-                                    __instance.relic.currentY = gridRow.getY(item.row, rugY);
-                                } else {
-                                    __instance.relic.currentY = rugY + (item.row == 0 ? 400F : 200F) * Settings.xScale;
-                                }
+                                __instance.relic.currentY = gridRow.getY(item.row, rugY);
                                 __instance.relic.currentX = gridRow.getX(item.col);
                                 return SpireReturn.Continue();
                             }
@@ -264,7 +264,7 @@ public class ShopGridPatch {
                 return true;
             }
 
-            public static boolean canRenderGold(SpriteBatch sb, StoreRelic instance) {
+            public static boolean canRenderGold(StoreRelic instance) {
                 if (!canRender(instance)) {
                     if (instance.relic.hb.hovered) {
                         hoveringItem = true;
@@ -278,7 +278,7 @@ public class ShopGridPatch {
             }
 
             public static float goldY(StoreRelic instance, float yOffset) {
-                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
+                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 3)
                     return instance.relic.currentY - 75F * Settings.yScale;
                 return instance.relic.currentY + yOffset;
             }
@@ -290,7 +290,7 @@ public class ShopGridPatch {
                         if (m.getMethodName().equals("draw")) {
                             m.replace(""
                                 + "{"
-                                    + "if (basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StoreRelicPatches.Render.canRenderGold($0, this))"
+                                    + "if (basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StoreRelicPatches.Render.canRenderGold(this))"
                                         + "sb.draw($1, $2, basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StoreRelicPatches.Render.goldY(this, RELIC_GOLD_OFFSET_Y), $4, $5);"
                                 + "}"
                             );
@@ -310,7 +310,7 @@ public class ShopGridPatch {
             }
 
             public static float textY(StoreRelic instance, float yOffset) {
-                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
+                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 3)
                     return instance.relic.currentY - 40F * Settings.scale;
                 return instance.relic.currentY + yOffset;
             }
@@ -411,7 +411,7 @@ public class ShopGridPatch {
                 return true;
             }
 
-            public static boolean canRenderGold(SpriteBatch sb, StorePotion instance) {
+            public static boolean canRenderGold(StorePotion instance) {
                 if (!canRender(instance)) {
                     if (instance.potion.hb.hovered) {
                         hoveringItem = true;
@@ -425,7 +425,7 @@ public class ShopGridPatch {
             }
 
             public static float goldY(StorePotion instance, float yOffset) {
-                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
+                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 3)
                     return instance.potion.posY - 75F * Settings.yScale;
                 return instance.potion.posY + yOffset;
             }
@@ -437,7 +437,7 @@ public class ShopGridPatch {
                         if (m.getMethodName().equals("draw")) {
                             m.replace(""
                                 + "{"
-                                    + "if (basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StorePotionPatches.Render.canRenderGold($0, this))"
+                                    + "if (basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StorePotionPatches.Render.canRenderGold(this))"
                                         + "sb.draw($1, $2, basemod.patches.com.megacrit.cardcrawl.shop.ShopScreen.ShopGridPatch.StorePotionPatches.Render.goldY(this, RELIC_GOLD_OFFSET_Y), $4, $5);"
                                 + "}"
                             );
@@ -457,7 +457,7 @@ public class ShopGridPatch {
             }
 
             public static float textY(StorePotion instance, float yOffset) {
-                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 2)
+                if (compatibleWithGrid.get(instance) && ShopGrid.getCurrentPage().contains(instance) && ShopGrid.getCurrentPage().rows.size() > 3)
                     return instance.potion.posY - 40F * Settings.scale;
                 return instance.potion.posY + yOffset;
             }
