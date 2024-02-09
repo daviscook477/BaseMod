@@ -26,6 +26,9 @@ public class ShopGrid {
 
     private static int pageIdCounter = 0;
 
+    // temporary dimensions to help support SpicyShops
+    public static int[] initialPageDimensions = { 3, 3, 4 };
+
     public static int defaultPageRows = 2;
 
     public static int defaultPageCols = 3;
@@ -59,7 +62,10 @@ public class ShopGrid {
         pages.clear();
         customPages.clear();
         pageIdCounter = 1;
-        currentPage = addDefaultPage();
+        // currentPage = addDefaultPage();
+        Page initialPage = new Page(initialPageDimensions);
+        pages.addLast(initialPage);
+        currentPage = initialPage;
         rightArrow = new NavButton(true);
         leftArrow = new NavButton(false);
     }
@@ -163,6 +169,10 @@ public class ShopGrid {
             currentPage = previousPage;
         else if (currentPage == previousPage && pages.size() == 0 && customPages.size() == 0)
             currentPage = EMPTY_SHOP_PAGE;
+    }
+
+    public static void removeEmptyRows() {
+        currentPage.rows.removeIf((row) -> row.isEmpty());
     }
 
     public static void hide() {

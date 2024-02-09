@@ -136,6 +136,7 @@ public class ShopGridPatch {
             @SpirePostfixPatch
             public static void ClearEmptyPagesAfterInit() {
                 ShopGrid.removeEmptyPages();
+                ShopGrid.removeEmptyRows();
             }
 
             @SpireInsertPatch(locator = ArrayAddLocator.class, localvars = { "potion" })
