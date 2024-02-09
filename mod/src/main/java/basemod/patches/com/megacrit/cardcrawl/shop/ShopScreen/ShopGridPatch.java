@@ -232,10 +232,7 @@ public class ShopGridPatch {
                     for (ShopGrid.Row gridRow : ShopGrid.getCurrentPage().rows)
                         for (CustomShopItem item : gridRow.items) {
                             if (item.storeRelic == __instance) {
-                                item.storeRelic.relic = null;
-                                item.storeRelic = null;
                                 item.isPurchased = true;
-
                                 ShopGrid.removeEmptyPages();
                                 return;
                             }
@@ -379,10 +376,7 @@ public class ShopGridPatch {
                     for (ShopGrid.Row gridRow : ShopGrid.getCurrentPage().rows)
                         for (CustomShopItem item : gridRow.items) {
                             if (item.storePotion == __instance) {
-                                item.storePotion.potion = null;
-                                item.storePotion = null;
                                 item.isPurchased = true;
-
                                 ShopGrid.removeEmptyPages();
                                 break;
                             }
