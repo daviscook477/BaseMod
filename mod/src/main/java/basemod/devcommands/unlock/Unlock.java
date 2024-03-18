@@ -39,7 +39,7 @@ public class Unlock extends ConsoleCommand {
             for (int i = 0; i < 5; i++) {
                 result.add(String.valueOf(i));
             }
-            if(result.contains(tokens[depth + 1])) {
+            if(tokens.length >= 3 && result.contains(tokens[depth + 1])) {
                 complete = true;
             }
         } else if(tokens.length > depth + 1) {
