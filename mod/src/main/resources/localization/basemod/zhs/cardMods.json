@@ -1,0 +1,22 @@
+{
+    "basemod:ExhaustCardModifier": {
+        "TEXT": [
+            "%s NL 消耗 。"
+        ]
+    },
+    "basemod:EtherealCardModifier": {
+        "TEXT": [
+            "虚无 。 NL %s"
+        ]
+    },
+    "basemod:InnateCardModifier": {
+        "TEXT": [
+            "固有 。 NL %s"
+        ]
+    },
+    "basemod:RetainCardModifier": {
+        "TEXT": [
+            "保留 。 NL %s"
+        ]
+    }
+}

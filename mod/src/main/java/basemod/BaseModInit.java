@@ -2,12 +2,14 @@ package basemod;
 
 import basemod.interfaces.ImGuiSubscriber;
 import basemod.interfaces.PostInitializeSubscriber;
+import basemod.patches.imgui.ImGuiPatches;
 import basemod.patches.whatmod.WhatMod;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Texture;
+import com.evacipated.cardcrawl.modthespire.Loader;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
@@ -28,6 +30,8 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 	public static final float BUTTON_Y = 650.0f;
 	public static final float BUTTON_LABEL_X = 475.0f;
 	public static final float BUTTON_LABEL_Y = 700.0f;
+	public static final float IMGUI_BUTTON_Y = 185.0f;
+	public static final float IMGUI_BUTTON_LABEL_Y = 235.0f;
 	public static final float BUTTON_ENABLE_X = 350.0f;
 	public static final float BUTTON_ENABLE_Y = 600.0f;
 	public static final float AUTOCOMPLETE_BUTTON_ENABLE_X = 350.0f;
@@ -49,7 +53,7 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			if (me.parent.waitingOnEvent) {
 				me.text = "Press key";
 			} else {
-				me.text = "Change console hotkey (" + Keys.toString(DevConsole.toggleKey) + ")";
+				me.text = "Change console hotkey (" + DevConsole.newToggleKey.toString() + ")";
 			}
 		});
 		settingsPanel.addUIElement(buttonLabel);
@@ -57,18 +61,49 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 		ModButton consoleKeyButton = new ModButton(BUTTON_X, BUTTON_Y, settingsPanel, (me) -> {
 			me.parent.waitingOnEvent = true;
 			oldInputProcessor = Gdx.input.getInputProcessor();
-			Gdx.input.setInputProcessor(new InputAdapter() {
+			Gdx.input.setInputProcessor(new HotkeyInput() {
 				@Override
 				public boolean keyUp(int keycode) {
-					DevConsole.toggleKey = keycode;
-					BaseMod.setString("console-key", Keys.toString(keycode));
-					me.parent.waitingOnEvent = false;
-					Gdx.input.setInputProcessor(oldInputProcessor);
+					if (!super.keyUp(keycode)) {
+						DevConsole.newToggleKey = new DevConsole.KeyWithMods(keycode, ctrl, shift, alt);
+						BaseMod.setString("console-key", DevConsole.newToggleKey.save());
+						me.parent.waitingOnEvent = false;
+						Gdx.input.setInputProcessor(oldInputProcessor);
+					}
 					return true;
 				}
 			});
 		});
 		settingsPanel.addUIElement(consoleKeyButton);
+
+		if (Loader.LWJGL3_ENABLED) {
+			ModLabel imguiButtonLabel = new ModLabel("", BUTTON_LABEL_X, IMGUI_BUTTON_LABEL_Y, settingsPanel, (me) -> {
+				if (me.parent.waitingOnEvent) {
+					me.text = "Press key";
+				} else {
+					me.text = "Change ImGui hotkey (" + ImGuiPatches.toggleKey.toString() + ")";
+				}
+			});
+			settingsPanel.addUIElement(imguiButtonLabel);
+
+			ModButton imguiKeyButton = new ModButton(BUTTON_X, IMGUI_BUTTON_Y, settingsPanel, (me) -> {
+				me.parent.waitingOnEvent = true;
+				oldInputProcessor = Gdx.input.getInputProcessor();
+				Gdx.input.setInputProcessor(new HotkeyInput() {
+					@Override
+					public boolean keyUp(int keycode) {
+						if (!super.keyUp(keycode)) {
+							ImGuiPatches.toggleKey = new DevConsole.KeyWithMods(keycode, ctrl, shift, alt);
+							BaseMod.setString("imgui-key", ImGuiPatches.toggleKey.save());
+							me.parent.waitingOnEvent = false;
+							Gdx.input.setInputProcessor(oldInputProcessor);
+						}
+						return true;
+					}
+				});
+			});
+			settingsPanel.addUIElement(imguiKeyButton);
+		}
 
 		ModLabeledToggleButton enableConsole = new ModLabeledToggleButton("Enable dev console",
 				BUTTON_ENABLE_X, BUTTON_ENABLE_Y, Settings.CREAM_COLOR, FontHelper.charDescFont,
@@ -136,5 +171,64 @@ public class BaseModInit implements PostInitializeSubscriber, ImGuiSubscriber {
 			ui = new BaseModImGuiUI();
 		}
 		ui.receiveImGui();
+	}
+
+	private abstract static class HotkeyInput extends InputAdapter
+	{
+		protected boolean ctrl = false;
+		protected boolean shift = false;
+		protected boolean alt = false;
+
+		@Override
+		public boolean keyDown(int keycode)
+		{
+			switch (keycode) {
+				case Keys.CONTROL_LEFT:
+				case Keys.CONTROL_RIGHT:
+					ctrl = true;
+					break;
+				case Keys.SHIFT_LEFT:
+				case Keys.SHIFT_RIGHT:
+					shift = true;
+					break;
+				case Keys.ALT_LEFT:
+				case Keys.ALT_RIGHT:
+					alt = true;
+					break;
+				default:
+					return false;
+			}
+			return true;
+		}
+
+		@Override
+		public boolean keyUp(int keycode) {
+			switch (keycode) {
+				case Keys.CONTROL_LEFT:
+				case Keys.CONTROL_RIGHT:
+					if (!shift && !alt) {
+						return false;
+					}
+					ctrl = false;
+					break;
+				case Keys.SHIFT_LEFT:
+				case Keys.SHIFT_RIGHT:
+					if (!ctrl && !alt) {
+						return false;
+					}
+					shift = false;
+					break;
+				case Keys.ALT_LEFT:
+				case Keys.ALT_RIGHT:
+					if (!ctrl && !shift) {
+						return false;
+					}
+					alt = false;
+					break;
+				default:
+					return false;
+			}
+			return true;
+		}
 	}
 }

@@ -11,13 +11,16 @@ import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class ModToggleButton implements IUIElement {
 	private static final float TOGGLE_Y_DELTA = 0f;
 	private static final float TOGGLE_X_EXTEND = 12.0f;
 	private static final float HB_WIDTH_EXTENDED = 200.0f;
-	
+
+	private List<Consumer<ModToggleButton>> consumers = new ArrayList<Consumer<ModToggleButton>>();
 	private Consumer<ModToggleButton> toggle;
 	Hitbox hb;
 	private float x;
@@ -97,6 +100,9 @@ public class ModToggleButton implements IUIElement {
 	private void onToggle() {
 		this.enabled = !enabled;
 		toggle.accept(this);
+		for(Consumer<ModToggleButton> c : consumers){
+			c.accept(this);
+		}
 	}
 
 	public void toggle() {
@@ -143,5 +149,9 @@ public class ModToggleButton implements IUIElement {
 	@Override
 	public float getY() {
 		return y/Settings.scale;
+	}
+
+	public void addConsumer(Consumer<ModToggleButton> c){
+		consumers.add(c);
 	}
 }

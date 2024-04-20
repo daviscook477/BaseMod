@@ -992,4 +992,80 @@ This is a fast forward to v1.6.3 of daviscook477's fork with a few additional ch
 * Fix card descriptor frame not accounting for CardMods in SCV (kiooeht)
 * Fix card descriptor dynamic frame for all cards, not just CustomCard (kiooeht)
 
+#### v5.52.0 ####
+* Fix basegame bug: SCV not displaying locked card art correctly (kiooeht)
+* Fix possible crash if SCV card name font ends up null (kiooeht)
+* Fix crash if other mods enable pedantic shaders (kiooeht)
+* Add convenience methods for phased event card selections (Alchyr)
+* Add ability to color dropdown menus (Pandemonium)
+* Fix incorrect width of custom dynamic variables in CN languages (Mwalls)
+* Add horizontal only toggle to  MultiCardPreview (NellyDevo)
+* Fix possible crash when removing CardMods (NellyDevo)
+* Add onCardModified hook for CardMods (NellyDevo)
+* Fix CardMod crash in run history (NellyDevo)
+* Add border glows to CardMods (NellyDevo)
+* Add onLoadedMisc hook to CustomCard (NellyDevo)
+* Add ModRadioButtonGroup (Mindbomber2)
+* Add support for large relic art to CustomRelic (Alchyr)
+* Fix offset of capitalized keyword prefixes (Alchyr)
+* Refactor CardMod base values (Alchyr)
+* Allow Ctrl, Shift, and Alt to be used as modifiers for opening the console (kiooeht)
+* Add hotkey config ui for opening ImGui (kiooeht/Piña Colada)
+* Stop ImGui hotkey activating while console is open (kiooeht)
+
+#### v5.52.1 ####
+* Fix CardMods getting removed when they shouldn't be (Mistress Alison/NellyDevo)
+* Fix base value modifier upgrade preview (Alchyr)
+
+#### v5.52.2 ####
+* Allow Ctrl, Shift, and Alt to be used on their own again for opening the console (kiooeht)
+
+#### v5.52.3 ####
+* Fix CardMod base value changes (Mistress Alison)
+* Fix border glow manager not testing for CardMod glows (NellyDevo)
+
+#### v5.53.0 ####
+* Make multiline relic descriptions work on character select screen (JohnnyBazooka89)
+* Don't fade limbo when clearing card queue (Alchyr)
+* Add repeat to dynamic text blocks (herbix)
+* Allow bonusCondition and spawnCondition to be repeated in AddEventParams (Alchyr)
+* Fix Choke power description not updating (SandTag)
+* Remove check for Focus when updating orb descriptions (SandTag)
+* Add scrolling tooltips for relics on SingleRelicView (SandTag)
+* Fix card descriptors and custom card frames not working together (Enbeon)
+* Add PostShopInitializeSubscriber (DandyLion)
+* Add pagination to shop relic grid (DandyLion)
+* Card in use now counts as "in hand" for dynamic text (Mistress Alison)
+* Fix CardMod render not working in SCV (Mistress Alison)
+* Add overload for addCharacter (Alchyr)
+* Nelly gets to keep her purple license
+  * Fix inconsistant CardMod application (NellyDevo)
+  * Add on battle start hook for CardMods (NellyDevo)
+  * Add addToBot and addToTop to CardMods (NellyDevo)
+  * Improve error handling with unserializable CardMods (NellyDevo)
+* Fix for ModRadioButtonGroup (Mindbomber2)
+* Fix magic number not resetting if a CardMod was applied once (herbix)
+* Fix TwitchVoter crashing sometimes (Alchyr)
+* Fix soft lock with endsWithRewardsUI events (Alchyr)
+* Fix queueExtraCard crash (erasels/kiooeht)
+* Fix provided CardMod localization (Rucodeby)
+
+#### v5.53.1 ####
+* Revert changes
+  * Add PostShopInitializeSubscriber (DandyLion)
+  * Add pagination to shop relic grid (DandyLion)
+
+#### v5.53.2 ####
+* Revert changes
+  * Fix magic number not resetting if a CardMod was applied once (herbix)
+    * Broke basegame cards like Halt
+
+#### v5.54.0 ####
+* Make basegame start relic upgrades replace the correct relic (erasels/kiooeht)
+* Make framebuffers nested (kiooeht)
+* Fix whatmod tooltip in the wrong position on SCV and SRV (kiooeht)
+
+#### v5.54.1 ####
+* Fix crash when inspecting single cards or relics in SCV/SRC (kiooeht)
+
 #### dev ####

@@ -1,6 +1,7 @@
 package basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard;
 
 import basemod.BaseMod;
+import basemod.helpers.CardModifierManager;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.cards.AbstractCard;
@@ -13,6 +14,7 @@ import javassist.CannotCompileException;
 import javassist.CtBehavior;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.Arrays;
@@ -44,6 +46,12 @@ public class DynamicTextBlocks {
     public static class DynamicTextField {
         public static final SpireField<Boolean> isDynamic = new SpireField<>(() -> Boolean.FALSE);
         public static final SpireField<String> varData = new SpireField<>(() -> "");
+    }
+
+    //Spire Field for if displayUpgrades was called
+    @SpirePatch(clz= AbstractCard.class, method=SpirePatch.CLASS)
+    public static class DisplayingUpgradesField {
+        public static final SpireField<Boolean> displayingUpgrades = new SpireField<>(() -> Boolean.FALSE);
     }
 
     //When we render said card copy, set its field and initialize description
@@ -149,18 +157,18 @@ public class DynamicTextBlocks {
         Integer var = null;
         if (dynvarKey.equals("!D!")) {
             //Uses !D! for damage, just like normal dynvars, same applies to !B! and !M!
-            var = c.damage;
+            var = c.isDamageModified && !DisplayingUpgradesField.displayingUpgrades.get(c) ? c.damage : CardModifierManager.modifiedBaseValue(c, c.baseDamage, "D");
         } else if (dynvarKey.equals("!B!")) {
-            var = c.block;
+            var = c.isBlockModified && !DisplayingUpgradesField.displayingUpgrades.get(c) ? c.block : CardModifierManager.modifiedBaseValue(c, c.baseBlock, "B");
         } else if (dynvarKey.equals("!M!")) {
-            var = c.magicNumber;
+            var = c.isMagicNumberModified && !DisplayingUpgradesField.displayingUpgrades.get(c) ? c.magicNumber : CardModifierManager.modifiedBaseValue(c, c.baseMagicNumber, "M");
         } else if (dynvarKey.equals("!Location!")) {
             //Used to grab the location of the card. Isn't a real dynvar, but we can pretend
             var = -2; //Compendium or otherwise not in a run
             if (CardCrawlGame.dungeon != null && AbstractDungeon.player != null) {
                 if (AbstractDungeon.player.masterDeck.contains(c)) {
                     var = -1;
-                } else if (AbstractDungeon.player.hand.contains(c) || AbstractDungeon.player.limbo.contains(c)) {
+                } else if (AbstractDungeon.player.hand.contains(c) || AbstractDungeon.player.limbo.contains(c) || AbstractDungeon.player.cardInUse == c) {
                     var = 0;
                 } else if (AbstractDungeon.player.drawPile.contains(c)) {
                     var = 1;
@@ -215,24 +223,18 @@ public class DynamicTextBlocks {
                         String[] numbers = split[0].split(",");
                         //Iterate each condition, as long as at least 1 condition matches we set the text
                         for (String n : numbers) {
-                            if(checkMatch(var, n)) {
-                                //Checking the length allows up to know if there is actual text or just an empty string
-                                if (split.length > 1) {
-                                    key = split[1];
-                                } else {
-                                    key = "";
-                                }
+                            //Checking the length allows up to know if there is actual text or just an empty string
+                            String value = checkMatch(var, n, split.length > 1 ? split[1]: "");
+                            if (value != null) {
+                                key = value;
                                 matched = true;
                             }
                         }
                     } else {
                         //Else just check the condition directly
-                        if (checkMatch(var, split[0])) {
-                            if (split.length > 1) {
-                                key = split[1];
-                            } else {
-                                key = "";
-                            }
+                        String value = checkMatch(var, split[0], split.length > 1 ? split[1]: "");
+                        if (value != null) {
+                            key = value;
                             matched = true;
                         }
                     }
@@ -250,7 +252,14 @@ public class DynamicTextBlocks {
         return key;
     }
 
-    private static boolean checkMatch(Integer var, String s) {
+    private static String checkMatch(Integer var, String s, String value) {
+        //Repeat check
+        if (s.equals("repeat")) {
+            if (var > 0) {
+                return StringUtils.repeat(value, var);
+            }
+            return "";
+        }
         //Greater Than, Less Than, Divisible By, and Ends With are the 4 supported conditional checks, in addition to Direct Match, which has no symbol attached
         boolean greater = s.contains(">");
         boolean less = s.contains("<");
@@ -268,9 +277,11 @@ public class DynamicTextBlocks {
             //Checks the Ends With case. If the numbers are equal, or if the trailing digits of comp are all 0's, then var ends with N
             boolean digitCheck = ends && (comp == 0 || comp % Math.pow(10, s.length()) == 0);
             //As long as at least one condition matches we are good
-            return signCheck || moduloCheck || digitCheck;
+            if (signCheck || moduloCheck || digitCheck) {
+                return value;
+            }
         }
-        //If it's not a creatable number, there was a format error. Just return false instead of blowing up
-        return false;
+        //The input doesn't match any cases above
+        return null;
     }
 }

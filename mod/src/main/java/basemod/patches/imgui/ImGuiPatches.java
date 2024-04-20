@@ -1,6 +1,7 @@
 package basemod.patches.imgui;
 
 import basemod.BaseMod;
+import basemod.DevConsole;
 import basemod.ReflectionHacks;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -32,6 +33,7 @@ import java.util.List;
 
 public class ImGuiPatches
 {
+	public static DevConsole.KeyWithMods toggleKey = new DevConsole.KeyWithMods(Input.Keys.E, false, true, false);
 	private static ImGuiImplGlfw imGuiGlfw;
 	private static ImGuiImplGl3 imGuiGl3;
 
@@ -100,8 +102,8 @@ public class ImGuiPatches
 
 			SuppressHotkey.suppressedKeys.clear();
 
-			if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) && Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-				SuppressHotkey.suppressedKeys.add(Input.Keys.E);
+			if (!DevConsole.visible && toggleKey.isJustPressed()) {
+				SuppressHotkey.suppressedKeys.add(toggleKey.keycode);
 				enabled = !enabled;
 				GameCursor.hidden = enabled;
 			}

@@ -25,7 +25,7 @@ public class WhatMod
 
 	static void renderModTooltip(SpriteBatch sb, Class<?>... cls)
 	{
-		renderModTooltip(sb, Settings.WIDTH / 2f + 340.0f * Settings.scale, 700.0f * Settings.scale, cls);
+		renderModTooltip(sb, Settings.WIDTH / 2f + 340.0f * Settings.scale, Settings.HEIGHT / 2f + 160f * Settings.yScale, cls);
 	}
 
 	static void renderModTooltip(SpriteBatch sb, Class<?> cls, float x, float y)
@@ -73,7 +73,7 @@ public class WhatMod
 
 	static void renderModTooltipBottomLeft(SpriteBatch sb, Class<?>... cls)
 	{
-		renderModTooltipBottomLeft(sb, Settings.WIDTH / 2f + 340.0f * Settings.scale, 700.0f * Settings.scale, cls);
+		renderModTooltipBottomLeft(sb, Settings.WIDTH / 2f + 340.0f * Settings.scale, Settings.HEIGHT / 2f + 160f * Settings.yScale, cls);
 	}
 
 	static void renderModTooltipBottomLeft(SpriteBatch sb, float x, float y, Class<?>... cls)

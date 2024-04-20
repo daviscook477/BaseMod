@@ -1,0 +1,22 @@
+{
+    "basemod:ExhaustCardModifier": {
+        "TEXT": [
+            "%s NL Exhaust."
+        ]
+    },
+    "basemod:EtherealCardModifier": {
+        "TEXT": [
+            "Ethereal. NL %s"
+        ]
+    },
+    "basemod:InnateCardModifier": {
+        "TEXT": [
+            "Innate. NL %s"
+        ]
+    },
+    "basemod:RetainCardModifier": {
+        "TEXT": [
+            "Retain. NL %s"
+        ]
+    }
+}
