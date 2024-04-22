@@ -13,10 +13,10 @@ import javassist.CtBehavior;
 import java.util.ArrayList;
 
 // This patch, solves the issue that colored text [color]text[] is set to a wrong width for non alphabetic languages by AbstractCard.initializeDescriptionCN() .
-// The vanilla code checks the text block if it starts with an "[" for energy icon, but unfortunately colored text is of the form [color]text[] , so its width wil be set
+// The vanilla code checks the text block if it starts with an "[" for energy icon, but unfortunately colored text is of the form [color]text[] , so its width will be set
 // to the energy orb's. In this patch we insert a check before that happens and skip the following code by setting the current text block to empty.
 // Together with the patch FixInitializeDescriptionCNWidthLogic, colored text will be rendered correctly.
-// For a comparison before and after the patch, visit
+// For a comparison before and after the patch, visit https://github.com/daviscook477/BaseMod/pull/427
 
 
 @SpirePatch(

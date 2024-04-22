@@ -6,7 +6,7 @@ import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 
 // This patch, corrects the incorrect text rendering issue for non alphabetic languages(ZHS, JPN, KOR etc) when there exists double space in cards.json
-// For a comparison before and after the patch, visit
+// For a comparison before and after the patch, visit https://github.com/daviscook477/BaseMod/pull/427
 
 public class FixInitializeDescriptionCNWidthLogic {
 
