@@ -5,6 +5,7 @@ import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.DescriptionLine;
+import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.localization.LocalizedStrings;
 import javassist.CannotCompileException;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 // Together with the patch FixInitializeDescriptionCNWidthLogic, colored text will be rendered correctly.
 // For a comparison before and after the patch, visit https://github.com/daviscook477/BaseMod/pull/427
 
-
 @SpirePatch(
         clz=AbstractCard.class,
         method="initializeDescriptionCN"
@@ -30,35 +30,40 @@ public class CNCardTextColors {
     )
     public static void Insert(AbstractCard __instance, @ByRef String[] word, @ByRef float[] currentWidth, @ByRef int[] numLines, @ByRef StringBuilder[] sbuilder, float CN_DESC_BOX_WIDTH) {
         if (word[0].startsWith("[#") && word[0].endsWith("[]")) {
-            String wordTrim = word[0].substring(9, word[0].length() - 2);
-            float wordWidth = new GlyphLayout(FontHelper.cardDescFont_N, wordTrim).width;
-
-            // Vanilla automatically ignores ending punctuation width, but it's trikier to do so with color tags at sides, so instead we manually detect ending
-            // punctuations(by checking if the combined string crosses some threshold so the punctuation in the new block of text will likely be an ending one)
-            // and ignore its width(by subtracting the extra counted width)
-            if(wordTrim.contains(LocalizedStrings.PERIOD) && (currentWidth[0] + wordWidth)  >= 0.8 * CN_DESC_BOX_WIDTH  ){
-                float periodWidth = new GlyphLayout(FontHelper.cardDescFont_N, LocalizedStrings.PERIOD).width;
-                wordWidth -= periodWidth;
+            String wordTrim = word[0].substring(9, word[0].length() - 2).trim();
+            String colorTag = word[0].substring(0, 9);
+            char[] lettersOfWord = wordTrim.toCharArray();
+            int wordLength = lettersOfWord.length;
+            // using the same logic of the last else branch of the main if else branch from the original function, except inserts a pair of
+            // inserting a pair of color tags at the side of each char .
+            for(int i = 0; i < wordLength; ++i) {
+                char letter = lettersOfWord[i];
+                float letterWidth = new GlyphLayout(FontHelper.cardDescFont_N, String.valueOf(letter)).width;
+                sbuilder[0].append(" " + colorTag).append(letter).append("[]");
+                if (!Settings.manualLineBreak) {
+                    // If the current line is reaching its end, then the ending punctuation's width should be ignored or it would result in
+                    // a new line with a single punctuation as the text
+                    if( (letter == LocalizedStrings.PERIOD.charAt(0)) && ((currentWidth[0] + letterWidth)  >= 0.8 * CN_DESC_BOX_WIDTH)  ){
+                        letterWidth = 0F;
+                    }
+                    if((letter == '，') && ((currentWidth[0] + letterWidth)  >= 0.8 * CN_DESC_BOX_WIDTH ) ){
+                        letterWidth = 0F;
+                    }
+                    if((letter == '、') && ((currentWidth[0] + letterWidth)  >= 0.8 * CN_DESC_BOX_WIDTH  )){
+                        letterWidth = 0F;
+                    }
+                    if (currentWidth[0] + letterWidth > CN_DESC_BOX_WIDTH) {
+                        ++numLines[0];
+                        __instance.description.add(new DescriptionLine(sbuilder[0].toString(), currentWidth[0]));
+                        sbuilder[0].setLength(0);
+                        currentWidth[0] = letterWidth;
+                    } else {
+                        currentWidth[0] += letterWidth;
+                    }
+                }
             }
-            if(wordTrim.contains("，") && (currentWidth[0] + wordWidth)  >= 0.8 * CN_DESC_BOX_WIDTH  ){
-                float periodWidth = new GlyphLayout(FontHelper.cardDescFont_N, "，").width;
-                wordWidth -= periodWidth;
-            }
-            if(wordTrim.contains("、") && (currentWidth[0] + wordWidth)  >= 0.8 * CN_DESC_BOX_WIDTH  ){
-                float periodWidth = new GlyphLayout(FontHelper.cardDescFont_N, "、").width;
-                wordWidth -= periodWidth;
-            }
-            if (currentWidth[0] + wordWidth > CN_DESC_BOX_WIDTH) {
-                ++numLines[0];
-                __instance.description.add(new DescriptionLine(sbuilder[0].toString(), currentWidth[0]));
-                sbuilder[0].setLength(0);
-                currentWidth[0] = wordWidth;
-                sbuilder[0].append(word[0]);
-            } else {
-                currentWidth[0] += wordWidth;
-                sbuilder[0].append(word[0]);
-            }
-            word[0] = "";
+            sbuilder[0].append(" ");
+            word[0] = ""; // setting to empty to skip the following code because the block of colored text is handled already here
         }
     }
 
