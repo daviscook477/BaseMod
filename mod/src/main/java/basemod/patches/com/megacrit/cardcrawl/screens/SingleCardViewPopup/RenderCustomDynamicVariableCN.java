@@ -43,7 +43,7 @@ public class RenderCustomDynamicVariableCN
 					}
 				} else {
 					//cardmods affect base variables
-					tmp[0] = Integer.toString(dv.modifiedBaseValue(card));
+					tmp[0] = "[#" + dv.getNormalColor().toString() + "]" + Integer.toString(dv.modifiedBaseValue(card)) + "[]";
 				}
 			}
 		}

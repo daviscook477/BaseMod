@@ -41,7 +41,7 @@ public class RenderCustomDynamicVariableCN
 						tmp[0] = "[#" + dv.getDecreasedValueColor().toString() + "]" + Integer.toString(dv.value(__instance)) + "[]";
 					}
 				} else {
-					tmp[0] = Integer.toString(dv.modifiedBaseValue(__instance));
+					tmp[0] = "[#" + dv.getNormalColor().toString() + "]" + Integer.toString(dv.modifiedBaseValue(__instance)) + "[]";
 				}
 			}
 		}
