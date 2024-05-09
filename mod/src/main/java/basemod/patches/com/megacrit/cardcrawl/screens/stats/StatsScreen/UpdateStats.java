@@ -12,9 +12,10 @@ import java.lang.reflect.Field;
 public class UpdateStats
 {
 	public static final Logger logger = LogManager.getLogger(BaseMod.class.getName());
-	
+
 	public static final float SIZE_PER_CHARACTER = 400.0F;
-	
+	public static final float SIZE_PER_ACHIEVEMENT_ROW = 180.0F; // Assuming each row of achievements needs 180.0F of space
+
 	@SpirePatch(
 			clz=StatsScreen.class,
 			method="calculateScrollBounds"
@@ -26,9 +27,13 @@ public class UpdateStats
 			try {
 				Field scrollUpperBoundField = __instance.getClass().getDeclaredField("scrollUpperBound");
 				scrollUpperBoundField.setAccessible(true);
+
 				int characterCount = BaseMod.getModdedCharacters().size();
-				scrollUpperBoundField.set(__instance, scrollUpperBoundField.getFloat(__instance) +
-						(SIZE_PER_CHARACTER * characterCount * Settings.scale));
+				int totalAchievements = BaseMod.getTotalAchievements();
+				int achievementRows = totalAchievements / 5;
+
+				float extraHeight = (SIZE_PER_CHARACTER * characterCount + SIZE_PER_ACHIEVEMENT_ROW * achievementRows) * Settings.scale;
+				scrollUpperBoundField.set(__instance, scrollUpperBoundField.getFloat(__instance) + extraHeight);
 			} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
 				logger.error("could not calculate updated scroll bounds");
 				logger.error("error was: " + e.toString());
