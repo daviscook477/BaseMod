@@ -246,6 +246,7 @@ public class BaseMod {
 	private static HashMap<AbstractPlayer.PlayerClass, HashMap<Integer, CustomUnlockBundle>> unlockBundles;
 	private static HashMap<AbstractPlayer.PlayerClass, ArrayList<String>> unlockCards;
 	private static HashMap<AbstractPlayer.PlayerClass, Integer> maxUnlockLevel;
+	private static Map<String, Integer> modAchievements = new HashMap<>();
 
 	private static HashMap<String, CustomSavableRaw> customSaveFields = new HashMap<>();
 	private static HashMap<AbstractDungeon.CurrentScreen, CustomScreen> customScreens = new HashMap<>();
@@ -1703,6 +1704,14 @@ public class BaseMod {
 
 	public static List<AbstractPlayer> getModdedCharacters() {
 		return CardCrawlGame.characterManager.getAllCharacters().subList(lastBaseCharacterIndex+1, CardCrawlGame.characterManager.getAllCharacters().size());
+	}
+
+	public static void registerAchievements(String modId, int numberOfAchievements) {
+		modAchievements.merge(modId, numberOfAchievements, Integer::sum);
+	}
+
+	public static int getTotalAchievements() {
+		return modAchievements.values().stream().reduce(0, Integer::sum);
 	}
 
 	// add character - the String characterID *must* be the exact same as what
