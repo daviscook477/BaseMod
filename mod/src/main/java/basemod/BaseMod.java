@@ -248,7 +248,7 @@ public class BaseMod {
 	private static HashMap<AbstractPlayer.PlayerClass, HashMap<Integer, CustomUnlockBundle>> unlockBundles;
 	private static HashMap<AbstractPlayer.PlayerClass, ArrayList<String>> unlockCards;
 	private static HashMap<AbstractPlayer.PlayerClass, Integer> maxUnlockLevel;
-	private static Map<String, List<ModAchievement>> modAchievements = new HashMap<>();
+	public static Map<String, List<ModAchievement>> modAchievements = new HashMap<>();
 
 	private static HashMap<String, CustomSavableRaw> customSaveFields = new HashMap<>();
 	private static HashMap<AbstractDungeon.CurrentScreen, CustomScreen> customScreens = new HashMap<>();

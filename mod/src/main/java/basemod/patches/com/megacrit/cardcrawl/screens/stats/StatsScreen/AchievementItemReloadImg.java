@@ -16,7 +16,9 @@ public class AchievementItemReloadImg {
     @SpirePostfixPatch
     public static void Postfix(AchievementItem __instance) {
         if (__instance instanceof ModAchievement) {
-            ((ModAchievement) __instance).currentImg = ((ModAchievement) __instance).atlas.findRegion(((ModAchievement) __instance).currentImg.name);
+            ModAchievement modAchievement = (ModAchievement) __instance;
+            modAchievement.updateImage(); // Ensure this method switches images based on isUnlocked
         }
     }
 }
+

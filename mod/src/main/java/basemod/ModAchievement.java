@@ -29,6 +29,10 @@ public class ModAchievement extends AchievementItem {
         }
     }
 
+    public void updateImage() {
+        this.currentImg = this.isUnlocked ? this.unlockedImg : this.lockedImg;
+    }
+
     public void render(SpriteBatch sb, float x, float y) {
         TextureAtlas.AtlasRegion currentImg = this.isUnlocked ? this.unlockedImg : this.lockedImg;
         this.currentImg = currentImg;
