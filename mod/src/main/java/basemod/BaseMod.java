@@ -1709,27 +1709,6 @@ public class BaseMod {
 		return CardCrawlGame.characterManager.getAllCharacters().subList(lastBaseCharacterIndex+1, CardCrawlGame.characterManager.getAllCharacters().size());
 	}
 
-	public static void registerAchievement(String modID, String imgName, String id, boolean isHidden, TextureAtlas atlas) {
-		UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(id);
-		String name = uiStrings.TEXT[0];
-		String description = uiStrings.TEXT[1];
-
-		TextureAtlas.AtlasRegion achievementImageUnlocked = atlas.findRegion("unlocked/" + imgName);
-		TextureAtlas.AtlasRegion achievementImageLocked = atlas.findRegion("locked/" + imgName);
-
-		ModAchievement achievement = new ModAchievement(name, description, id, isHidden, achievementImageUnlocked, achievementImageLocked, atlas);
-
-		if (!modAchievements.containsKey(modID)) {
-			modAchievements.put(modID, new ArrayList<>());
-		}
-		modAchievements.get(modID).add(achievement);
-	}
-
-	public static int getTotalAchievements() {
-		return modAchievements.values().stream()
-				.mapToInt(List::size)
-				.sum();
-	}
 
 	// add character - the String characterID *must* be the exact same as what
 	// you put in the PlayerClass enum
@@ -2130,13 +2109,37 @@ public class BaseMod {
 	// Achievements
 	//
 
-	public static void loadAchievement(AchievementGrid grid, String imgName, String id, boolean isHidden, TextureAtlas atlas) {
+	public static void registerAchievement(String modID, String imgName, String id, boolean isHidden, TextureAtlas atlas) {
 		UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(id);
 		String name = uiStrings.TEXT[0];
 		String description = uiStrings.TEXT[1];
-		TextureAtlas.AtlasRegion AchievementImageUnlocked = atlas.findRegion("unlocked/" + imgName);
-		TextureAtlas.AtlasRegion AchievementImageLocked = atlas.findRegion("locked/" + imgName);
-		grid.items.add(new ModAchievement(name, description, id, isHidden, AchievementImageUnlocked, AchievementImageLocked, atlas));
+
+		TextureAtlas.AtlasRegion achievementImageUnlocked = atlas.findRegion("unlocked/" + imgName);
+		TextureAtlas.AtlasRegion achievementImageLocked = atlas.findRegion("locked/" + imgName);
+
+		ModAchievement newAchievement = new ModAchievement(name, description, id, isHidden, achievementImageUnlocked, achievementImageLocked, atlas);
+
+		List<ModAchievement> achievements = modAchievements.get(modID);
+		if (achievements == null) {
+			achievements = new ArrayList<>();
+			modAchievements.put(modID, achievements);
+		} else {
+			// Check if an achievement with the same ID has already been added
+			for (ModAchievement achievement : achievements) {
+				if (achievement.key.equals(id)) {
+					// Achievement already registered, do not add it again
+					return;
+				}
+			}
+		}
+		achievements.add(newAchievement);
+	}
+
+
+	public static int getTotalAchievements() {
+		return modAchievements.values().stream()
+				.mapToInt(List::size)
+				.sum();
 	}
 
 	//
