@@ -17,7 +17,7 @@ public class AchievementItemReloadImg {
     public static void Postfix(AchievementItem __instance) {
         if (__instance instanceof ModAchievement) {
             ModAchievement modAchievement = (ModAchievement) __instance;
-            modAchievement.updateImage(); // Ensure this method switches images based on isUnlocked
+            modAchievement.updateImage();
         }
     }
 }

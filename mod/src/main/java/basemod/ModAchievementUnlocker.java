@@ -16,7 +16,7 @@ public class ModAchievementUnlocker {
                 BaseMod.logger.info("Attempting to unlock achievement with key: " + key);
                 achievementPref.putBoolean(key, true);
                 achievementPref.flush();
-                // Find the achievement and update its image
+
                 for (List<ModAchievement> achievements : modAchievements.values()) {
                     for (ModAchievement achievement : achievements) {
                         if (achievement.key.equals(key)) {
