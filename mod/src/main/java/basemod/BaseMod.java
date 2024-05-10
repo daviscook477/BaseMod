@@ -68,6 +68,7 @@ import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.screens.charSelect.CharacterOption;
 import com.megacrit.cardcrawl.screens.custom.CustomMod;
 import com.megacrit.cardcrawl.screens.custom.CustomModeCharacterButton;
+import com.megacrit.cardcrawl.screens.stats.AchievementGrid;
 import com.megacrit.cardcrawl.shop.ShopScreen;
 import com.megacrit.cardcrawl.shop.StorePotion;
 import com.megacrit.cardcrawl.shop.StoreRelic;
@@ -143,6 +144,7 @@ public class BaseMod {
 	private static ArrayList<EditStringsSubscriber> editStringsSubscribers;
 	private static ArrayList<AddAudioSubscriber> addAudioSubscribers;
 	private static ArrayList<EditKeywordsSubscriber> editKeywordsSubscribers;
+	private static ArrayList<EditAchievementsSubscriber> editAchievementsSubscribers;
 	private static ArrayList<PostBattleSubscriber> postBattleSubscribers;
 	private static ArrayList<SetUnlocksSubscriber> setUnlocksSubscribers;
 	private static ArrayList<PostPotionUseSubscriber> postPotionUseSubscribers;
@@ -246,7 +248,7 @@ public class BaseMod {
 	private static HashMap<AbstractPlayer.PlayerClass, HashMap<Integer, CustomUnlockBundle>> unlockBundles;
 	private static HashMap<AbstractPlayer.PlayerClass, ArrayList<String>> unlockCards;
 	private static HashMap<AbstractPlayer.PlayerClass, Integer> maxUnlockLevel;
-	private static Map<String, Integer> modAchievements = new HashMap<>();
+	private static Map<String, List<ModAchievement>> modAchievements = new HashMap<>();
 
 	private static HashMap<String, CustomSavableRaw> customSaveFields = new HashMap<>();
 	private static HashMap<AbstractDungeon.CurrentScreen, CustomScreen> customScreens = new HashMap<>();
@@ -485,6 +487,7 @@ public class BaseMod {
 		editStringsSubscribers = new ArrayList<>();
 		addAudioSubscribers = new ArrayList<>();
 		editKeywordsSubscribers = new ArrayList<>();
+		editAchievementsSubscribers = new ArrayList<>();
 		postBattleSubscribers = new ArrayList<>();
 		setUnlocksSubscribers = new ArrayList<>();
 		postPotionUseSubscribers = new ArrayList<>();
@@ -1706,12 +1709,26 @@ public class BaseMod {
 		return CardCrawlGame.characterManager.getAllCharacters().subList(lastBaseCharacterIndex+1, CardCrawlGame.characterManager.getAllCharacters().size());
 	}
 
-	public static void registerAchievements(String modId, int numberOfAchievements) {
-		modAchievements.merge(modId, numberOfAchievements, Integer::sum);
+	public static void registerAchievement(String modID, String imgName, String id, boolean isHidden, TextureAtlas atlas) {
+		UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(id);
+		String name = uiStrings.TEXT[0];
+		String description = uiStrings.TEXT[1];
+
+		TextureAtlas.AtlasRegion achievementImageUnlocked = atlas.findRegion("unlocked/" + imgName);
+		TextureAtlas.AtlasRegion achievementImageLocked = atlas.findRegion("locked/" + imgName);
+
+		ModAchievement achievement = new ModAchievement(name, description, id, isHidden, achievementImageUnlocked, achievementImageLocked, atlas);
+
+		if (!modAchievements.containsKey(modID)) {
+			modAchievements.put(modID, new ArrayList<>());
+		}
+		modAchievements.get(modID).add(achievement);
 	}
 
 	public static int getTotalAchievements() {
-		return modAchievements.values().stream().reduce(0, Integer::sum);
+		return modAchievements.values().stream()
+				.mapToInt(List::size)
+				.sum();
 	}
 
 	// add character - the String characterID *must* be the exact same as what
@@ -2107,6 +2124,19 @@ public class BaseMod {
 	// save an energy orb texture for a color
 	public static void saveEnergyOrbPortraitTexture(AbstractCard.CardColor color, com.badlogic.gdx.graphics.Texture tex) {
 		colorEnergyOrbPortraitTextureMap.put(color, tex);
+	}
+
+	//
+	// Achievements
+	//
+
+	public static void loadAchievement(AchievementGrid grid, String imgName, String id, boolean isHidden, TextureAtlas atlas) {
+		UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(id);
+		String name = uiStrings.TEXT[0];
+		String description = uiStrings.TEXT[1];
+		TextureAtlas.AtlasRegion AchievementImageUnlocked = atlas.findRegion("unlocked/" + imgName);
+		TextureAtlas.AtlasRegion AchievementImageLocked = atlas.findRegion("locked/" + imgName);
+		grid.items.add(new ModAchievement(name, description, id, isHidden, AchievementImageUnlocked, AchievementImageLocked, atlas));
 	}
 
 	//
@@ -2703,6 +2733,19 @@ public class BaseMod {
 		}
 		unsubscribeLaterHelper(EditKeywordsSubscriber.class);
 	}
+	public static void publishEditAchievements(AchievementGrid grid) {
+		logger.info("editing achievements");
+		for (EditAchievementsSubscriber sub : editAchievementsSubscribers) {
+			sub.receiveEditAchievements();
+		}
+		for (Map.Entry<String, List<ModAchievement>> entry : modAchievements.entrySet()) {
+			List<ModAchievement> achievements = entry.getValue();
+			for (ModAchievement achievement : achievements) {
+				grid.items.add(achievement);
+			}
+		}
+		unsubscribeLaterHelper(EditAchievementsSubscriber.class);
+	}
 
 	// publishOnPowersModified
 	public static void publishOnPowersModified() {
@@ -2906,6 +2949,7 @@ public class BaseMod {
 		subscribeIfInstance(editCharactersSubscribers, sub, EditCharactersSubscriber.class);
 		subscribeIfInstance(editStringsSubscribers, sub, EditStringsSubscriber.class);
 		subscribeIfInstance(editKeywordsSubscribers, sub, EditKeywordsSubscriber.class);
+		subscribeIfInstance(editAchievementsSubscribers, sub, EditAchievementsSubscriber.class);
 		subscribeIfInstance(postBattleSubscribers, sub, PostBattleSubscriber.class);
 		subscribeIfInstance(setUnlocksSubscribers, sub, SetUnlocksSubscriber.class);
 		subscribeIfInstance(postPotionUseSubscribers, sub, PostPotionUseSubscriber.class);
@@ -2990,6 +3034,8 @@ public class BaseMod {
 			editStringsSubscribers.add((EditStringsSubscriber) sub);
 		} else if (additionClass.equals(EditKeywordsSubscriber.class)) {
 			editKeywordsSubscribers.add((EditKeywordsSubscriber) sub);
+		} else if (additionClass.equals(EditAchievementsSubscriber.class)) {
+			editAchievementsSubscribers.add((EditAchievementsSubscriber) sub);
 		} else if (additionClass.equals(PostBattleSubscriber.class)) {
 			postBattleSubscribers.add((PostBattleSubscriber) sub);
 		} else if (additionClass.equals(SetUnlocksSubscriber.class)) {
@@ -3064,6 +3110,7 @@ public class BaseMod {
 		unsubscribeIfInstance(editCharactersSubscribers, sub, EditCharactersSubscriber.class);
 		unsubscribeIfInstance(editStringsSubscribers, sub, EditStringsSubscriber.class);
 		unsubscribeIfInstance(editKeywordsSubscribers, sub, EditKeywordsSubscriber.class);
+		unsubscribeIfInstance(editAchievementsSubscribers, sub, EditAchievementsSubscriber.class);
 		unsubscribeIfInstance(postBattleSubscribers, sub, PostBattleSubscriber.class);
 		unsubscribeIfInstance(setUnlocksSubscribers, sub, SetUnlocksSubscriber.class);
 		unsubscribeIfInstance(postPotionUseSubscribers, sub, PostPotionUseSubscriber.class);
@@ -3148,6 +3195,8 @@ public class BaseMod {
 			editStringsSubscribers.remove(sub);
 		} else if (removalClass.equals(EditKeywordsSubscriber.class)) {
 			editKeywordsSubscribers.remove(sub);
+		} else if (removalClass.equals(EditAchievementsSubscriber.class)) {
+			editAchievementsSubscribers.remove(sub);
 		} else if (removalClass.equals(AddAudioSubscriber.class)) {
 			addAudioSubscribers.remove(sub);
 		} else if (removalClass.equals(PostBattleSubscriber.class)) {
