@@ -19,6 +19,7 @@ import com.megacrit.cardcrawl.screens.mainMenu.MainMenuScreen;
 
 import java.util.function.Consumer;
 
+@Deprecated
 public class ModTextPanel implements RenderSubscriber, PostUpdateSubscriber {
 	private String prevName;
 	public static String textField;

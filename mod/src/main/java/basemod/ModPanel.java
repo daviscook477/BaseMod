@@ -91,6 +91,13 @@ public class ModPanel {
         	created = true;
     	}
     }
+
+    public ArrayList<IUIElement> getRenderElements() {
+        return uiElementsRender;
+    }
+    public ArrayList<IUIElement> getUpdateElements() {
+        return uiElementsUpdate;
+    }
     
     public void addUIElement(IUIElement element) {
     	uiElementsRender.add(element);
