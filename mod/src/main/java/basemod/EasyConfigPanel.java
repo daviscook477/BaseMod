@@ -1,6 +1,5 @@
-package basemod.abstracts;
+package basemod;
 
-import basemod.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -197,14 +196,18 @@ public class EasyConfigPanel extends ModPanel {
         }
     }
 
+    //For manual saving if someone ever has to do that for some reason
     public void save() {
         try {
             for (ConfigField field : configFields) {
                 field.readValue();
             }
+            config.save();
         }
         catch (IllegalAccessException e) {
             throw new RuntimeException("Failed to read field", e);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save config", e);
         }
     }
 
