@@ -146,13 +146,16 @@ public class ModTextInput implements IUIElement, TextReceiver {
 
     private void finishEntry() {
         TextInput.stopTextReceiver(this);
-        inputActive = false;
 
-        if (validator != null && !validator.test(text)) {
-            text = lastValidText;
-        }
-        else {
-            valueSetListener.accept(this);
+        if (inputActive) {
+            inputActive = false;
+
+            if (validator != null && !validator.test(text)) {
+                text = lastValidText;
+            }
+            else {
+                valueSetListener.accept(this);
+            }
         }
     }
 
