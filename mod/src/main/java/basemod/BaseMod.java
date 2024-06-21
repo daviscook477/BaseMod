@@ -16,7 +16,6 @@ import basemod.patches.imgui.ImGuiPatches;
 import basemod.patches.whatmod.WhatMod;
 import basemod.screens.ModalChoiceScreen;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Version;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -68,7 +67,7 @@ import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.screens.charSelect.CharacterOption;
 import com.megacrit.cardcrawl.screens.custom.CustomMod;
 import com.megacrit.cardcrawl.screens.custom.CustomModeCharacterButton;
-import com.megacrit.cardcrawl.screens.stats.AchievementGrid;
+import com.megacrit.cardcrawl.screens.stats.StatsScreen;
 import com.megacrit.cardcrawl.shop.ShopScreen;
 import com.megacrit.cardcrawl.shop.StorePotion;
 import com.megacrit.cardcrawl.shop.StoreRelic;
@@ -249,7 +248,7 @@ public class BaseMod {
 	private static HashMap<AbstractPlayer.PlayerClass, ArrayList<String>> unlockCards;
 	private static HashMap<AbstractPlayer.PlayerClass, Integer> maxUnlockLevel;
 	public static Map<String, List<ModAchievement>> modAchievements = new HashMap<>();
-
+	public static Map<String, ModAchievementGrid> modAchievementGrids = new HashMap<>();
 	private static HashMap<String, CustomSavableRaw> customSaveFields = new HashMap<>();
 	private static HashMap<AbstractDungeon.CurrentScreen, CustomScreen> customScreens = new HashMap<>();
 
@@ -259,6 +258,9 @@ public class BaseMod {
 	private static FrameBuffer animationBuffer;
 	private static Texture animationTexture;
 	private static TextureRegion animationTextureRegion;
+	private static String achievementModID;
+	private static String achievementMakeID;
+	private static TextureAtlas achievementAtlas;
 
 	public static boolean fixesEnabled = true;
 
@@ -2109,37 +2111,48 @@ public class BaseMod {
 	// Achievements
 	//
 
-	public static void registerAchievement(String modID, String imgName, String id, boolean isHidden, TextureAtlas atlas) {
-		UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(id);
-		String name = uiStrings.TEXT[0];
-		String description = uiStrings.TEXT[1];
-
-		TextureAtlas.AtlasRegion achievementImageUnlocked = atlas.findRegion("unlocked/" + imgName);
-		TextureAtlas.AtlasRegion achievementImageLocked = atlas.findRegion("locked/" + imgName);
-
-		ModAchievement newAchievement = new ModAchievement(name, description, id, isHidden, achievementImageUnlocked, achievementImageLocked, atlas);
-
-		List<ModAchievement> achievements = modAchievements.get(modID);
-		if (achievements == null) {
-			achievements = new ArrayList<>();
-			modAchievements.put(modID, achievements);
-		} else {
-			// Check if an achievement with the same ID has already been added
-			for (ModAchievement achievement : achievements) {
-				if (achievement.key.equals(id)) {
-					// Achievement already registered, do not add it again
-					return;
-				}
-			}
-		}
-		achievements.add(newAchievement);
+	public static String getAchievementModID() {
+		return achievementModID;
 	}
 
+	public static void registerAchievementGrid(String modID, TextureAtlas atlas, String headerText) {
+		achievementModID = modID;
+		achievementAtlas = atlas;
+		ModAchievementGrid grid = new ModAchievementGrid(modID, headerText);
+		modAchievementGrids.put(modID, grid);
+	}
 
-	public static int getTotalAchievements() {
-		return modAchievements.values().stream()
-				.mapToInt(List::size)
-				.sum();
+	public static void registerAchievement(String id, boolean isHidden) {
+		if (achievementModID == null || achievementAtlas == null) {
+			throw new IllegalStateException("You must call registerAchievementGrid before registering achievements.");
+		}
+
+		String fullID = achievementModID + ":" + id;
+		UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(fullID);
+		String name = uiStrings.TEXT[0];
+		String description = uiStrings.TEXT[1];
+		TextureAtlas.AtlasRegion achievementImageUnlocked = achievementAtlas.findRegion("unlocked/" + id);
+		TextureAtlas.AtlasRegion achievementImageLocked = achievementAtlas.findRegion("locked/" + id);
+
+		if (achievementImageUnlocked == null || achievementImageLocked == null) {
+			BaseMod.logger.info("Failed to find achievement images for: " + fullID);
+			return; // Skip adding this achievement
+		}
+
+		ModAchievement newAchievement = new ModAchievement(name, description, fullID, isHidden, achievementImageUnlocked, achievementImageLocked, achievementAtlas);
+
+		ModAchievementGrid grid = modAchievementGrids.get(achievementModID);
+		if (grid == null) {
+			throw new IllegalStateException("Achievement grid for " + achievementModID + " not found. Make sure to call registerAchievementGrid first.");
+		}
+
+		for (ModAchievement achievement : grid.items) {
+			if (achievement.key.equals(fullID)) {
+				return; // Achievement already exists, skip adding
+			}
+		}
+
+		grid.items.add(newAchievement);
 	}
 
 	//
@@ -2736,16 +2749,18 @@ public class BaseMod {
 		}
 		unsubscribeLaterHelper(EditKeywordsSubscriber.class);
 	}
-	public static void publishEditAchievements(AchievementGrid grid) {
+	public static void publishEditAchievements(StatsScreen statsScreen) {
 		logger.info("editing achievements");
 		for (EditAchievementsSubscriber sub : editAchievementsSubscribers) {
 			sub.receiveEditAchievements();
 		}
-		for (Map.Entry<String, List<ModAchievement>> entry : modAchievements.entrySet()) {
-			List<ModAchievement> achievements = entry.getValue();
-			for (ModAchievement achievement : achievements) {
-				grid.items.add(achievement);
-			}
+		try {
+			Method calculateScrollBoundsMethod = StatsScreen.class.getDeclaredMethod("calculateScrollBounds");
+			calculateScrollBoundsMethod.setAccessible(true);
+			calculateScrollBoundsMethod.invoke(statsScreen);
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+			logger.error("Failed to invoke calculateScrollBounds method: " + e.getMessage());
+			e.printStackTrace();
 		}
 		unsubscribeLaterHelper(EditAchievementsSubscriber.class);
 	}
