@@ -21,7 +21,7 @@ public class ModAchievement {
     public boolean isUnlocked;
     public Hitbox hb;
 
-    public ModAchievement(String title, String desc, String key, boolean hidden, TextureAtlas.AtlasRegion unlockedImage, TextureAtlas.AtlasRegion lockedImage, TextureAtlas atlas) {
+    public ModAchievement(String title, String desc, String key, TextureAtlas.AtlasRegion unlockedImage, TextureAtlas.AtlasRegion lockedImage, TextureAtlas atlas) {
         this.hb = new Hitbox(160.0F * Settings.scale, 160.0F * Settings.scale);
         this.isUnlocked = UnlockTracker.isAchievementUnlocked(key);
         this.key = key;

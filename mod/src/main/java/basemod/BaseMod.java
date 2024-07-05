@@ -2122,7 +2122,7 @@ public class BaseMod {
 		modAchievementGrids.put(modID, grid);
 	}
 
-	public static void registerAchievement(String id, boolean isHidden) {
+	public static void registerAchievement(String id) {
 		if (achievementModID == null || achievementAtlas == null) {
 			throw new IllegalStateException("You must call registerAchievementGrid before registering achievements.");
 		}
@@ -2139,7 +2139,7 @@ public class BaseMod {
 			return; // Skip adding this achievement
 		}
 
-		ModAchievement newAchievement = new ModAchievement(name, description, fullID, isHidden, achievementImageUnlocked, achievementImageLocked, achievementAtlas);
+		ModAchievement newAchievement = new ModAchievement(name, description, fullID, achievementImageUnlocked, achievementImageLocked, achievementAtlas);
 
 		ModAchievementGrid grid = modAchievementGrids.get(achievementModID);
 		if (grid == null) {
