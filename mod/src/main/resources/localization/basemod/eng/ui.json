@@ -1,0 +1,10 @@
+{
+    "basemod:WhatMod": {
+        "TEXT": [
+            "What mod is this from?",
+            "Not modded content",
+            "Unknown",
+            "<unknown>"
+        ]
+    }
+}

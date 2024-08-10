@@ -3,9 +3,11 @@ package basemod.patches.whatmod;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.Loader;
 import com.evacipated.cardcrawl.modthespire.ModInfo;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.TipHelper;
+import com.megacrit.cardcrawl.localization.UIStrings;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.NotFoundException;
@@ -22,6 +24,7 @@ import java.util.Set;
 public class WhatMod
 {
 	public static boolean enabled = true;
+	private static UIStrings strings;
 
 	static void renderModTooltip(SpriteBatch sb, Class<?>... cls)
 	{
@@ -39,7 +42,7 @@ public class WhatMod
 		for (Class<?> c : cls) {
 			String name = findModName(c);
 			if (name == null) {
-				name = "Not modded content";
+				name = getUIStrings().TEXT[1];
 			}
 			modNames.add(name);
 		}
@@ -51,7 +54,7 @@ public class WhatMod
 		float BODY_TEXT_WIDTH = 280.0F * Settings.scale;
 		float TIP_DESC_LINE_SPACING = 26.0F * Settings.scale;
 
-		String title = "What mod is this from?";
+		String title = getUIStrings().TEXT[0];
 
 		try {
 			String body = getBody(cls);
@@ -118,7 +121,7 @@ public class WhatMod
 		URL locationURL = findModURL(cls);
 
 		if (locationURL == null) {
-			return "Unknown";
+			return getUIStrings().TEXT[2];
 		}
 
 		try {
@@ -127,7 +130,7 @@ public class WhatMod
 			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-			return "Unknown";
+			return getUIStrings().TEXT[2];
 		}
 
 		for (ModInfo modInfo : Loader.MODINFOS) {
@@ -136,7 +139,7 @@ public class WhatMod
 			}
 		}
 
-		return "Unknown";
+		return getUIStrings().TEXT[2];
 	}
 
 	public static String findModID(Class<?> cls)
@@ -144,7 +147,7 @@ public class WhatMod
 		URL locationURL = findModURL(cls);
 
 		if (locationURL == null) {
-			return "<unknown>";
+			return getUIStrings().TEXT[3];
 		}
 
 		try {
@@ -153,7 +156,7 @@ public class WhatMod
 			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-			return "<unknown>";
+			return getUIStrings().TEXT[3];
 		}
 
 		for (ModInfo modInfo : Loader.MODINFOS) {
@@ -162,6 +165,13 @@ public class WhatMod
 			}
 		}
 
-		return "<unknown>";
+		return getUIStrings().TEXT[3];
+	}
+
+	private static UIStrings getUIStrings() {
+		if (strings == null) {
+			strings = CardCrawlGame.languagePack.getUIString("basemod:WhatMod");
+		}
+		return strings;
 	}
 }

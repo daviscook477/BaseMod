@@ -2573,6 +2573,12 @@ public class BaseMod {
 		}
 		BaseMod.loadCustomStringsFile(UIStrings.class, path);
 
+		path = String.format("localization/basemod/%s/ui.json", Settings.language.name().toLowerCase());
+		if (!Gdx.files.internal(path).exists()) {
+			path = String.format("localization/basemod/%s/ui.json", Settings.GameLanguage.ENG.name().toLowerCase());
+		}
+		BaseMod.loadCustomStringsFile(UIStrings.class, path);
+
 		for (EditStringsSubscriber sub : editStringsSubscribers) {
 			sub.receiveEditStrings();
 		}
