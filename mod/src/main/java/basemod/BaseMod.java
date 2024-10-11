@@ -783,8 +783,13 @@ public class BaseMod {
 		StringBuilder retVal = new StringBuilder();
 		Scanner s = new Scanner(input);
 		while (s.hasNext()) {
-			retVal.append("[").append(colorValue).append("]").append(s.next());
-			retVal.append(" ");
+			if(Settings.language == Settings.GameLanguage.ZHS || Settings.language == Settings.GameLanguage.ZHT){
+				retVal.append("[").append(colorValue).append("]").append(s.next());
+				retVal.append("[]");
+			}else {
+				retVal.append("[").append(colorValue).append("]").append(s.next());
+				retVal.append(" ");
+			}
 		}
 		s.close();
 		return retVal.toString().trim();
