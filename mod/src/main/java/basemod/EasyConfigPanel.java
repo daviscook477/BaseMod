@@ -240,7 +240,7 @@ public class EasyConfigPanel extends ModPanel {
     private static ConfigField makeConfigField(SpireConfig config, Field f) {
         BiFunction<SpireConfig, Field, ConfigField> builder = configFieldBuilders.get(f.getType());
         if (builder == null) {
-            throw new RuntimeException("Type " + f.getName() + " is not supported by EasyConfigPanel.");
+            throw new RuntimeException("Type " + f.getName() + " is not supported by EasyConfigPanel. If you require this type, registerFieldType can be used.");
         }
         return builder.apply(config, f);
     }
