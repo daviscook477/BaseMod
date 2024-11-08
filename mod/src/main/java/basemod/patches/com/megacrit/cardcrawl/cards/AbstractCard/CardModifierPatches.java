@@ -782,7 +782,10 @@ public class CardModifierPatches
                         }
                         Object object = unsafe.allocateInstance(foundClass);
                         String serialized = gson.toJson(object);
-                        gson.fromJson(serialized, foundClass);
+                        Object deserialized = gson.fromJson(serialized, foundClass);
+                        if (deserialized == null) {
+                            throw new Exception("The card modifier is not serialized correctly.");
+                        }
                         modifierAdapter.registerSubtype(foundClass, info.getClassName());
                     } catch (Exception e) {
                         BaseMod.logger.warn("Test serialization failed on class " + foundClass + ".");
