@@ -379,7 +379,7 @@ public class TestMod implements
 
 	@Override
 	public void receiveEditStrings() {
-		loudWrite(writer, "begin editting strings");
+		loudWrite(writer, "begin editing strings");
 		
 		// RelicStrings
 		String relicStrings = Gdx.files.internal(
@@ -393,38 +393,38 @@ public class TestMod implements
 				String.valueOf(StandardCharsets.UTF_8));
 		BaseMod.loadCustomStrings(CardStrings.class, cardStrings);
 		
-		loudWrite(writer, "end editting strings");
+		loudWrite(writer, "end editing strings");
 	}
 
 	@Override
 	public void receiveEditRelics() {
-		loudWrite(writer, "begin editting relics");
+		loudWrite(writer, "begin editing relics");
 		
 		RelicLibrary.add(new Arcanosphere());
 		
-		loudWrite(writer, "end editting relics");
+		loudWrite(writer, "end editing relics");
 	}
 
 	@Override
 	public void receiveEditCharacters() {
-		loudWrite(writer, "begin editting characters");
+		loudWrite(writer, "begin editing characters");
 
 		BaseMod.addCharacter(new Purpleclad(CardCrawlGame.playerName),
 				makePath(ASSET_FOLDER, PURPLECLAD_BUTTON),
 				makePath(ASSET_FOLDER, PURPLECLAD_PORTRAIT),
 				CharacterEnumPatch.THE_PURPLECLAD);
 		
-		loudWrite(writer, "done editting characters");
+		loudWrite(writer, "done editing characters");
 	}
 
 	@Override
 	public void receiveEditCards() {
-		loudWrite(writer, "begin editting cards");
+		loudWrite(writer, "begin editing cards");
 		
 		BaseMod.addCard(new Strike_Purple());
 		BaseMod.addCard(new Defend_Purple());
 		
-		loudWrite(writer, "End editting cards");
+		loudWrite(writer, "End editing cards");
 	}
 
 	public void saveFieldTest() {

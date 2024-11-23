@@ -1155,7 +1155,7 @@ public class BaseMod {
 				registerBottleRelic(((CustomBottleRelic) relic).isOnCard(), relic);
 			}
 		} else {
-			logger.error("could not add relic to non existent custom pool: " + color);
+			logger.error("could not add relic to non-existent custom pool: " + color);
 		}
 	}
 
@@ -2685,7 +2685,7 @@ public class BaseMod {
 
 	// publishEditKeywords
 	public static void publishEditKeywords() {
-		logger.info("editting keywords");
+		logger.info("editing keywords");
 
 		addKeyword(new String[] { "[E]" }, GameDictionary.TEXT[0]);
 
