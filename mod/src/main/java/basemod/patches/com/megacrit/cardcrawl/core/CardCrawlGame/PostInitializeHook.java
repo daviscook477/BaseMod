@@ -15,8 +15,9 @@ public class PostInitializeHook {
             locator = WithinTryLocator.class
     )
     public static void PostInitialize(CardCrawlGame __instance) {
-        //Only notable functionality change would probably be that mode is not set to SPLASH yet. Unlikely to cause an issue?
-        //PostInitialize is only expected to happen once, so the value of mode is unlikely to be a factor.
+        // Manually set mode to SPLASH since insert now happens before that gets set in the original method
+        // Not setting it would be unlikely to cause issues, but might as well to be safe
+        CardCrawlGame.mode = CardCrawlGame.GameMode.SPLASH;
         BaseMod.publishPostInitialize();
     }
 
