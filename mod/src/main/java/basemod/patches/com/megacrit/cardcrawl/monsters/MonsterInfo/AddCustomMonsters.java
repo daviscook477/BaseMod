@@ -22,18 +22,18 @@ public class AddCustomMonsters
 
 		switch (calls) {
 			case 1: // Normal monsters
-				for(MonsterInfo i:BaseMod.getMonsterEncounters(AbstractDungeon.id)){
-					monsters[0].add(new MonsterInfo(i.name,i.weight));
+				for (MonsterInfo i : BaseMod.getMonsterEncounters(AbstractDungeon.id)) {
+					monsters[0].add(new MonsterInfo(i.name, i.weight));
 				}
 				break;
 			case 2: // Strong monsters
-				for(MonsterInfo i:BaseMod.getStrongMonsterEncounters(AbstractDungeon.id)){
-					monsters[0].add(new MonsterInfo(i.name,i.weight));
+				for (MonsterInfo i : BaseMod.getStrongMonsterEncounters(AbstractDungeon.id)) {
+					monsters[0].add(new MonsterInfo(i.name, i.weight));
 				}
 				break;
 			case 3: // Elites
-				for(MonsterInfo i:BaseMod.getEliteEncounters(AbstractDungeon.id)){
-					monsters[0].add(new MonsterInfo(i.name,i.weight));
+				for (MonsterInfo i : BaseMod.getEliteEncounters(AbstractDungeon.id)) {
+					monsters[0].add(new MonsterInfo(i.name, i.weight));
 				}
 				break;
 			default:
