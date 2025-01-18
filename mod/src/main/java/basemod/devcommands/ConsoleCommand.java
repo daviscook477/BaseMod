@@ -22,6 +22,7 @@ import basemod.devcommands.maxhp.MaxHp;
 import basemod.devcommands.potions.Potions;
 import basemod.devcommands.power.Power;
 import basemod.devcommands.relic.Relic;
+import basemod.devcommands.shop.Shop;
 import basemod.devcommands.statics.SetStatic;
 import basemod.devcommands.unlock.Unlock;
 import basemod.DevConsole;
@@ -151,6 +152,7 @@ public abstract class ConsoleCommand {
         addCommand("setstatic", SetStatic.class);
         addCommand("evalstatic", EvalStatic.class);
         addCommand("evalcode", EvalCode.class);
+        addCommand("shop", Shop.class);
 
         ActCommand.initialize();
     }

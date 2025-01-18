@@ -120,6 +120,8 @@ public class BaseMod {
 	private static ArrayList<PostDungeonInitializeSubscriber> postDungeonInitializeSubscribers;
 	private static ArrayList<PostEnergyRechargeSubscriber> postEnergyRechargeSubscribers;
 	private static ArrayList<PostInitializeSubscriber> postInitializeSubscribers;
+	private static ArrayList<PostGridInitializeSubscriber> postGridInitializeSubscribers;
+	private static ArrayList<PostShopInitializeSubscriber> postShopInitializeSubscribers;
 	private static ArrayList<PreMonsterTurnSubscriber> preMonsterTurnSubscribers;
 	private static ArrayList<RenderSubscriber> renderSubscribers;
 	private static ArrayList<PreRenderSubscriber> preRenderSubscribers;
@@ -461,6 +463,8 @@ public class BaseMod {
 		postDungeonInitializeSubscribers = new ArrayList<>();
 		postEnergyRechargeSubscribers = new ArrayList<>();
 		postInitializeSubscribers = new ArrayList<>();
+		postGridInitializeSubscribers = new ArrayList<>();
+		postShopInitializeSubscribers = new ArrayList<>();
 		preMonsterTurnSubscribers = new ArrayList<>();
 		renderSubscribers = new ArrayList<>();
 		preRenderSubscribers = new ArrayList<>();
@@ -2313,6 +2317,26 @@ public class BaseMod {
 		unsubscribeLaterHelper(PostInitializeSubscriber.class);
 	}
 
+	// publishPostGridInitialize -
+	public static void publishPostGridInitialize() {
+		logger.info("publishPostGridInitialize");
+
+		for (PostGridInitializeSubscriber sub : postGridInitializeSubscribers) {
+			sub.receivePostGridInitialize();
+		}
+		unsubscribeLaterHelper(PostGridInitializeSubscriber.class);
+	}
+
+	// publishPostShopInitialize -
+	public static void publishPostShopInitialize() {
+		logger.info("publishPostShopInitialize");
+
+		for (PostShopInitializeSubscriber sub : postShopInitializeSubscribers) {
+			sub.receivePostShopInitialize();
+		}
+		unsubscribeLaterHelper(PostShopInitializeSubscriber.class);
+	}
+
 	// publishPreMonsterTurn - false skips monster turn
 	public static boolean publishPreMonsterTurn(AbstractMonster m) {
 		logger.info("publishPreMonsterTurn");
@@ -2885,6 +2909,7 @@ public class BaseMod {
 		subscribeIfInstance(postDungeonInitializeSubscribers, sub, PostDungeonInitializeSubscriber.class);
 		subscribeIfInstance(postEnergyRechargeSubscribers, sub, PostEnergyRechargeSubscriber.class);
 		subscribeIfInstance(postInitializeSubscribers, sub, PostInitializeSubscriber.class);
+		subscribeIfInstance(postShopInitializeSubscribers, sub, PostShopInitializeSubscriber.class);
 		subscribeIfInstance(preMonsterTurnSubscribers, sub, PreMonsterTurnSubscriber.class);
 		subscribeIfInstance(renderSubscribers, sub, RenderSubscriber.class);
 		subscribeIfInstance(preRenderSubscribers, sub, PreRenderSubscriber.class);
@@ -2948,6 +2973,8 @@ public class BaseMod {
 			postEnergyRechargeSubscribers.add((PostEnergyRechargeSubscriber) sub);
 		} else if (additionClass.equals(PostInitializeSubscriber.class)) {
 			postInitializeSubscribers.add((PostInitializeSubscriber) sub);
+		} else if (additionClass.equals(PostShopInitializeSubscriber.class)) {
+			postShopInitializeSubscribers.add((PostShopInitializeSubscriber) sub);
 		} else if (additionClass.equals(PreMonsterTurnSubscriber.class)) {
 			preMonsterTurnSubscribers.add((PreMonsterTurnSubscriber) sub);
 		} else if (additionClass.equals(RenderSubscriber.class)) {
@@ -3044,6 +3071,7 @@ public class BaseMod {
 		unsubscribeIfInstance(postDungeonInitializeSubscribers, sub, PostDungeonInitializeSubscriber.class);
 		unsubscribeIfInstance(postEnergyRechargeSubscribers, sub, PostEnergyRechargeSubscriber.class);
 		unsubscribeIfInstance(postInitializeSubscribers, sub, PostInitializeSubscriber.class);
+		unsubscribeIfInstance(postShopInitializeSubscribers, sub, PostShopInitializeSubscriber.class);
 		unsubscribeIfInstance(preMonsterTurnSubscribers, sub, PreMonsterTurnSubscriber.class);
 		unsubscribeIfInstance(renderSubscribers, sub, RenderSubscriber.class);
 		unsubscribeIfInstance(preRenderSubscribers, sub, PreRenderSubscriber.class);
@@ -3106,6 +3134,8 @@ public class BaseMod {
 			postEnergyRechargeSubscribers.remove(sub);
 		} else if (removalClass.equals(PostInitializeSubscriber.class)) {
 			postInitializeSubscribers.remove(sub);
+		} else if (removalClass.equals(PostInitializeSubscriber.class)) {
+			postShopInitializeSubscribers.remove(sub);
 		} else if (removalClass.equals(PreMonsterTurnSubscriber.class)) {
 			preMonsterTurnSubscribers.remove(sub);
 		} else if (removalClass.equals(RenderSubscriber.class)) {
