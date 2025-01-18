@@ -16,7 +16,6 @@ import basemod.patches.imgui.ImGuiPatches;
 import basemod.patches.whatmod.WhatMod;
 import basemod.screens.ModalChoiceScreen;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Version;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -68,6 +67,7 @@ import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.screens.charSelect.CharacterOption;
 import com.megacrit.cardcrawl.screens.custom.CustomMod;
 import com.megacrit.cardcrawl.screens.custom.CustomModeCharacterButton;
+import com.megacrit.cardcrawl.screens.stats.StatsScreen;
 import com.megacrit.cardcrawl.shop.ShopScreen;
 import com.megacrit.cardcrawl.shop.StorePotion;
 import com.megacrit.cardcrawl.shop.StoreRelic;
@@ -143,6 +143,7 @@ public class BaseMod {
 	private static ArrayList<EditStringsSubscriber> editStringsSubscribers;
 	private static ArrayList<AddAudioSubscriber> addAudioSubscribers;
 	private static ArrayList<EditKeywordsSubscriber> editKeywordsSubscribers;
+	private static ArrayList<EditAchievementsSubscriber> editAchievementsSubscribers;
 	private static ArrayList<PostBattleSubscriber> postBattleSubscribers;
 	private static ArrayList<SetUnlocksSubscriber> setUnlocksSubscribers;
 	private static ArrayList<PostPotionUseSubscriber> postPotionUseSubscribers;
@@ -246,7 +247,8 @@ public class BaseMod {
 	private static HashMap<AbstractPlayer.PlayerClass, HashMap<Integer, CustomUnlockBundle>> unlockBundles;
 	private static HashMap<AbstractPlayer.PlayerClass, ArrayList<String>> unlockCards;
 	private static HashMap<AbstractPlayer.PlayerClass, Integer> maxUnlockLevel;
-
+	public static Map<String, List<ModAchievement>> modAchievements = new HashMap<>();
+	public static Map<String, ModAchievementGrid> modAchievementGrids = new HashMap<>();
 	private static HashMap<String, CustomSavableRaw> customSaveFields = new HashMap<>();
 	private static HashMap<AbstractDungeon.CurrentScreen, CustomScreen> customScreens = new HashMap<>();
 
@@ -256,6 +258,9 @@ public class BaseMod {
 	private static FrameBuffer animationBuffer;
 	private static Texture animationTexture;
 	private static TextureRegion animationTextureRegion;
+	private static String achievementModID;
+	private static String achievementMakeID;
+	private static TextureAtlas achievementAtlas;
 
 	public static boolean fixesEnabled = true;
 
@@ -484,6 +489,7 @@ public class BaseMod {
 		editStringsSubscribers = new ArrayList<>();
 		addAudioSubscribers = new ArrayList<>();
 		editKeywordsSubscribers = new ArrayList<>();
+		editAchievementsSubscribers = new ArrayList<>();
 		postBattleSubscribers = new ArrayList<>();
 		setUnlocksSubscribers = new ArrayList<>();
 		postPotionUseSubscribers = new ArrayList<>();
@@ -1710,6 +1716,7 @@ public class BaseMod {
 		return CardCrawlGame.characterManager.getAllCharacters().subList(lastBaseCharacterIndex+1, CardCrawlGame.characterManager.getAllCharacters().size());
 	}
 
+
 	// add character - the String characterID *must* be the exact same as what
 	// you put in the PlayerClass enum
 	public static void addCharacter(AbstractPlayer character,
@@ -2103,6 +2110,54 @@ public class BaseMod {
 	// save an energy orb texture for a color
 	public static void saveEnergyOrbPortraitTexture(AbstractCard.CardColor color, com.badlogic.gdx.graphics.Texture tex) {
 		colorEnergyOrbPortraitTextureMap.put(color, tex);
+	}
+
+	//
+	// Achievements
+	//
+
+	public static String getAchievementModID() {
+		return achievementModID;
+	}
+
+	public static void registerAchievementGrid(String modID, TextureAtlas atlas, String headerText) {
+		achievementModID = modID;
+		achievementAtlas = atlas;
+		ModAchievementGrid grid = new ModAchievementGrid(modID, headerText);
+		modAchievementGrids.put(modID, grid);
+	}
+
+	public static void registerAchievement(String id) {
+		if (achievementModID == null || achievementAtlas == null) {
+			throw new IllegalStateException("You must call registerAchievementGrid before registering achievements.");
+		}
+
+		String fullID = achievementModID + ":" + id;
+		UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(fullID);
+		String name = uiStrings.TEXT[0];
+		String description = uiStrings.TEXT[1];
+		TextureAtlas.AtlasRegion achievementImageUnlocked = achievementAtlas.findRegion("unlocked/" + id);
+		TextureAtlas.AtlasRegion achievementImageLocked = achievementAtlas.findRegion("locked/" + id);
+
+		if (achievementImageUnlocked == null || achievementImageLocked == null) {
+			BaseMod.logger.info("Failed to find achievement images for: " + fullID);
+			return; // Skip adding this achievement
+		}
+
+		ModAchievement newAchievement = new ModAchievement(name, description, fullID, achievementImageUnlocked, achievementImageLocked, achievementAtlas);
+
+		ModAchievementGrid grid = modAchievementGrids.get(achievementModID);
+		if (grid == null) {
+			throw new IllegalStateException("Achievement grid for " + achievementModID + " not found. Make sure to call registerAchievementGrid first.");
+		}
+
+		for (ModAchievement achievement : grid.items) {
+			if (achievement.key.equals(fullID)) {
+				return; // Achievement already exists, skip adding
+			}
+		}
+
+		grid.items.add(newAchievement);
 	}
 
 	//
@@ -2705,6 +2760,21 @@ public class BaseMod {
 		}
 		unsubscribeLaterHelper(EditKeywordsSubscriber.class);
 	}
+	public static void publishEditAchievements(StatsScreen statsScreen) {
+		logger.info("editing achievements");
+		for (EditAchievementsSubscriber sub : editAchievementsSubscribers) {
+			sub.receiveEditAchievements();
+		}
+		try {
+			Method calculateScrollBoundsMethod = StatsScreen.class.getDeclaredMethod("calculateScrollBounds");
+			calculateScrollBoundsMethod.setAccessible(true);
+			calculateScrollBoundsMethod.invoke(statsScreen);
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+			logger.error("Failed to invoke calculateScrollBounds method: " + e.getMessage());
+			e.printStackTrace();
+		}
+		unsubscribeLaterHelper(EditAchievementsSubscriber.class);
+	}
 
 	// publishOnPowersModified
 	public static void publishOnPowersModified() {
@@ -2908,6 +2978,7 @@ public class BaseMod {
 		subscribeIfInstance(editCharactersSubscribers, sub, EditCharactersSubscriber.class);
 		subscribeIfInstance(editStringsSubscribers, sub, EditStringsSubscriber.class);
 		subscribeIfInstance(editKeywordsSubscribers, sub, EditKeywordsSubscriber.class);
+		subscribeIfInstance(editAchievementsSubscribers, sub, EditAchievementsSubscriber.class);
 		subscribeIfInstance(postBattleSubscribers, sub, PostBattleSubscriber.class);
 		subscribeIfInstance(setUnlocksSubscribers, sub, SetUnlocksSubscriber.class);
 		subscribeIfInstance(postPotionUseSubscribers, sub, PostPotionUseSubscriber.class);
@@ -2992,6 +3063,8 @@ public class BaseMod {
 			editStringsSubscribers.add((EditStringsSubscriber) sub);
 		} else if (additionClass.equals(EditKeywordsSubscriber.class)) {
 			editKeywordsSubscribers.add((EditKeywordsSubscriber) sub);
+		} else if (additionClass.equals(EditAchievementsSubscriber.class)) {
+			editAchievementsSubscribers.add((EditAchievementsSubscriber) sub);
 		} else if (additionClass.equals(PostBattleSubscriber.class)) {
 			postBattleSubscribers.add((PostBattleSubscriber) sub);
 		} else if (additionClass.equals(SetUnlocksSubscriber.class)) {
@@ -3066,6 +3139,7 @@ public class BaseMod {
 		unsubscribeIfInstance(editCharactersSubscribers, sub, EditCharactersSubscriber.class);
 		unsubscribeIfInstance(editStringsSubscribers, sub, EditStringsSubscriber.class);
 		unsubscribeIfInstance(editKeywordsSubscribers, sub, EditKeywordsSubscriber.class);
+		unsubscribeIfInstance(editAchievementsSubscribers, sub, EditAchievementsSubscriber.class);
 		unsubscribeIfInstance(postBattleSubscribers, sub, PostBattleSubscriber.class);
 		unsubscribeIfInstance(setUnlocksSubscribers, sub, SetUnlocksSubscriber.class);
 		unsubscribeIfInstance(postPotionUseSubscribers, sub, PostPotionUseSubscriber.class);
@@ -3150,6 +3224,8 @@ public class BaseMod {
 			editStringsSubscribers.remove(sub);
 		} else if (removalClass.equals(EditKeywordsSubscriber.class)) {
 			editKeywordsSubscribers.remove(sub);
+		} else if (removalClass.equals(EditAchievementsSubscriber.class)) {
+			editAchievementsSubscribers.remove(sub);
 		} else if (removalClass.equals(AddAudioSubscriber.class)) {
 			addAudioSubscribers.remove(sub);
 		} else if (removalClass.equals(PostBattleSubscriber.class)) {
