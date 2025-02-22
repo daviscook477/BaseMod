@@ -24,6 +24,7 @@ public class FixDescriptionWidthCustomDynamicVariableCN
 							  StringBuilder currentLine, @ByRef int[] numLines,
 							  float CN_DESC_BOX_WIDTH)
 	{
+		// edit: changed the extra "!" appended after the variable to " "
 		float MAGIC_NUMBER_LENGTH = 20.0F * Settings.scale ;
 		if (word[0].startsWith("!")) {
 //			GlyphLayout gl = new GlyphLayout(FontHelper.cardDescFont_N, "!M!");
@@ -32,9 +33,9 @@ public class FixDescriptionWidthCustomDynamicVariableCN
 				__instance.description.add(new DescriptionLine(currentLine.toString(), currentWidth[0]));
 				currentLine.setLength(0);
 				currentWidth[0] = MAGIC_NUMBER_LENGTH;
-				currentLine.append(" ").append(word[0]).append("! ");
+				currentLine.append(" ").append(word[0]).append(" ");
 			} else {
-				currentLine.append(" ").append(word[0]).append("! ");
+				currentLine.append(" ").append(word[0]).append(" ");
 				currentWidth[0] += MAGIC_NUMBER_LENGTH;
 			}
 			word[0] = "";
