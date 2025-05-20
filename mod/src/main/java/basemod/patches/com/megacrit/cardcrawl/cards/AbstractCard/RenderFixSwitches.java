@@ -63,9 +63,6 @@ public class RenderFixSwitches
 		custom frame, no descriptor - custom rendering
 		custom frame, descriptor - custom rendering
 		no frame, descriptor - ....custom rendering?
-		If custom frame:
-		render custom frame, skip normal frame rendering
-		otherwise,
 	 */
 	@SpirePatch(
 			clz=AbstractCard.class,
