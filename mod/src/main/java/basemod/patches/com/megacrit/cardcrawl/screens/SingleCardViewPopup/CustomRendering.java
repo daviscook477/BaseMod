@@ -1,14 +1,20 @@
 package basemod.patches.com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 
 import basemod.abstracts.CustomCard;
+import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.RenderCardDescriptors;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.Vector2;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpireReturn;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
+
+import java.util.List;
 
 import static basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.RenderCardDescriptors.getAllDescriptors;
 
@@ -50,57 +56,130 @@ public class CustomRendering {
                 return SpireReturn.Continue();
             }
 
-            // If the card has card descriptors, don't render here because the descriptor rendering will break
-            if (!getAllDescriptors(___card).isEmpty()) {
-                return SpireReturn.Continue();
-            }
+            List<String> descriptors = getAllDescriptors(___card);
 
             CustomCard card = (CustomCard) ___card;
+            TextureAtlas.AtlasRegion frame = card.frameLargeRegion,
+                    frameMid = card.frameMiddleLargeRegion,
+                    frameLeft = card.frameLeftLargeRegion,
+                    frameRight = card.frameRightLargeRegion;
 
-            if (card.frameLargeRegion != null) //Does it have a custom frame?
-            {
-                renderHelper(sb, (float) Settings.WIDTH / 2.0F, (float)Settings.HEIGHT / 2.0F, card.frameLargeRegion);
-
-                if (card.frameMiddleLargeRegion != null) //Does it have dynamic frame parts?
-                {
-                    float tWidth = 0;
-                    float tOffset = 0;
-
-                    switch (card.type)
-                    {
-                        case ATTACK:
-                            tWidth = AbstractCard.typeWidthAttack;
-                            tOffset = AbstractCard.typeOffsetAttack;
-                            break;
-                        case SKILL:
-                            tWidth = AbstractCard.typeWidthSkill;
-                            tOffset = AbstractCard.typeOffsetSkill;
-                            break;
-                        case POWER:
-                            tWidth = AbstractCard.typeWidthPower;
-                            tOffset = AbstractCard.typeOffsetPower;
-                            break;
-                        case STATUS:
-                            tWidth = AbstractCard.typeWidthStatus;
-                            tOffset = AbstractCard.typeOffsetStatus;
-                            break;
-                        case CURSE:
-                            tWidth = AbstractCard.typeWidthCurse;
-                            tOffset = AbstractCard.typeOffsetCurse;
-                            break;
-                    }
-
-                    if (tWidth > 1.1f)
-                    {
-                        dynamicFrameRenderHelper(sb, ImageMaster.CARD_COMMON_FRAME_MID, 0.0F, ___drawScale, tWidth);
-                        dynamicFrameRenderHelper(sb, ImageMaster.CARD_COMMON_FRAME_LEFT, -tOffset, ___drawScale, 1.0F);
-                        dynamicFrameRenderHelper(sb, ImageMaster.CARD_COMMON_FRAME_RIGHT, tOffset, ___drawScale, 1.0F);
-                    }
+            if (frame == null) {
+                if (descriptors.isEmpty()) {
+                    return SpireReturn.Continue();
                 }
-                return SpireReturn.Return(null);
+
+                switch (card.rarity) {
+                    case UNCOMMON:
+                        if (frameMid == null) {
+                            frameMid = ImageMaster.CARD_UNCOMMON_FRAME_MID_L;
+                            frameLeft = ImageMaster.CARD_UNCOMMON_FRAME_LEFT_L;
+                            frameRight = ImageMaster.CARD_UNCOMMON_FRAME_RIGHT_L;
+                        }
+                        switch (card.type) {
+                            case ATTACK:
+                                frame = ImageMaster.CARD_FRAME_ATTACK_UNCOMMON_L;
+                                break;
+                            case POWER:
+                                frame = ImageMaster.CARD_FRAME_POWER_UNCOMMON_L;
+                                break;
+                            default:
+                                frame = ImageMaster.CARD_FRAME_SKILL_UNCOMMON_L;
+                                break;
+                        }
+                        break;
+                    case RARE:
+                        if (frameMid == null) {
+                            frameMid = ImageMaster.CARD_RARE_FRAME_MID_L;
+                            frameLeft = ImageMaster.CARD_RARE_FRAME_LEFT_L;
+                            frameRight = ImageMaster.CARD_RARE_FRAME_RIGHT_L;
+                        }
+                        switch (card.type) {
+                            case ATTACK:
+                                frame = ImageMaster.CARD_FRAME_ATTACK_RARE_L;
+                                break;
+                            case POWER:
+                                frame = ImageMaster.CARD_FRAME_POWER_RARE_L;
+                                break;
+                            default:
+                                frame = ImageMaster.CARD_FRAME_SKILL_RARE_L;
+                                break;
+                        }
+                        break;
+                    default:
+                        if (frameMid == null) {
+                            frameMid = ImageMaster.CARD_COMMON_FRAME_MID_L;
+                            frameLeft = ImageMaster.CARD_COMMON_FRAME_LEFT_L;
+                            frameRight = ImageMaster.CARD_COMMON_FRAME_RIGHT_L;
+                        }
+                        switch (card.type) {
+                            case ATTACK:
+                                frame = ImageMaster.CARD_FRAME_ATTACK_COMMON_L;
+                                break;
+                            case POWER:
+                                frame = ImageMaster.CARD_FRAME_POWER_COMMON_L;
+                                break;
+                            default:
+                                frame = ImageMaster.CARD_FRAME_SKILL_COMMON_L;
+                                break;
+                        }
+                        break;
+                }
             }
 
-            return SpireReturn.Continue();
+            float tWidth = 0;
+            float tOffset = 0;
+
+            switch (card.type)
+            {
+                case ATTACK:
+                    descriptors.add(0, AbstractCard.TEXT[0]);
+                    tWidth = AbstractCard.typeWidthAttack;
+                    tOffset = AbstractCard.typeOffsetAttack;
+                    break;
+                case SKILL:
+                    descriptors.add(0, AbstractCard.TEXT[1]);
+                    tWidth = AbstractCard.typeWidthSkill;
+                    tOffset = AbstractCard.typeOffsetSkill;
+                    break;
+                case POWER:
+                    descriptors.add(0, AbstractCard.TEXT[2]);
+                    tWidth = AbstractCard.typeWidthPower;
+                    tOffset = AbstractCard.typeOffsetPower;
+                    break;
+                case CURSE:
+                    descriptors.add(0, AbstractCard.TEXT[3]);
+                    tWidth = AbstractCard.typeWidthCurse;
+                    tOffset = AbstractCard.typeOffsetCurse;
+                    break;
+                case STATUS:
+                    descriptors.add(0, AbstractCard.TEXT[7]);
+                    tWidth = AbstractCard.typeWidthStatus;
+                    tOffset = AbstractCard.typeOffsetStatus;
+                    break;
+                default:
+                    descriptors.add(0, AbstractCard.TEXT[5]);
+                    break;
+            }
+
+            renderHelper(sb, (float) Settings.WIDTH / 2.0F, (float)Settings.HEIGHT / 2.0F, frame);
+
+            if (descriptors.size() > 1) {
+                String text = String.join(RenderCardDescriptors.SEPARATOR, descriptors);
+                GlyphLayout gl = new GlyphLayout();
+                FontHelper.panelNameFont.getData().setScale(1f);
+                gl.setText(FontHelper.panelNameFont, text);
+                tOffset = (gl.width - 70 * Settings.scale) / 2f;
+                tWidth = (gl.width - 0f) / (62 * Settings.scale);
+            }
+
+            if (tWidth > 1.1f && frameMid != null) {
+                dynamicFrameRenderHelper(sb, frameMid, 0.0F, ___drawScale, tWidth);
+                dynamicFrameRenderHelper(sb, frameLeft, -tOffset, ___drawScale, 1.0F);
+                dynamicFrameRenderHelper(sb, frameRight, tOffset, ___drawScale, 1.0F);
+            }
+
+            return SpireReturn.Return(null);
         }
     }
 
@@ -110,7 +189,19 @@ public class CustomRendering {
     }
 
     private static void dynamicFrameRenderHelper(SpriteBatch sb, TextureAtlas.AtlasRegion img, float xOffset, float drawScale, float xScale) {
-        if (img != null)
-            sb.draw(img, (float)Settings.WIDTH / 2.0F + img.offsetX - (float)img.originalWidth / 2.0F + xOffset * drawScale, (float)Settings.HEIGHT / 2.0F + img.offsetY - (float)img.originalHeight / 2.0F, (float)img.originalWidth / 2.0F - img.offsetX, (float)img.originalHeight / 2.0F - img.offsetY, (float)img.packedWidth, (float)img.packedHeight, Settings.scale * xScale, Settings.scale, 0.0F);
+        Vector2 tmp = new Vector2(0, 0);
+        tmp.set(xOffset, 0);
+        sb.draw(
+                img,
+                Settings.WIDTH / 2f + img.offsetX - (img.originalWidth / 2f + 2) + tmp.x,
+                Settings.HEIGHT / 2f + img.offsetY - img.originalHeight / 2f + tmp.y,
+                img.originalWidth / 2f - img.offsetX + 2,
+                img.originalHeight / 2f - img.offsetY,
+                img.packedWidth,
+                img.packedHeight,
+                Settings.scale * xScale,
+                Settings.scale,
+                0f
+        );
     }
 }

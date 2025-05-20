@@ -54,6 +54,7 @@ public class RenderCardDescriptors
 		}
 	}
 
+	//Should be deleted, but cannot because stslib patches this.
 	@SpirePatch(
 			clz = AbstractCard.class,
 			method = "renderPortraitFrame"
@@ -66,6 +67,8 @@ public class RenderCardDescriptors
 		)
 		public static SpireReturn<Void> Insert(AbstractCard __instance, SpriteBatch sb, float x, float y, @ByRef float[] tOffset, @ByRef float[] tWidth)
 		{
+			if (__instance != null) return SpireReturn.Continue(); //if (true) gets optimized and removes rest of method
+
 			String typeText;
 			switch (__instance.type) {
 				case ATTACK:

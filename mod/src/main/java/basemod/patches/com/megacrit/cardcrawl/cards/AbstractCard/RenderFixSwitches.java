@@ -5,8 +5,10 @@ import basemod.abstracts.CustomCard;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.Vector2;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.AbstractCard.CardColor;
@@ -24,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import static basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.RenderCardDescriptors.getAllDescriptors;
 
@@ -54,6 +57,16 @@ public class RenderFixSwitches
 		}
 	}
 
+	/*
+		4 possibilities
+		no frame, no descriptor - normal rendering
+		custom frame, no descriptor - custom rendering
+		custom frame, descriptor - custom rendering
+		no frame, descriptor - ....custom rendering?
+		If custom frame:
+		render custom frame, skip normal frame rendering
+		otherwise,
+	 */
 	@SpirePatch(
 			clz=AbstractCard.class,
 			method="renderPortraitFrame"
@@ -67,57 +80,131 @@ public class RenderFixSwitches
 				return SpireReturn.Continue();
 			}
 
-			// If the card has card descriptors, don't render here because the descriptor rendering will break
-			if (!getAllDescriptors(__instance).isEmpty()) {
-				return SpireReturn.Continue();
-			}
+			List<String> descriptors = getAllDescriptors(__instance);
 
 			CustomCard card = (CustomCard) __instance;
+			TextureAtlas.AtlasRegion frame = card.frameSmallRegion,
+					frameMid = card.frameMiddleRegion,
+					frameLeft = card.frameLeftRegion,
+					frameRight = card.frameRightRegion;
 
-			if (card.frameSmallRegion != null) //Does it have a custom frame?
-			{
-				renderHelper(card, sb, ___renderColor, card.frameSmallRegion, x, y);
-
-				if (card.frameMiddleRegion != null) //Does it have dynamic frame parts?
-				{
-					float tWidth = 0;
-					float tOffset = 0;
-
-					switch (card.type)
-					{
-						case ATTACK:
-							tWidth = AbstractCard.typeWidthAttack;
-							tOffset = AbstractCard.typeOffsetAttack;
-							break;
-						case SKILL:
-							tWidth = AbstractCard.typeWidthSkill;
-							tOffset = AbstractCard.typeOffsetSkill;
-							break;
-						case POWER:
-							tWidth = AbstractCard.typeWidthPower;
-							tOffset = AbstractCard.typeOffsetPower;
-							break;
-						case STATUS:
-							tWidth = AbstractCard.typeWidthStatus;
-							tOffset = AbstractCard.typeOffsetStatus;
-							break;
-						case CURSE:
-							tWidth = AbstractCard.typeWidthCurse;
-							tOffset = AbstractCard.typeOffsetCurse;
-							break;
-					}
-
-					if (tWidth > 1.1f)
-					{
-						dynamicFrameRenderHelper(sb, ImageMaster.CARD_COMMON_FRAME_MID, x, y, 0.0F, __instance.drawScale, __instance.angle, tWidth);
-						dynamicFrameRenderHelper(sb, ImageMaster.CARD_COMMON_FRAME_LEFT, x, y, -tOffset, __instance.drawScale, __instance.angle, 1.0F);
-						dynamicFrameRenderHelper(sb, ImageMaster.CARD_COMMON_FRAME_RIGHT, x, y, tOffset, __instance.drawScale, __instance.angle, 1.0F);
-					}
+			if (frame == null) {
+				if (descriptors.isEmpty()) {
+					return SpireReturn.Continue();
 				}
-				return SpireReturn.Return(null);
+
+				switch (card.rarity) {
+					case UNCOMMON:
+						if (frameMid == null) {
+							frameMid = ImageMaster.CARD_UNCOMMON_FRAME_MID;
+							frameLeft = ImageMaster.CARD_UNCOMMON_FRAME_LEFT;
+							frameRight = ImageMaster.CARD_UNCOMMON_FRAME_RIGHT;
+						}
+						switch (card.type) {
+							case ATTACK:
+								frame = ImageMaster.CARD_FRAME_ATTACK_UNCOMMON;
+								break;
+							case POWER:
+								frame = ImageMaster.CARD_FRAME_POWER_UNCOMMON;
+								break;
+							default:
+								frame = ImageMaster.CARD_FRAME_SKILL_UNCOMMON;
+								break;
+						}
+						break;
+					case RARE:
+						if (frameMid == null) {
+							frameMid = ImageMaster.CARD_RARE_FRAME_MID;
+							frameLeft = ImageMaster.CARD_RARE_FRAME_LEFT;
+							frameRight = ImageMaster.CARD_RARE_FRAME_RIGHT;
+						}
+						switch (card.type) {
+							case ATTACK:
+								frame = ImageMaster.CARD_FRAME_ATTACK_RARE;
+								break;
+							case POWER:
+								frame = ImageMaster.CARD_FRAME_POWER_RARE;
+								break;
+							default:
+								frame = ImageMaster.CARD_FRAME_SKILL_RARE;
+								break;
+						}
+						break;
+					default:
+						if (frameMid == null) {
+							frameMid = ImageMaster.CARD_COMMON_FRAME_MID;
+							frameLeft = ImageMaster.CARD_COMMON_FRAME_LEFT;
+							frameRight = ImageMaster.CARD_COMMON_FRAME_RIGHT;
+						}
+						switch (card.type) {
+							case ATTACK:
+								frame = ImageMaster.CARD_FRAME_ATTACK_COMMON;
+								break;
+							case POWER:
+								frame = ImageMaster.CARD_FRAME_POWER_COMMON;
+								break;
+							default:
+								frame = ImageMaster.CARD_FRAME_SKILL_COMMON;
+								break;
+						}
+						break;
+				}
 			}
 
-			return SpireReturn.Continue();
+
+			float tWidth = 0;
+			float tOffset = 0;
+
+			switch (card.type)
+			{
+				case ATTACK:
+					descriptors.add(0, AbstractCard.TEXT[0]);
+					tWidth = AbstractCard.typeWidthAttack;
+					tOffset = AbstractCard.typeOffsetAttack;
+					break;
+				case SKILL:
+					descriptors.add(0, AbstractCard.TEXT[1]);
+					tWidth = AbstractCard.typeWidthSkill;
+					tOffset = AbstractCard.typeOffsetSkill;
+					break;
+				case POWER:
+					descriptors.add(0, AbstractCard.TEXT[2]);
+					tWidth = AbstractCard.typeWidthPower;
+					tOffset = AbstractCard.typeOffsetPower;
+					break;
+				case CURSE:
+					descriptors.add(0, AbstractCard.TEXT[3]);
+					tWidth = AbstractCard.typeWidthCurse;
+					tOffset = AbstractCard.typeOffsetCurse;
+					break;
+				case STATUS:
+					descriptors.add(0, AbstractCard.TEXT[7]);
+					tWidth = AbstractCard.typeWidthStatus;
+					tOffset = AbstractCard.typeOffsetStatus;
+					break;
+				default:
+					descriptors.add(0, AbstractCard.TEXT[5]);
+					break;
+			}
+
+			renderHelper(card, sb, ___renderColor, frame, x, y);
+
+			if (descriptors.size() > 1) {
+				String text = String.join(RenderCardDescriptors.SEPARATOR, descriptors);
+				GlyphLayout gl = new GlyphLayout();
+				FontHelper.cardTypeFont.getData().setScale(1f);
+				gl.setText(FontHelper.cardTypeFont, text);
+				tOffset = (gl.width - 38 * Settings.scale) / 2f;
+				tWidth = (gl.width - 0f) / (32 * Settings.scale);
+			}
+
+			if (tWidth > 1.1f && frameMid != null) {
+				dynamicFrameRenderHelper(sb, frameMid, x, y, 0.0F, __instance.drawScale, __instance.angle, tWidth);
+				dynamicFrameRenderHelper(sb, frameLeft, x, y, -tOffset, __instance.drawScale, __instance.angle, 1.0F);
+				dynamicFrameRenderHelper(sb, frameRight, x, y, tOffset, __instance.drawScale, __instance.angle, 1.0F);
+			}
+
+			return SpireReturn.Return(null);
 		}
 	}
 	
@@ -339,6 +426,21 @@ public class RenderFixSwitches
 	}
 
 	private static void dynamicFrameRenderHelper(SpriteBatch sb, TextureAtlas.AtlasRegion img, float x, float y, float xOffset, float drawScale, float angle, float xScale) {
-		sb.draw(img, x + img.offsetX - (float)img.originalWidth / 2.0F + xOffset * drawScale, y + img.offsetY - (float)img.originalHeight / 2.0F, (float)img.originalWidth / 2.0F - img.offsetX, (float)img.originalHeight / 2.0F - img.offsetY, (float)img.packedWidth, (float)img.packedHeight, drawScale * Settings.scale * xScale, drawScale * Settings.scale, angle);
+		Vector2 tmp = new Vector2(0,0);
+		tmp.set(xOffset, 0);
+		tmp.scl(drawScale);
+		tmp.rotate(angle);
+		sb.draw(
+				img,
+				x + img.offsetX - (img.originalWidth / 2f + 1) + tmp.x,
+				y + img.offsetY - img.originalHeight / 2f + tmp.y,
+				img.originalWidth / 2f - img.offsetX + 1,
+				img.originalHeight / 2f - img.offsetY,
+				img.packedWidth,
+				img.packedHeight,
+				Settings.scale * drawScale * xScale,
+				Settings.scale * drawScale,
+				angle
+		);
 	}
 }

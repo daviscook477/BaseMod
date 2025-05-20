@@ -43,6 +43,8 @@ public class RenderCardDescriptorsSCV
 			}
 		}
 	}
+
+	//Should be deleted, but cannot because stslib patches this.
 	@SpirePatch(
 			clz = SingleCardViewPopup.class,
 			method = "renderFrame"
@@ -55,6 +57,8 @@ public class RenderCardDescriptorsSCV
 		)
 		public static SpireReturn<Void> Insert(SingleCardViewPopup __instance, SpriteBatch sb, AbstractCard ___card, @ByRef float[] tOffset, @ByRef float[] tWidth)
 		{
+			if (__instance != null) return SpireReturn.Continue(); //if (true) gets optimized and removes rest of method
+
 			//RenderCardDescriptors.Frame.Insert(___card, sb, 0, 0, tOffset, tWidth);
 			String typeText;
 			switch (___card.type) {
