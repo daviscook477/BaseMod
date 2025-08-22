@@ -1,0 +1,22 @@
+{
+    "basemod:ExhaustCardModifier": {
+        "TEXT": [
+            "%s NL Put-uit."
+        ]
+    },
+    "basemod:EtherealCardModifier": {
+        "TEXT": [
+            "Etherisch. NL %s"
+        ]
+    },
+    "basemod:InnateCardModifier": {
+        "TEXT": [
+            "Aangeboren. NL %s"
+        ]
+    },
+    "basemod:RetainCardModifier": {
+        "TEXT": [
+            "Behoud. NL %s"
+        ]
+    }
+}

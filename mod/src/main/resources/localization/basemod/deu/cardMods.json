@@ -1,0 +1,22 @@
+{
+    "basemod:ExhaustCardModifier": {
+        "TEXT": [
+            "%s NL Erschöpfen."
+        ]
+    },
+    "basemod:EtherealCardModifier": {
+        "TEXT": [
+            "Flüchtig. NL %s"
+        ]
+    },
+    "basemod:InnateCardModifier": {
+        "TEXT": [
+            "Angeboren. NL %s"
+        ]
+    },
+    "basemod:RetainCardModifier": {
+        "TEXT": [
+            "Behalten. NL %s"
+        ]
+    }
+}
