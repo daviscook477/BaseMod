@@ -43,7 +43,7 @@ public class CNCardTextColors {
                 if (!Settings.manualLineBreak) {
                     // If the current line is reaching its end, then the ending punctuation's width should be ignored or it would result in
                     // a new line with a single punctuation as the text
-                    if( (letter == LocalizedStrings.PERIOD.charAt(0)) && ((currentWidth[0] + letterWidth)  >= 0.8 * CN_DESC_BOX_WIDTH)  ){
+                            if( (LocalizedStrings.PERIOD.length() != 0 && letter == LocalizedStrings.PERIOD.charAt(0)) && ((currentWidth[0] + letterWidth)  >= 0.8 * CN_DESC_BOX_WIDTH)  ){
                         letterWidth = 0F;
                     }
                     if((letter == '，') && ((currentWidth[0] + letterWidth)  >= 0.8 * CN_DESC_BOX_WIDTH ) ){
