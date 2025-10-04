@@ -33,9 +33,9 @@ public class RenderRelicOnCard
 	{
 		if (!Settings.hideCards /*&& !__instance.isOnScreen()*/ && !__instance.isFlipped) {
 			for (Pair<Predicate<AbstractCard>, AbstractRelic> info : BaseMod.getBottledRelicList()) {
-				if (info.getKey().test(__instance)) {
+                if (info.getKey().test(__instance) && (((CustomBottleRelic) info.getValue()).showInCombat(__instance) || (AbstractDungeon.getCurrRoom()).phase != AbstractRoom.RoomPhase.COMBAT || AbstractDungeon.screen == AbstractDungeon.CurrentScreen.MASTER_DECK_VIEW)) {
 					AbstractRelic r = info.getValue();
-					r.scale = __instance.drawScale * Settings.scale;
+					r.scale = __instance.drawScale * Settings.scale * ((CustomBottleRelic) r).scale(__instance);
 					try {
 						relicRotation.set(r, __instance.angle);
 					} catch (IllegalAccessException e) {
