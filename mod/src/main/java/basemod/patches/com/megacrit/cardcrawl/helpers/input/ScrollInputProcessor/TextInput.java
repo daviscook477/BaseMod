@@ -33,9 +33,9 @@ public class TextInput implements PreUpdateSubscriber {
 
     @Override
     public void receivePreUpdate() {
-        if (receivers.size() > 0 && receivers.get(0).isDone())
+        if (receivers.size() > 0 && receivers.get(receivers.size() - 1).isDone())
         {
-            stopTextReceiver(receivers.get(0));
+            stopTextReceiver(receivers.get(receivers.size() - 1));
         }
     }
 
